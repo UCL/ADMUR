@@ -3,7 +3,7 @@ Title: Modelling population dynamics from 14C datasets
 Version: 1.0
 Authors@R: person("Adrian", "Timpson", email = "a.timpson@ucl.ac.uk", role = c("aut", "cre"))
 Maintainer: Adrian Timpson <a.timpson@ucl.ac.uk>
-Description: Tools to directly model underlying dynamics of 14C datasets, using a Continuous Piecewise Linear (CPL) model framework. This package accompanies 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates' by Adrian Timpson, Ramiro Barberena, Mark G. Thomas, CÃ©sar MÃ©ndez and  Katie Manning. Philosophical Transactions of the Royal Society B 2020.
+Description: Tools to directly model underlying dynamics of 14C datasets, using a Continuous Piecewise Linear (CPL) model framework. This package accompanies 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates' by Adrian Timpson, Ramiro Barberena, Mark G. Thomas, César Méndez and Katie Manning. Philosophical Transactions of the Royal Society B 2020.
 Imports: dplyr, combinat, DEoptimR, stats, LaplacesDemon
 Depends: R (>= 3.1.0)
 Suggests: scales, knitr, ks

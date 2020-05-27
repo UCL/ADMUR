@@ -3,7 +3,7 @@
 \title{PopCPLmodel} 
 \docType{package}
 \description{
-	Tools to directly model underlying dynamics of 14C datasets, using a Continuous Piecewise Linear (CPL) model framework
+	Tools to directly model underlying dynamics of 14C datasets, using a Continuous Piecewise Linear (CPL) model framework.
 	}
 \details{
 	Package to model population dynamics from anthropogenic 14C datasets, providing a more robust and useful approach than Summed Probability Distribution testing, which typically can only reject (or fail to reject) a null hypothesis.

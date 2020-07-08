@@ -1,0 +1,61 @@
+---
+title: "Guide to using PopCPLmodel"
+author: "Adrian Timpson"
+date: "06/07/2020"
+output: rmarkdown::html_vignette
+description: >
+  A comprehensive guide to modelling population dynamics using PopCPLmodel.
+  
+vignette: >
+  %\VignetteIndexEntry{Guide to using PopCPLmodel}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+This vignette provides a guide to using the R package PopCPLmodel, to accompany and support the publication 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates', Philosophical Transactions B, 2020, A. Timpson et al. It assumes the user has some basic familiarity with programming in R. Version 1.0 can currently only handle 14C dates, but in principle this methodology can be applied to other types of chronological data such as thermoluminescence, and future versions of PopCPLmodel will incorporate this flexibility.
+
+## Installation
+
+The PopCPLmodel package can be installed directly from GitHub, after installing and loading the 'devtools' package on the CRAN:
+
+```{r, eval = FALSE}
+install.packages('devtools')
+library(devtools)
+install_github('UCL/PopCPLmodel')
+```
+
+The PopCPLModel package can then be locally loaded:
+
+```{r, message = FALSE}
+library(PopCPLmodel)
+```
+
+## 14C datasets
+
+A summary of the available help files and data sets included in the package can be browsed, which include a terrestrial anthropogenic 14C dataset from the South American Arid Diagonal:
+
+```{r, eval = FALSE}
+help(PopCPLmodel)
+help(arid)
+```
+
+Datasets must be structured as a data.frame that include columns 'age' and 'sd', which represent the uncalibated 14C age and its error, respectively.
+
+
+```{r, eval = TRUE}
+arid[1:5,1:8]
+```
+
+
+## Calibrated 14C date probability distributions
+
+The algorithm used by PopCPLmodel to calculate model likelihoods of a 14C dataset uses an intermediate step of calculating a calibrated probability distribution for an individual 14C date. This is intrinsically useful for ordinary date calibration or for generating a Summed Probability Distribution (SPD).
+
+Generating a calibrated date distribution or SPD requires two steps:
+
+1. The chosen calibration curve is converted to a CalArray using the function [makeCalArray()](../html/makeCalArray.html)
+1. 14C dates are simultaneously calibrated through the CalArray using the [summedCalibrator()](../html/summedCalibrator.html) function.
+
+```{r, eval = TRUE}
+CalArray <- makeCalArray(intcal13,calrange=c(8000,13000))
+```

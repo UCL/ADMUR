@@ -1,7 +1,7 @@
 #--------------------------------------------------------------------------------------------
 # Functions for PopCPLmodel package
 #--------------------------------------------------------------------------------------------
-# test change
+# test change 14:04
 makeCalArray <- function(calcurve,calrange,inc=5){
 
 	# calcurve: the object intcal13 loaded from intcal13.RData, or any other calibration curve

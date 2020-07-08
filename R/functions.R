@@ -1,7 +1,7 @@
 #--------------------------------------------------------------------------------------------
 # Functions for PopCPLmodel package
 #--------------------------------------------------------------------------------------------
-#' @export
+# test change
 makeCalArray <- function(calcurve,calrange,inc=5){
 
 	# calcurve: the object intcal13 loaded from intcal13.RData, or any other calibration curve
@@ -33,7 +33,6 @@ makeCalArray <- function(calcurve,calrange,inc=5){
 	colnames(CalArray) <- cal
 return(CalArray)}
 #--------------------------------------------------------------------------------------------
-#' @export
 plotCalArray <- function(CalArray){
 	
 	# CalArray: matrix created by makeCalArray(). Requires row and col names corresponding to c14 and cal years respectively
@@ -45,7 +44,6 @@ plotCalArray <- function(CalArray){
 	image(cal,c14,t(CalArray)^0.1,xlab='Cal BP',ylab='C14',xlim=rev(range(cal)),col = heat.colors(20))
 	}
 #--------------------------------------------------------------------------------------------	
-#' @export
 summedCalibrator <- function(CalArray,data){
 
 	# function to generate a summed probability distribution (SPD) of calibrated dates
@@ -91,7 +89,6 @@ summedCalibrator <- function(CalArray,data){
 result <- data.frame(calBP=cal,prob=cal.prob)
 return(result)}
 #--------------------------------------------------------------------------------------------	
-#' @export
 plot.SPD <- function(SPD){
 	
 	# SPD: the output of summedCalibrator()
@@ -102,7 +99,6 @@ plot.SPD <- function(SPD){
 	polygon(x=c(SPD$calBP,SPD$calBP[c(nrow(SPD),1)]), y=c(SPD$prob,0,0),col='grey', border=F )
 	}
 #--------------------------------------------------------------------------------------------	
-#' @export
 choose.calrange <- function(data,calcurve){
 
 	# data: data.frame of 14C dates. Requires 'age' and 'sd'.
@@ -120,7 +116,6 @@ choose.calrange <- function(data,calcurve){
 	calrange <- c(calmin,calmax)
 return(calrange)}
 #--------------------------------------------------------------------------------------------	
-#' @export
 SPD.wrapper <- function(data,calcurve=intcal13){
 
 	# data: data.frame of 14C dates. Requires 'age' and 'sd'.
@@ -140,7 +135,6 @@ SPD.wrapper <- function(data,calcurve=intcal13){
 	plot.SPD(SPD)
 	}
 #--------------------------------------------------------------------------------------------	
-#' @export
 check.data <- function(data){
 	
 	# data: data.frame of 14C dates. Requires 'age' and 'sd'.

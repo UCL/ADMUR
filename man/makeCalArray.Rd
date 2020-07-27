@@ -1,7 +1,7 @@
 \name{makeCalArray} 
 \alias{makeCalArray} 
 \title{Makes a calibration curve probability array} 
-\description{Generates CalArray, a 2D probability array of the calibration curve. }
+\description{Generates CalArray containing a 2D probability array of the calibration curve. }
 \usage{makeCalArray(calcurve, calrange, inc=5)}
 \arguments{
   \item{calcurve}{
@@ -12,7 +12,11 @@
 	}
 }
 \value{
-	Returns a 2D array. 
+	Returns a list including:
+	probs: a 2D probability array of the calibration curve
+	calcurve: the calibration curve as provided as an argument
+	cal: a numeric vector of calendar years 
+	inc: the resolution of the array in calendar years
 	}
 \details{
 	Generates an array of probabilities mapping the calibration curve and its error ribbon.
@@ -28,7 +32,4 @@
 \examples{
 	# generate a CalArray of the intcal13 curve covering 5500 calBP to 7000 calBP
 	x <- makeCalArray(intcal13, c(5500,7000) )
-
-	# generate a CalArray of the shcal13 curve covering 5500 calBP to 7000 calBP
-	x <- makeCalArray(shcal13, c(7000,5500) )
 	}

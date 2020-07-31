@@ -1,8 +1,10 @@
-\name{PopCPLmodel} 
-\alias{PopCPLmodel} 
-\title{PopCPLmodel R package} 
+\name{ADMUR} 
+\alias{ADMUR} 
+\title{ADMUR R package} 
 \docType{package}
 \description{
+ADMUR: Ancient Demographic Modelling Using Radiocarbon
+
 Tools to directly model underlying dynamics of date datasets, using either a Continuous Piecewise Linear (CPL) model framework, or Summed Probability Distributions (SPD). 
 	}
 \details{

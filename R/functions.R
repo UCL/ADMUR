@@ -32,45 +32,11 @@ checkDatingType <- function(data){
 		}
 return(data)}
 #--------------------------------------------------------------------------------------------
-makeCalArrayOLD <- function(calcurve,calrange,inc=5){
-
-	# calcurve: the object intcal13 loaded from intcal13.RData, or any other calibration curve
-	# calrange: vector of two values giving a calendar range to analyse (BP). Narrowing the range from the default c(0,50000) reduces memory and time.
-	
-	# builds a matrix of probabilities representing the calibration curve
-	# rows of the matrix represent c14 years (annual resolution)
-	# columns of the matrix use the calcurve C14 date and error to form Gaussian distributions (5 year resolution)
-	# therefore it is rather memory intensive, and takes a while, but is only required once for any number of dates
-
-	# extract the requested section
-	calmin <- min(calrange)
-	calmax <- max(calrange)
-
-	# interpolate the calcurve to a 5 yr cal resolution
-	cal <- seq(calmin,calmax,by=inc)
-	c14.interp <- approx(x=calcurve$cal,y=calcurve$C14,xout=cal)$y
-	error.interp <- approx(x=calcurve$cal,y=calcurve$error,xout=cal)$y
-
-	# sensible c14 range, at 1 yr resolution
-	c14 <- min(c14.interp):max(c14.interp)
-
-	R <- length(c14)
-	C <- length(cal)
-	CalArray <- array(0,c(R,C))	
-	for(i in 1:C)CalArray[,i] <- dnorm(c14,c14.interp[i],error.interp[i]) 
-
-	row.names(CalArray) <- c14
-	colnames(CalArray) <- cal
-
-	# store the original calibration curve as a attribute
-	attr(CalArray, 'calcurve') <- calcurve
-
-return(CalArray)}
-#--------------------------------------------------------------------------------------------
 makeCalArray <- function(calcurve,calrange,inc=5){
 
 	# calcurve: the object intcal13 loaded from intcal13.RData, or any other calibration curve
 	# calrange: vector of two values giving a calendar range to analyse (BP). Narrowing the range from the default c(0,50000) reduces memory and time.
+	# inc: increments to interpolate calendar years. 
 	
 	# builds a matrix of probabilities representing the calibration curve
 	# rows of the matrix represent c14 years (annual resolution)
@@ -105,7 +71,8 @@ makeCalArray <- function(calcurve,calrange,inc=5){
 	CalArray <- list(
 		probs = probs,
 		calcurve = calcurve,
-		cal = seq(calmin,calmax,by=inc),
+		cal = cal[cal>=calmin & cal<=calmax],
+		calrange = calrange,
 		inc = inc
 		)
 
@@ -127,16 +94,17 @@ plotCalArray <- function(CalArray){
 	cal <- as.numeric(colnames(P))
 	image(cal,c14,t(P)^0.1,xlab='Cal BP',ylab='C14',xlim=rev(range(cal)),col = heat.colors(20),las=1, cex.axis=0.7, cex.lab=0.7)
 	}
-#--------------------------------------------------------------------------------------------
-plotCal <- function(cal){
-	
-	# cal: the output of summedCalibrator()
-	
-	# performs a very basic plot of the SPD
+#--------------------------------------------------------------------------------------------	
+plotPD <- function(x){
+	years <- as.numeric(row.names(x))
+	plot(NULL, type = "n", bty = "n", xlim = rev(range(years)), ylim=c(0,max(x)*1.2),las = 1, cex.axis = 0.7, cex.lab = 0.7, ylab='PD',xlab='calBP')
+	for(n in 1:ncol(x)){
+		prob <- x[,n]
+ 		polygon(x = c(years, years[c(length(years), 1)]), y = c(prob, 0, 0), col = "grey", border = 'steelblue')
+		}
+	if(ncol(x)>1)text(x=colSums(x*years)/colSums(x), y=apply(x, 2, max), labels=names(x),cex=0.7, srt=90)
+}
 
-	plot(cal,type='n',bty='n',xlim=rev(range(cal$calBP)),las=1, cex.axis=0.7, cex.lab=0.7)
-	polygon(x=c(cal$calBP,cal$calBP[c(nrow(cal),1)]), y=c(cal$prob,0,0),col='grey', border=F )
-	}
 #--------------------------------------------------------------------------------------------	
 chooseCalrange <- function(data,calcurve){
 
@@ -248,7 +216,7 @@ internalCalibrator <- function(data, CalArray){
 
 	# truncate to the required range
 	result <- data.frame(calBP=as.numeric(colnames(CalArray$prob)),prob=cal.prob)
-	result <- subset(result, calBP%in%CalArray$cal)
+	result <- subset(result, calBP>=min(CalArray$calrange) & calBP<=max(CalArray$calrange))
 
 return(result)}
 #--------------------------------------------------------------------------------------------
@@ -264,7 +232,9 @@ summedCalibrator <- function(data, CalArray, normalise = TRUE){
 	if(attr(CalArray, 'creator')!= 'makeCalArray') stop('CalArray was not made by makeCalArray()' )
 
 	if(nrow(data)==0){
-		result <- data.frame(calBP=CalArray$cal,prob=0)
+		result <- data.frame(rep(0,length(CalArray$cal)))
+		row.names(result) <- CalArray$cal
+		names(result) <- NULL
 		return(result)
 		}
 
@@ -281,10 +251,12 @@ summedCalibrator <- function(data, CalArray, normalise = TRUE){
 	nonC14.PD <- colSums(matrix(dnorm(rep(CalArray$cal,each=n), nonC14.data$age, nonC14.data$sd),n,length(CalArray$cal)))
 
 	# combine and adjust
-	PD <- C14.PD + nonC14.PD
+	PD <- nonC14.PD + C14.PD
 	if(normalise)PD <- PD / nrow(data) 	# normalise by number of samples, not by total PD. This means total normalised PD can be less than 1, in cases where CalArray is badly specified to the dataset, or visaversa
 
-	result <- data.frame(calBP=CalArray$cal,prob=PD)
+	result <- data.frame(PD)
+	row.names(result) <- CalArray$cal
+	names(result) <- NULL
 return(result)}
 #--------------------------------------------------------------------------------------------	
 phaseCalibrator <- function(data, CalArray, width = 200){
@@ -308,12 +280,12 @@ phaseCalibrator <- function(data, CalArray, width = 200){
 		}
 
 	phases <- sort(unique(data$phase))
-	phase.SPDs <- array(0,c(ncol(CalArray),length(phases)))
+	phase.SPDs <- array(0,c(length(CalArray$cal),length(phases)))
 
 	for(p in 1:length(phases)){
 		phase.data <- subset(data,phase==phases[p])
 		if(p==2)options(warn=(-1)) # only need to report for first iteration
-		phase.SPDs[,p] <- summedCalibrator(phase.data, CalArray, normalise = TRUE)$prob
+		phase.SPDs[,p] <- summedCalibrator(phase.data, CalArray, normalise = TRUE)[,1]
 		}
 	options(warn=0) # back to default
 
@@ -340,8 +312,16 @@ summedCalibratorWrapper <- function(data,calcurve=intcal13){
 	if(diff(calrange)>25000)int <- 20
 	CalArray <- makeCalArray(calcurve,calrange,int)
 	SPD <- summedCalibrator(data,CalArray)
-	plotCal(SPD)
+	plotPD(SPD)
 return(SPD)	}
 #--------------------------------------------------------------------------------------------	
+summedPhaseCalibrator <- function(data, calcurve, calrange, inc=5, width=200){
+	CalArray <- makeCalArray(calcurve=calcurve, calrange=calrange, inc=inc)
+	x <- phaseCalibrator(data=data, CalArray=CalArray, width=width)
+	SPD <- as.data.frame(rowSums(x))
 
-
+	# normalise
+	SPD <- SPD/sum(SPD)
+	SPD <- SPD/CalArray$inc
+return(SPD)}
+#--------------------------------------------------------------------------------------------	

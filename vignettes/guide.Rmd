@@ -12,7 +12,13 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-This vignette provides a guide to using the R package PopCPLmodel, to accompany and support the publication 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates', Philosophical Transactions B, 2020, A. Timpson et al. It assumes the user has some basic familiarity with programming in R. 
+This vignette provides a guide to using the R package PopCPLmodel, and accompanies the publication 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates', Philosophical Transactions B, 2020, A. Timpson et al. It assumes the user has some basic familiarity with programming in R. 
+
+In addition to some basic information on getting started, this vignette is divided into three main parts:
+
+1. **Date calibration and SPDs:**  Calibrate individual radiocarbon dates, generate Summed Probability Distributions, and automatically phase large datasets to adjust for ascertainment bias. Comparison with other software.
+1. **Continuous Piecewise Linear (CPL) Modelling:** Parameter estimation using the likelihood function, and its application in MCMC for estimating credible intervals. Model selection using BIC, and goodness-of-fit tests.
+1. **SPD simulation testing:** Blah blah.
 
 ## Installation
 
@@ -39,19 +45,21 @@ help(PopCPLmodel)
 help(arid)
 ```
 
-Datasets must be structured as a data.frame that include columns 'age' and 'sd', which represent the uncalibated 14C age and its error, respectively.
+Datasets must be structured as a data frame that include columns 'age' and 'sd', which represent the uncalibrated 14C age and its error, respectively.
 
 
 ```{r, eval = TRUE}
 arid[1:5,1:8]
 ```
+**********
+# Part 1
+# Date calibration and SPDs
 
+The algorithm used by PopCPLmodel to calculate model likelihoods of a 14C dataset uses several functions to first calibrate 14C dates. These functions that are intrinsically useful for ordinary date calibration or for generating a Summed Probability Distribution (SPD).
 
 ## Calibrated 14C date probability distributions
 
-The algorithm used by PopCPLmodel to calculate model likelihoods of a 14C dataset has a component that calibrates the 14C dates. Therefore this package also provides functions that are intrinsically useful for ordinary date calibration or for generating a Summed Probability Distribution (SPD).
-
-Generating a single calibrated date distribution or SPD requires either a two step process to give the user full control of the date range and temporal resolution, or a simpler one step process using a wrapper function that automatically estimates a sensible date range and resolution from the dataset, performs the two step process internally, and outputs a plot of the SPD.
+Generating a single calibrated date distribution or SPD requires either a two-step process to give the user full control of the date range and temporal resolution, or a simpler one step process using a wrapper function that automatically estimates a sensible date range and resolution from the dataset, performs the two step process internally, and outputs a plot of the SPD.
 
 ### With the wrapper
 
@@ -74,17 +82,18 @@ x <- summedCalibratorWrapper(data, shcal13)
 Generating the SPD without the wrapper gives you more control, and requires a two step process:
 
 1. Convert a calibration curve to a CalArray using the function [makeCalArray()](../html/makeCalArray.html)
-1. Calibrate the 14C dates through the CalArray using the [summedCalibrator()](../html/summedCalibrator.html) function.
+1. Calibrate the 14C dates through the CalArray using the function [summedCalibrator()](../html/summedCalibrator.html).
 
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
 data <- data.frame(age = c(9144), sd=c(151) )
 CalArray <- makeCalArray( intcal13, calrange = c(8000,13000) )
 cal <- summedCalibrator(data, CalArray)
-plotCal(cal)
+plotPD(cal)
 ```
-The CalArray is essentially a two-dimensional probability array of the calibration curve, and can be viewed using using the [plotCalArray()](../html/plotCalArray.html) function. Although the calibration curve has a maximum temporal resolution of 5 cal yrs, a finer resolution CalArray can be generated using the parameter inc which interpolates the calibration curve. However, this can be time costly if plotting the entire 50,000 year range of the calibration curve. 
 
-```{r, eval = TRUE, fig.height = 5, fig.width=5, fig.align = "center", dev='svg'}
+The CalArray is essentially a two-dimensional probability array of the calibration curve, and can be viewed using the [plotCalArray()](../html/plotCalArray.html) function. Although the calibration curve has a maximum temporal resolution of 5 cal yrs, a finer resolution CalArray can be generated using the parameter **inc** which interpolates the calibration curve. However, this can be time costly if plotting the entire 50,000 year range of the calibration curve. 
+
+```{r, eval = TRUE, fig.height = 5, fig.width=5, fig.align = "center", dev='jpeg'}
 x <- makeCalArray(shcal13, c(5500,6000), inc=1 )
 plotCalArray(x)
 ```
@@ -92,7 +101,7 @@ plotCalArray(x)
 
 ## Calibration comparison with other software
 
-It is worth noting that the algorithm used by this package to calibrate 14C dates gives equivalent results to those from [OxCal](https://c14.arch.ox.ac.uk/oxcal.html) generated using  [OxcAAR](https://cran.r-project.org/web/packages/oxcAAR/index.html) but these differ slightly to the results generated by [Bchron](https://cran.r-project.org/web/packages/Bchron/index.html).
+It is worth noting that the algorithm used by this package to calibrate 14C dates gives equivalent results to those from [OxCal](https://c14.arch.ox.ac.uk/oxcal.html) generated using [OxcAAR](https://cran.r-project.org/web/packages/oxcAAR/index.html) but these differ slightly to the results generated by [Bchron](https://cran.r-project.org/web/packages/Bchron/index.html).
 
 ![Comparison of calibration software for the 14C date: 150 +/- 25 calibrated through intcal13. This PopCPLmodel package (grey) and Oxcal (blue) give equivalent results, whilst Bchron differs in several locations on the curve.](software compare.svg)
 
@@ -100,5 +109,53 @@ It is worth noting that the algorithm used by this package to calibrate 14C date
 
 A naive approach to generating an SPD as a proxy for population dynamics would be to sum all dates in the dataset, but a more sensible approach is to sum the SPDs of each phase. The need to bin dates into phases is an important step in modelling population dynamics to adjust for the data ascertainment bias of some archaeological finds having more dates by virtue of a larger research interest/budget. 
 
-Therefore [phaseCalibrator()](../html/phaseCalibrator.html) generates an SPD for each phase in a dataset, and includes a binning algorithm which provides a simple and useful solution to handling large datasets that have not been phased.
+Therefore [phaseCalibrator()](../html/phaseCalibrator.html) generates an SPD for each phase in a dataset, and includes a binning algorithm which provides a useful solution to handling large datasets that have not been phased. For example, consider the following 8 dates from 2 sites:
 
+```{r, eval = TRUE}
+data <- subset(arid, site %in% c('Carrizal','Pacopampa'))
+data[,2:7]
+```
+
+The data have not been binned (do not include a column 'phase') therefore the default binning algorithm calibrates these dates into 4 phases:
+
+
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+CalArray <- makeCalArray(shcal13, calrange = c(2000,6000))
+x <- phaseCalibrator(data, CalArray)
+plotPD(x)
+```
+
+Finally, the distributions in each phase can be summed and normalised to unity. It is straight forward to achieve this directly from the dataframe created above: 
+
+```{r, eval = TRUE}
+SPD <- as.data.frame(rowSums(x))
+
+# normalise
+SPD <- SPD/(sum(SPD)*CalArray$inc)
+```
+
+Alternatively, the wrapper function [summedPhaseCalibrator()](../html/summedPhaseCalibrator.html) will perform this entire workflow internally:
+
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+SPD <- summedPhaseCalibrator(data, shcal13, c(2000,6000))
+plotPD(SPD)
+```
+
+**********
+# Part 2
+# Continuous Piecewise Linear (CPL) Modelling
+
+A CPL model lends itself well to the objectives of identifying specific demographic events. Its parameters are the (x,y) coordinates of the hinge points, which are the relative population size (y) and timing (x) of these events. Crucially, this package calculates model likelihoods (the probability of the data given some proposed parameter combination). This likelihood is used in a search algorithm to find the maximum likelihood parameters; to compare models with different numbers parameters to find the best fit without overfitting; in Monte-Carlo Markov Chain (MCMC) analysis to estimate credible intervals of those parameters; and in a goodness-of-fit test to check that the data is a typical realisation of the maximum likelihood model and its parameters.
+
+## Likelihoods
+
+Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). Because calibration curves has a resolution of 5 years at best, this package generates a calibrated PMF with a default resolution of 5 years, although this can be adjusted to any preferred resolution (see [makeCalArray()](../html/makeCalArray.html) ). This discretisation provides the advantage that numerical methods can be used to easily calculate likelihoods, provided the model is also discretised. 
+
+A [toy()](../html/toy.html) model is provided to demonstrate how this achieved.
+
+
+**********
+# Part 3
+# SPD simulation testing
+
+Quote some text from paper about why this isnt a very sophisticated approach. Provide references of those who have done it. Explain key improvement that the summary statistic is the likelihood.

@@ -2,6 +2,7 @@
 export(makeCalArray)
 export(plotCalArray)
 export(summedCalibrator)
-export(plotCal)
+export(plotPD)
 export(summedCalibratorWrapper)
 export(phaseCalibrator)
+export(summedPhaseCalibrator)

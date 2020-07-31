@@ -1,7 +1,7 @@
 \name{summedCalibrator} 
 \alias{summedCalibrator} 
 \title{Generates a summed probability distribution (SPD) of calibrated dates} 
-\description{Generates a Summed Probability Distribution (SPD). Handles both C14 and other date types e.g., thermoluminescence.}}
+\description{Generates a Summed Probability Distribution (SPD). Handles both C14 and other date types e.g., thermoluminescence.}
 \usage{summedCalibrator(data, CalArray, normalise = TRUE)}
 \arguments{
   \item{data}{
@@ -28,21 +28,21 @@ Optionally 'datingType' can be provided in the data, but must comprise only 'C14
 		datingType = rep('C14',3)
 		)
 	SPD <- summedCalibrator(data, CalArray, normalise = FALSE)
-	plotCal(SPD)
+	plotPD(SPD)
 
 	# At 5 cal yr resolution the SPD area = 3
-	sum(SPD$prob) * 5
+	sum(SPD) * 5
 
 	# At 1 cal yr resolution the SPD area also = 3
 	CalArray <- makeCalArray(intcal13, calrange=c(9000,11000), inc=1 )
 	SPD <- summedCalibrator(data, CalArray, normalise = FALSE)
 	plotCal(SPD)
-	sum(SPD$prob) * 1
+	sum(SPD) * 1
 
 	# and under the default normalisation the SPD area = 1
 	SPD <- summedCalibrator(data, CalArray, normalise = TRUE)
-	plotCal(SPD)
-	sum(SPD$prob) * 1
+	plotPD(SPD)
+	sum(SPD) * 1
 	
 	# whilst a date outside the date range results in the SPD area < 1
 	data <- data.frame(
@@ -51,6 +51,6 @@ Optionally 'datingType' can be provided in the data, but must comprise only 'C14
 		datingType = c('C14','C14','nonC14')
 		)
 	SPD <- summedCalibrator(data, CalArray, normalise = TRUE)
-	plotCal(SPD)
-	sum(SPD$prob) * 1
+	plotPD(SPD)
+	sum(SPD) * 1
 	}

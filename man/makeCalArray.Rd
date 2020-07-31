@@ -10,6 +10,9 @@
   \item{calrange}{
 	A vector of two cal dates, giving the calendar range of CalArray. Can be in either order.
 	}
+  \item{inc}{
+	Increments to interpolate calendar years. Default = 5
+	}
 }
 \value{
 	Returns a list including:

@@ -1,18 +1,16 @@
 ---
-title: "Guide to using ADMUR"
+title: "ADMUR: Ancient Demographic Modelling Using Radiocarbon"
 author: "Adrian Timpson"
-date: "06/07/2020"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
-description: >
-  A comprehensive guide to modelling population dynamics using ADMUR: Ancient Demographic Modelling Using Radiocarbon.
-  
 vignette: >
   %\VignetteIndexEntry{Guide to using ADMUR}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
 
-This vignette provides a guide to using the R package ADMUR, and accompanies the publication 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates', Philosophical Transactions B, 2020, A. Timpson et al. It assumes the user has some basic familiarity with programming in R. 
+
+This vignette provides a comprehensive guide to modelling population dynamics using the R package ADMUR, and accompanies the publication 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates', Philosophical Transactions B, 2020, A. Timpson et al. It assumes the user has some basic familiarity with programming in R. 
 
 In addition to some basic information on getting started, this vignette is divided into three main parts:
 

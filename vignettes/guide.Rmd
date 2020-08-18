@@ -53,11 +53,11 @@ arid[1:5,1:8]
 # Part 1
 # Date calibration and SPDs
 
-The algorithm used by ADMUR to calculate model likelihoods of a 14C dataset uses several functions to first calibrate 14C dates. These functions that are intrinsically useful for ordinary date calibration or for generating a Summed Probability Distribution (SPD).
+The algorithm used by ADMUR to calculate model likelihoods of a 14C dataset uses several functions to first calibrate 14C dates. These functions are also intrinsically useful for ordinary date calibration or for generating a Summed Probability Distribution (SPD).
 
 ## Calibrated 14C date probability distributions
 
-Generating a single calibrated date distribution or SPD requires either a two-step process to give the user full control of the date range and temporal resolution, or a simpler one step process using a wrapper function that automatically estimates a sensible date range and resolution from the dataset, performs the two step process internally, and outputs a plot of the SPD.
+Generating a single calibrated date distribution or SPD requires either a two-step process to give the user full control of the date range and temporal resolution, or a simpler one step process using a wrapper function that automatically estimates a sensible date range and resolution from the dataset, performs the two step process internally, and plots the SPD.
 
 ### With the wrapper
 
@@ -105,7 +105,7 @@ It is worth noting that the algorithm used by this package to calibrate 14C date
 
 ## Phased data: adjusting for ascertainment bias
 
-A naive approach to generating an SPD as a proxy for population dynamics would be to sum all dates in the dataset, but a more sensible approach is to sum the SPDs of each phase. The need to bin dates into phases is an important step in modelling population dynamics to adjust for the data ascertainment bias of some archaeological finds having more dates by virtue of a larger research interest/budget. 
+A naive approach to generating an SPD as a proxy for population dynamics would be to sum all dates in the dataset, but a more sensible approach is to sum the SPDs of each phase. The need to bin dates into phases is an important step in modelling population dynamics to adjust for the data ascertainment bias of some archaeological finds having more dates by virtue of a larger research interest or budget. 
 
 Therefore [phaseCalibrator()](../html/phaseCalibrator.html) generates an SPD for each phase in a dataset, and includes a binning algorithm which provides a useful solution to handling large datasets that have not been phased. For example, consider the following 8 dates from 2 sites:
 
@@ -145,15 +145,43 @@ plotPD(SPD)
 
 A CPL model lends itself well to the objectives of identifying specific demographic events. Its parameters are the (x,y) coordinates of the hinge points, which are the relative population size (y) and timing (x) of these events. Crucially, this package calculates model likelihoods (the probability of the data given some proposed parameter combination). This likelihood is used in a search algorithm to find the maximum likelihood parameters; to compare models with different numbers parameters to find the best fit without overfitting; in Monte-Carlo Markov Chain (MCMC) analysis to estimate credible intervals of those parameters; and in a goodness-of-fit test to check that the data is a typical realisation of the maximum likelihood model and its parameters.
 
-## Likelihoods
+## Likelihood of a single date
 
-Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). Because calibration curves has a resolution of 5 years at best, this package generates a calibrated PMF with a default resolution of 5 years, although this can be adjusted to any preferred resolution (see [makeCalArray()](../html/makeCalArray.html) ). This discretisation provides the advantage that numerical methods can be used to easily calculate likelihoods, provided the model is also discretised. 
+Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). Because calibration curves have a resolution of 5 years at best, this package generates a calibrated PMF with a default resolution of 5 years, although this can be adjusted to any preferred resolution (see [makeCalArray()](../html/makeCalArray.html) ). This discretisation provides the advantage that numerical methods can be used to easily calculate likelihoods, provided the model is also discretised. 
 
-A [toy()](../html/toy.html) model is provided to demonstrate how this achieved.
+A [toy()](../html/toy.html) model and population is provided to demonstrate how this achieved. Notice the toy population covers a slightly wider date range to ensure simulated 14C dates are well represented around the edges.
 
+(need to first demonstrate the likelihood with a single date)
+
+## Likelihood of a dataset
+
+First, we simulate a plausible 14C dataset and calibrate it:
+
+```{r, eval = TRUE}
+# generate some simulated archaeological samples in proportion to the toy population dynamics
+
+cal <- sample(x = toy$population$calBP, size = 99, replace = TRUE, prob = toy$population$individuals ) 
+
+# convert to plausible 14C dates, using a real dataset to simulate plausible 14C errors
+
+age <- uncalibrateCalendarDates(cal, shcal13)
+sd <- sample(x = arid$sd, size = 99, replace = TRUE)
+data <- data.frame(age=age, sd=sd, phase=1:99, datingType = 'C14')
+
+# calibrate each phase (one date per phase), taking care to restrict to the modelled date range
+CalArray <- makeCalArray(shcal13, calrange = range(toy$model$calBP))
+x <- phaseCalibrator(data, CalArray)
+```
+
+Next we remove any calibrated dates with less than 50% of their PD within the modelled date range. This is a crucial step to avoid mischievous edge effects of dates outside the date range. The logic of only including dates with at least 50% of their PD within the date range is that their true dates are more likely to be within the date range (internal) than external. 
+
+```{r, eval = TRUE}
+i <- colSums(x) >= (0.5 / CalArray$inc) 
+x <- x[,i] 
+```
 
 **********
 # Part 3
 # SPD simulation testing
 
-Quote some text from paper about why this isnt a very sophisticated approach. Provide references of those who have done it. Explain key improvement that the summary statistic is the likelihood.
+Quote some text from paper about why this isnt a very sophisticated approach. Explain key improvement that the summary statistic is the likelihood.

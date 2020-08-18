@@ -136,6 +136,7 @@ binner <- function(data, width, calcurve){
 	# Arguments:
 	#	data:	data.frame containing at least the following columns :"age", "site", "datingType"
 	#	width:  any time interval in c14 time, default = 200 c14 years
+	#	calcurve: the object 'intcal13' loaded from intcal13.RData, or any other calibration curve
 
 	# argument checks
 	if(!is.numeric(width))stop('width must be numeric')
@@ -324,4 +325,15 @@ summedPhaseCalibrator <- function(data, calcurve, calrange, inc=5, width=200){
 	SPD <- SPD/sum(SPD)
 	SPD <- SPD/CalArray$inc
 return(SPD)}
+#--------------------------------------------------------------------------------------------	
+uncalibrateCalendarDates <- function(dates, calcurve){
+	# dates: vector of calendar dates (point estimates)
+	# randomly samples dates the calcurve error, at the corresponding cal date
+	# returns a vector of point estimates on 14C scale 
+
+	simC14.means <- approx(x=calcurve$cal,y=calcurve$C14,xout=dates)$y 
+	simC14.errors <- approx(x=calcurve$cal,y=calcurve$error,xout=dates)$y 
+	i <- !is.na(simC14.means) & !is.na(simC14.errors)
+	simC14Samples <- rnorm(n=sum(i),mean=simC14.means[i],sd=simC14.errors[i])
+return(round(simC14Samples))}
 #--------------------------------------------------------------------------------------------	

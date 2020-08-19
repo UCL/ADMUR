@@ -14,6 +14,9 @@
 	Default TRUE normalises probability distribution to give a total area equal to 1. Otherwise if FALSE total PD area equal to the number of dates. 
 	}
 }
+\value{
+	Returns a single-column data frame of SPD probabilities. Row names are the calendar years.
+	}
 \details{
 Uses CalArray once to simultaneously calibrate and sum all 14C dates in data. The result is equivalent to calibrating each date, then summing. Note, if normalise = TRUE the SPD total area equals 1, provided the date range of the CalArray encompasses the dates provided. If the date range used to generate CalArray does not encompass the entire dataset, some dates will have PD outside the date range, giving a SPD area < 1. This avoids deleterious edge effects. Similarly if normalise = FALSE the SPD total may be < the number of dates.
 

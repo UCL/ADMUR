@@ -324,6 +324,8 @@ summedPhaseCalibrator <- function(data, calcurve, calrange, inc=5, width=200){
 	# normalise
 	SPD <- SPD/sum(SPD)
 	SPD <- SPD/CalArray$inc
+
+	names(SPD) <- NULL
 return(SPD)}
 #--------------------------------------------------------------------------------------------	
 uncalibrateCalendarDates <- function(dates, calcurve){
@@ -336,4 +338,22 @@ uncalibrateCalendarDates <- function(dates, calcurve){
 	i <- !is.na(simC14.means) & !is.na(simC14.errors)
 	simC14Samples <- rnorm(n=sum(i),mean=simC14.means[i],sd=simC14.errors[i])
 return(round(simC14Samples))}
+#--------------------------------------------------------------------------------------------	
+loglik <- function(PD, model){
+
+	# ensure the date ranges exactly match
+	check <- identical(row.names(PD),row.names(model))
+	if(!check)stop('dates of PD and model dont match!')
+
+	# multiply phase PDs by model PD
+	weighted.PD <- PD * model$pdf
+
+	# sum weighted PDs across all years (a calibrated date's probabilities are OR) to give the lik for each date
+	liks <- colSums(weighted.PD)
+
+	# calculate the overall log lik
+	loglik <- sum(log(liks))
+
+	if(is.nan(loglik))loglik <- -Inf
+return(loglik)}
 #--------------------------------------------------------------------------------------------	

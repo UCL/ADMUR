@@ -11,6 +11,9 @@
 	A calibration curve object. Choose intcal13 (default) or shcal13. 
 	}
 }
+\value{
+	Returns a single-column data frame of SPD probabilities. Row names are the calendar years.
+	}
 \details{
 Function to easily plot a calibrated Summed Probability Distribution from 14C dates. Automatically chooses a sensible date range and interpolation increments. Uses these to generate CalArray internally.
 

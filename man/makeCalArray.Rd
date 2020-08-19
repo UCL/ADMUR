@@ -16,10 +16,10 @@
 }
 \value{
 	Returns a list including:
-	probs: a 2D probability array of the calibration curve
-	calcurve: the calibration curve as provided as an argument
-	cal: a numeric vector of calendar years 
-	inc: the resolution of the array in calendar years
+	\item{probs}{a 2D probability array of the calibration curve}
+	\item{calcurve}{the calibration curve as provided as an argument}
+	\item{cal}{a numeric vector of calendar years}
+	\item{inc}{the resolution of the array in calendar years}
 	}
 \details{
 	Generates an array of probabilities mapping the calibration curve and its error ribbon.

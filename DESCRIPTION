@@ -7,7 +7,7 @@ Maintainer: Adrian Timpson <a.timpson@ucl.ac.uk>
 Description: Tools to directly model underlying population dynamics using date datasets (radiocarbon and other), using either a Continuous Piecewise Linear (CPL) model framework, or Summed Probability Distributions (SPD). This package accompanies 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates' by Adrian Timpson, Ramiro Barberena, Mark G. Thomas, César Méndez and Katie Manning. Philosophical Transactions of the Royal Society B 2020.
 Imports: DEoptimR
 Depends: R (>= 3.1.0)
-Suggests: Bchron
+Suggests: Bchron, OxcAAR
 License: GPL-3
 Encoding: UTF-8
 VignetteBuilder: knitr

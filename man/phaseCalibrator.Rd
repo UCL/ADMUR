@@ -13,8 +13,11 @@
   \item{width}{
 	A timespan in C14 years used to automatically bin dates if they have not been phased, i.e., 'phase' is missing from the data. Default = 200.
 	}
-
 }
+\value{
+	Returns a data frame of probabilities. Each column provides the SPD of a phase. Column names are the phase names, row names are the calendar years.
+	}
+
 \details{
 
 Generates an SPD for each phase using \code{\link[=summedCalibrator]{summedCalibrator}} with default normalisation = TRUE. Returns a data frame of probabilities, with phase names assigned to column names, and calendar years assigned to row names. 

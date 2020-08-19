@@ -145,40 +145,53 @@ plotPD(SPD)
 
 A CPL model lends itself well to the objectives of identifying specific demographic events. Its parameters are the (x,y) coordinates of the hinge points, which are the relative population size (y) and timing (x) of these events. Crucially, this package calculates model likelihoods (the probability of the data given some proposed parameter combination). This likelihood is used in a search algorithm to find the maximum likelihood parameters; to compare models with different numbers parameters to find the best fit without overfitting; in Monte-Carlo Markov Chain (MCMC) analysis to estimate credible intervals of those parameters; and in a goodness-of-fit test to check that the data is a typical realisation of the maximum likelihood model and its parameters.
 
-## Likelihood of a single date
+## Calculating likelihoods
 
 Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). Because calibration curves have a resolution of 5 years at best, this package generates a calibrated PMF with a default resolution of 5 years, although this can be adjusted to any preferred resolution (see [makeCalArray()](../html/makeCalArray.html) ). This discretisation provides the advantage that numerical methods can be used to easily calculate likelihoods, provided the model is also discretised. 
 
-A [toy()](../html/toy.html) model and population is provided to demonstrate how this achieved. Notice the toy population covers a slightly wider date range to ensure simulated 14C dates are well represented around the edges.
-
-(need to first demonstrate the likelihood with a single date)
-
-## Likelihood of a dataset
-
-First, we simulate a plausible 14C dataset and calibrate it:
+A [toy()](../html/toy.html) model and population is provided to demonstrate how this achieved. Notice the toy population covers a slightly wider date range to ensure simulated 14C dates are well represented around the edges. First, we simulate a plausible 14C dataset and calibrate it:
 
 ```{r, eval = TRUE}
-# generate some simulated archaeological samples in proportion to the toy population dynamics
+# Generate some simulated archaeological samples in proportion to the toy population dynamics
+pop.years <- as.numeric(row.names(toy$population))
+mod.years <- as.numeric(row.names(toy$model))
+cal <- sample(x = pop.years, size = 99, replace = TRUE, prob = toy$population$individuals ) 
 
-cal <- sample(x = toy$population$calBP, size = 99, replace = TRUE, prob = toy$population$individuals ) 
-
-# convert to plausible 14C dates, using a real dataset to simulate plausible 14C errors
-
+# Convert to 14C dates. 14C errors are borrowed from the real dataset 'arid'.
 age <- uncalibrateCalendarDates(cal, shcal13)
 sd <- sample(x = arid$sd, size = 99, replace = TRUE)
-data <- data.frame(age=age, sd=sd, phase=1:99, datingType = 'C14')
+data <- data.frame(age = age, sd = sd, phase = 1:99, datingType = 'C14')
 
-# calibrate each phase (one date per phase), taking care to restrict to the modelled date range
-CalArray <- makeCalArray(shcal13, calrange = range(toy$model$calBP))
-x <- phaseCalibrator(data, CalArray)
+# Calibrate each phase, taking care to restrict to the modelled date range
+CalArray <- makeCalArray(shcal13, calrange = range(mod.years), inc = 1)
+PD <- phaseCalibrator(data, CalArray)
 ```
 
-Next we remove any calibrated dates with less than 50% of their PD within the modelled date range. This is a crucial step to avoid mischievous edge effects of dates outside the date range. The logic of only including dates with at least 50% of their PD within the date range is that their true dates are more likely to be within the date range (internal) than external. 
+Next we remove any calibrated dates with less than 50% of their PD within the modelled date range. This is a crucial step to avoid mischievous edge effects of dates outside the date range. The logic of only including dates with at least 50% of their PD within the date range is that their true dates are more likely to be within the date range (internal) than external:
 
 ```{r, eval = TRUE}
-i <- colSums(x) >= (0.5 / CalArray$inc) 
-x <- x[,i] 
+i <- colSums(PD) >= (0.5 / CalArray$inc) 
+PD <- PD[,i] 
 ```
+
+Finally we calculate the overall log likelihood of the model given the data:
+
+```{r, eval = TRUE}
+loglik(PD, toy$model)
+```
+
+For comparison, we can calculate the overall likelihood of a uniform model given exactly the same data. Intuitively this should have a lower likelihood, since our dataset was randomly generated from a toy population history that came from the toy model:
+
+```{r, eval = TRUE}
+uniform.model <- toy$model
+uniform.model$pdf <- 1/nrow(uniform.model)
+loglik(PD, uniform.model)
+```
+
+## Searching for maximum likelihood CPL model
+
+Having established how to calculate the likelihood of any proposed model given a dataset, we can use any out-of-the-box search algorithm to find the maximum likelihood model. Crucially this requires us to ... parameters to .... a model pdf.
+
 
 **********
 # Part 3

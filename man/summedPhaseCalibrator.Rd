@@ -20,6 +20,9 @@
 	A timespan in C14 years used to automatically bin dates if they have not been phased, i.e., 'phase' is missing from the data. Default = 200.
 	}
 }
+\value{
+	Returns a single-column data frame of SPD probabilities. Row names are the calendar years.
+	}
 \details{
 Wrapper function to generate an overall SPD for phased dates. Internally this first generates an SPD for each phase. Data may be phased already, alternatively if 'phase' is not provided, this function will automatically bin dates into phases, see \code{\link[=phaseCalibrator]{phaseCalibrator}}. Each phase's distribution is then summed, and the final SPD is normalised to unity.
 

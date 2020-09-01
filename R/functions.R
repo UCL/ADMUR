@@ -357,3 +357,83 @@ loglik <- function(PD, model){
 	if(is.nan(loglik))loglik <- -Inf
 return(loglik)}
 #--------------------------------------------------------------------------------------------	
+parametersToPDFcoords <- function(x.par,y.par){
+
+	# converts x.par and y.par parameters to pdf x y coordinates
+	# length of y.par should be 1 longer than length of x.par
+	# both x.par and y.par vectors should be values between 0 and 1
+	# returns x and y values between 0 and 1
+
+	# step 1 and 2 picks each subsequent y value independently from a gamma, whilst x-values are picked using the stick breaking beta process
+	# additional constraints are required on the x-sampling to ensure even sampling across the remainder of x (s.a) and remainder of pdf area (s.b)
+	# step 3 is the penultimate step, and requires x value to be sampled before y, to ensure the area after it isn't impossible
+	# step 3 then requires the y value to be beta constrained by some maximum value
+	# finally step 4 exactly calculates the y value, to ensure total area = 1
+
+	if(length(y.par)!= (1+length(x.par)))stop('y.par must be 1 parameter longer than x.par')
+	if(sum(c(x.par,y.par)<0 | c(x.par,y.par)>1))stop('x.par and y.par must be between 0 and 1')
+	K <- length(y.par)+1
+	y <- x <- area <- stick <- numeric(K) 
+
+	# step 1
+	if(K==2)y[1] <- qbeta(y.par[1],1,1)*2
+	if(K>2)y[1] <- qgamma(y.par[1],1,1)
+	x[1] <- 0
+	area[1] <- 0
+	stick[1] <- 0
+
+	# step 2
+	if(K>3)for(k in 2:(K-2)){
+		y[k] <- qgamma(y.par[k],1,1)
+		s.a <- 1-x[k-1]
+		s.b <-  2*(1-sum(area))/(y[k]+y[k-1])
+		s <- min(c(s.a,s.b))
+		stick[k] <- qbeta(x.par[k-1],1,K-k)*s
+		x[k] <- stick[k] + x[k-1]
+		area[k] <- (0.5)*(x[k]-x[k-1])*(y[k]+y[k-1])
+		}
+
+	# step 3
+	if(K>2)for(k in K-1){
+		s.a <- 1-x[k-1]
+		s.b <- 2*(1-sum(area))/y[k-1]
+		s <- min(c(s.a,s.b))
+		stick[k] <- qbeta(x.par[k-1],1,K-k)*s
+		x[k] <- stick[k] + x[k-1]
+		y.s <- ( 2*(1-sum(area)) +(x[k-1]*y[k-1]) - (x[k]*y[k-1]) ) / (1 - x[k-1])
+		y[k] <- qbeta(y.par[k],1,1)*y.s
+		area[k] <- (0.5)*(x[k]-x[k-1])*(y[k]+y[k-1])
+		}
+
+	# step 4
+	x[K] <- 1
+	y[K] <- 2*(1-sum(area))/(1-x[K-1]) - y[K-1]
+	stick[K] <- 1-x[K-1]
+	area[K] <- (0.5)*(x[K]-x[K-1])*(y[K]+y[K-1])
+
+	res <- data.frame(x=x,y=y,area=area,stick=stick)
+return(res)}
+#--------------------------------------------------------------------------------------------
+convertPars <- function(pars,years){
+
+	# must be odd, as (2n-1 parameters where n=number of pieces)
+ 	cond <- ((length(pars)+1) %% 2) == 0
+	if(!cond)stop('need an odd number of parameters')
+
+	if(length(pars)==1){
+		x.par <- c()
+		y.par <- pars
+		}
+
+	if(length(pars)!=1){
+		x.par <- pars[1:((length(pars)-1)/2)]
+		y.par <- pars[(length(x.par)+1):length(pars)]
+		}
+
+	d <- parametersToPDFcoords(x.par,y.par)
+	d$year <- d$x* (max(years)-min(years)) + min(years)
+	d$pdf <- d$y / length(years)
+
+return(d)}
+#--------------------------------------------------------------------------------------------
+

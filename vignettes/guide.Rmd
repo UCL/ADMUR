@@ -16,7 +16,7 @@ In addition to some basic information on getting started, this vignette is divid
 
 1. **Date calibration and SPDs:**  Calibrate individual radiocarbon dates, generate Summed Probability Distributions, and automatically phase large datasets to adjust for ascertainment bias. Comparison with other software.
 1. **Continuous Piecewise Linear (CPL) Modelling:** Parameter estimation using the likelihood function, and its application in MCMC for estimating credible intervals. Model selection using BIC, and the goodness-of-fit (GOF) test.
-1. **SPD simulation testing:** Null hypothesis testing by simulating SPDs and comparing to the observed SPD. P-values generated using likelihoods, rather than summary statistics originally devised in Shennan et al 2013 and Timpson et al 2014.
+1. **SPD simulation testing:** Null hypothesis testing by simulating SPDs and comparing to the observed SPD. P-values generated using likelihoods, improving on the summary statistics originally devised in Shennan et al 2013 and Timpson et al 2014.
 
 ## Installation
 
@@ -36,14 +36,14 @@ library(ADMUR)
 
 ## 14C datasets
 
-A summary of the available help files and data sets included in the package can be browsed, which include a terrestrial anthropogenic 14C dataset from the South American Arid Diagonal:
+A summary of the available help files and data sets included in the package can be browsed, which include a terrestrial anthropogenic ^14^C dataset from the South American Arid Diagonal:
 
 ```{r, eval = FALSE}
 help(ADMUR)
 help(arid)
 ```
 
-Datasets must be structured as a data frame that include columns 'age' and 'sd', which represent the uncalibrated 14C age and its error, respectively.
+Datasets must be structured as a data frame that include columns 'age' and 'sd', which represent the uncalibrated ^14^C age and its error, respectively.
 
 
 ```{r, eval = TRUE}
@@ -53,7 +53,7 @@ arid[1:5,1:8]
 # Part 1
 # Date calibration and SPDs
 
-The algorithm used by ADMUR to calculate model likelihoods of a 14C dataset uses several functions to first calibrate 14C dates. These functions are also intrinsically useful for ordinary date calibration or for generating a Summed Probability Distribution (SPD).
+The algorithm used by ADMUR to calculate model likelihoods of a ^14^C dataset uses several functions to first calibrate ^14^C dates. These functions are also intrinsically useful for ^14^C date calibration or for generating a Summed Probability Distribution (SPD).
 
 ## Calibrated 14C date probability distributions
 
@@ -68,7 +68,7 @@ data <- data.frame( age = c(6562,7144),  sd = c(44,51)  )
 x <- summedCalibratorWrapper(data)
 ```
 
-Notice the function automatically assumed the data provided were all 14C dates. However, if you have other kinds of date such as thermoluminescence you can specify 'nonC14'. You can also specify a particular calibration curve:
+Notice the function automatically assumed the data provided were all ^14^C dates. However, if you have other kinds of date such as thermoluminescence you can specify 'nonC14'. You can also specify a particular calibration curve:
 
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
 data <- data.frame( age = c(6562,7144),  sd = c(44,51), datingType = c('C14','nonC14') )
@@ -80,7 +80,9 @@ x <- summedCalibratorWrapper(data, shcal13)
 Generating the SPD without the wrapper gives you more control, and requires a two step process:
 
 1. Convert a calibration curve to a CalArray using the function [makeCalArray()](../html/makeCalArray.html)
-1. Calibrate the 14C dates through the CalArray using the function [summedCalibrator()](../html/summedCalibrator.html).
+1. Calibrate the ^14^C dates through the CalArray using the function [summedCalibrator()](../html/summedCalibrator.html).
+
+This is useful for improving computational times if generating many SPDs, for example in a simulation framework, since the CalArray needs generating only once.
 
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
 data <- data.frame(age = c(9144), sd=c(151) )
@@ -89,7 +91,8 @@ cal <- summedCalibrator(data, CalArray)
 plotPD(cal)
 ```
 
-The CalArray is essentially a two-dimensional probability array of the calibration curve, and can be viewed using the [plotCalArray()](../html/plotCalArray.html) function. Although the calibration curve has a maximum temporal resolution of 5 cal yrs, a finer resolution CalArray can be generated using the parameter **inc** which interpolates the calibration curve. However, this can be time costly if plotting the entire 50,000 year range of the calibration curve. 
+The CalArray is essentially a two-dimensional probability array of the calibration curve, and can be viewed using the [plotCalArray()](../html/plotCalArray.html) function. Although the calibration curve has a maximum temporal resolution of 5 cal yrs, a finer resolution CalArray can be generated using the parameter **inc** which interpolates the calibration curve.
+This would become prohibitively time and memory costly if analysing the entire 50,000 year range of the calibration curve at a 1 year resolution (requiring a 50,000 by 50,000 array) and in practice the default 5 year resolution provides equivalent results to 1 year resolution for study periods wider than c.1000 years. 
 
 ```{r, eval = TRUE, fig.height = 5, fig.width=5, fig.align = "center", dev='jpeg'}
 x <- makeCalArray(shcal13, c(5500,6000), inc=1 )
@@ -99,22 +102,22 @@ plotCalArray(x)
 
 ## Calibration comparison with other software
 
-It is worth noting that the algorithm used by this package to calibrate 14C dates gives equivalent results to those from [OxCal](https://c14.arch.ox.ac.uk/oxcal.html) generated using [OxcAAR](https://cran.r-project.org/web/packages/oxcAAR/index.html) but these differ slightly to the results generated by [Bchron](https://cran.r-project.org/web/packages/Bchron/index.html).
+It is worth noting that the algorithm used by this package to calibrate ^14^C dates gives equivalent results to those from [OxCal](https://c14.arch.ox.ac.uk/oxcal.html) generated using [OxcAAR](https://cran.r-project.org/web/packages/oxcAAR/index.html) but these differ slightly to the results generated by [Bchron](https://cran.r-project.org/web/packages/Bchron/index.html).
 
-![Comparison of calibration software for the 14C date: 150 +/- 25 calibrated through intcal13. This ADMUR package (grey) and Oxcal (blue) give equivalent results, whilst Bchron differs in several locations on the curve.](software compare.svg)
+![Comparison of calibration software for the ^14^C date: 150 +/- 25 calibrated through intcal13. This ADMUR package (grey) and Oxcal (blue) give equivalent results, whilst Bchron differs in several locations on the curve.](software compare.svg)
 
 ## Phased data: adjusting for ascertainment bias
 
 A naive approach to generating an SPD as a proxy for population dynamics would be to sum all dates in the dataset, but a more sensible approach is to sum the SPDs of each phase. The need to bin dates into phases is an important step in modelling population dynamics to adjust for the data ascertainment bias of some archaeological finds having more dates by virtue of a larger research interest or budget. 
 
-Therefore [phaseCalibrator()](../html/phaseCalibrator.html) generates an SPD for each phase in a dataset, and includes a binning algorithm which provides a useful solution to handling large datasets that have not been phased. For example, consider the following 8 dates from 2 sites:
+Therefore [phaseCalibrator()](../html/phaseCalibrator.html) generates an SPD for each phase in a dataset, and includes a binning algorithm which provides a useful solution to handling large datasets that have not aready been phased. For example, consider the following 8 dates from 2 sites:
 
 ```{r, eval = TRUE}
 data <- subset(arid, site %in% c('Carrizal','Pacopampa'))
 data[,2:7]
 ```
 
-The data have not been binned (do not include a column 'phase') therefore the default binning algorithm calibrates these dates into 4 phases:
+The data have not already been phased (do not include a column 'phase') therefore the default binning algorithm calibrates these dates into 4 phases. this is achieved by binning dates that have a mean ^14^C date within 200 ^14^C years of any other date in that respective bin. Therefore Pacopampa.1 comprises sample 1207, Pacopampa.2 comprises samples 1205 and 1206, Carrizal.1 comprises samples 1196 and 1195 and 1194 and 1193, and Carrizal.2 comprises sample 1192:
 
 
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
@@ -147,17 +150,18 @@ A CPL model lends itself well to the objectives of identifying specific demograp
 
 ## Calculating likelihoods
 
-Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). Because calibration curves have a resolution of 5 years at best, this package generates a calibrated PMF with a default resolution of 5 years, although this can be adjusted to any preferred resolution (see [makeCalArray()](../html/makeCalArray.html) ). This discretisation provides the advantage that numerical methods can be used to easily calculate likelihoods, provided the model is also discretised. 
+Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). Because calibration curves have a resolution of 5 years at best, this package generates a calibrated PMF with a default resolution of 5 years, although this can be adjusted to any preferred resolution (see [makeCalArray()](../html/makeCalArray.html) ). This discretisation provides the advantage that numerical methods can be used to easily calculate likelihoods, provided the model is also discretised to the same time points. 
 
-A [toy()](../html/toy.html) model and population is provided to demonstrate how this achieved. Notice the toy population covers a slightly wider date range to ensure simulated 14C dates are well represented around the edges. First, we simulate a plausible 14C dataset and calibrate it:
+A [toy()](../html/toy.html) model and population is provided to demonstrate how this achieved. Notice the toy population covers a slightly wider date range to ensure simulated ^14^C dates are well represented around the edges. First, we simulate a plausible ^14^C dataset and calibrate it:
 
 ```{r, eval = TRUE}
-# Generate some simulated archaeological samples in proportion to the toy population dynamics
+# Simulate 99 archaeological samples in proportion to the toy population dynamics
 pop.years <- as.numeric(row.names(toy$population))
 mod.years <- as.numeric(row.names(toy$model))
+set.seed(12345)
 cal <- sample(x = pop.years, size = 99, replace = TRUE, prob = toy$population$individuals ) 
 
-# Convert to 14C dates. 14C errors are borrowed from the real dataset 'arid'.
+# Convert to 14C dates. 14C errors are borrowed from the real dataset 'arid' for realism.
 age <- uncalibrateCalendarDates(cal, shcal13)
 sd <- sample(x = arid$sd, size = 99, replace = TRUE)
 data <- data.frame(age = age, sd = sd, phase = 1:99, datingType = 'C14')
@@ -167,7 +171,7 @@ CalArray <- makeCalArray(shcal13, calrange = range(mod.years), inc = 1)
 PD <- phaseCalibrator(data, CalArray)
 ```
 
-Next we remove any calibrated dates with less than 50% of their PD within the modelled date range. This is a crucial step to avoid mischievous edge effects of dates outside the date range. The logic of only including dates with at least 50% of their PD within the date range is that their true dates are more likely to be within the date range (internal) than external:
+Next we remove any calibrated dates with less than 50% of their PD within the modelled date range. This is a crucial step to avoid mischievous edge effects of dates outside the date range. Similarly, notice we constrained the CalArray to the modelled date range. These are important to ensure that we only model the population across a range that is well represented by data. To extend the model beyond the range of available data we would be to assume the absence of evidence means evidence of absence. No doubt there may be occasions when this is reasonable (for example if modelling the first colonisation of an island that has been well excavated, and the period before arrival is evidenced by the absence of datable material), but more often the range of representative data is due to research interest, and therefore the logic of only including dates with at least 50% of their PD within the date range is that their true dates are more likely to be internal (within the date range) than external:
 
 ```{r, eval = TRUE}
 i <- colSums(PD) >= (0.5 / CalArray$inc) 
@@ -180,7 +184,7 @@ Finally we calculate the overall log likelihood of the model given the data:
 loglik(PD, toy$model)
 ```
 
-For comparison, we can calculate the overall likelihood of a uniform model given exactly the same data. Intuitively this should have a lower likelihood, since our dataset was randomly generated from a toy population history that came from the toy model:
+For comparison, we can calculate the overall likelihood of a uniform model given exactly the same data. Intuitively this should have a lower likelihood, since our dataset was randomly generated from the non-uniform toy population history:
 
 ```{r, eval = TRUE}
 uniform.model <- toy$model
@@ -188,12 +192,56 @@ uniform.model$pdf <- 1/nrow(uniform.model)
 loglik(PD, uniform.model)
 ```
 
-## Searching for maximum likelihood CPL model
+And indeed the toy model is almost 5 million times more likely than the uniform model:
+```{r, eval = TRUE}
+exp( loglik(PD, toy$model) - loglik(PD, uniform.model) )
+```
 
-Having established how to calculate the likelihood of any proposed model given a dataset, we can use any out-of-the-box search algorithm to find the maximum likelihood model. Crucially this requires us to ... parameters to .... a model pdf.
+
+## The anatomy of a CPL model
+
+Having established how to calculate the likelihood of any proposed model given a dataset, we can use any out-of-the-box search algorithm to find the maximum likelihood model. This first requires us to describe the PDF of any population model in terms of a small number of parameters, rather than a vector of probabilities for each year.
+
+We achieve this using the Continuous Piecewise Linear (CPL) model, which can be described using the (x,y) coordinates of its hinge points.
+
+![Illustration of the toy model PDF, described using just four coordinate pairs.](model plot.svg)
+
+When performing a search for the best 3-CPL model coordinates (given a dataset), only five of these eight values are free parameters. The x-coordinates of the start and end (5500 BP and 7500 BP) are fixed by the choice of date range. Additionally, one of the y-coordinates must be constrained by the other parameters, since the total area of this PDF must equal 1. As a result, an n-CPL model will have 2n-1 free parameters.
+
+## Parameter space: The Area Breaking Process
+
+We use the function [convertPars()](../html/convertPars.html) to map our search parameters to their corresponding PDF coordinates. This allows us to propose independent parameter values from a uniform distribution between 0 and 1, and convert them into coordinates that describe a corresponding CPL model PDF. This parameter-to-coordinate mapping is achieved using a modified stick breaking Dirichlet process. 
+
+The Dirichlet Process (not to be confused with the Dirichlet distribution) is an algorithm that can break a stick (the x-axis date range) into a desired number of pieces, ensuring all lengths are sampled evenly. The length (proportion) of remaining stick to break (at each iteration) is chosen by sampling from the Beta distribution, such that we use the Beta CDF (with \alpha = 1 and \beta = the number of pieces still to be broken) to convert an x-parameter into its equivalent x-coordinate value. We extend this algorithm into two-dimensions by also sampling from a Gamma distribution on the y-axis, such that we use the Gamma CDF (with \alpha = 1 and \beta = 1) to convert a y-parameter (between 0 and 1) into its equivalent coordinate value between 0 and +\infty.
+
+The algorithm proceeds as follows:
+
+1. At the first hinge (H1, x = 5500 BP) convert the first y-parameter into the H1 y-coordinate using the Gamma CDF.
+1. At the next hinge (H2) convert the second y-parameter into the H2 y-coordinate using the Gamma CDF.
+1. Use the above y-coordinates (y~H1~ and y~H2~) to calculate the maximum possible H2 x-coordinate. This is achieved by assuming the PDF area so far (to the left of H2) equals 1. Or in other words by assuming the remaining hinges all have a y-coordinate equal to zero and the x-coordinate of H3 is infinitely close to H2. Convert the first x-parameter into x~H2~ by multiplying the Beta CDF by max(x~H2~). 
+1. Repeat steps 2 and 3 for subsequent hinges.
+
+The algorithm continues until the penultimate hinge, which differs slightly since the maximum possible x-coordinate is constrained not just by the area so far (to the left) but also a minimum triangle area to the right. Therefore at the penultimate hinge we convert the last x-parameter first, by multiplying the Beta CDF by max(x~Hpenultimate~) Notice in the case of a 1-CPL model the first hinge is also the penultimate hinge, so in this special case the first y-parameter is converted into the H1 y-coordinate using a uniform distribution between 0 and 2.
+
+Finally the coordinates of the last hinge are not free. This is because the x-coordinate is already defined as 7500 BP and the y-coordinate is calculated exactly using the other coordinates and the constraint that the total area equals 1.
+
+
+The parameters must be provided single vector with an odd length, each between 0 and 1 (y,x,y,x,...y):
+
+```{r, eval = TRUE}
+set.seed(12345) 
+convertPars(pars = runif(11),years = 5500:7500)
+```
+
+Note: The Area Breaking Algorithm is a heuristic that performs well and ensures the maximum likelihood parameters are always found, however its mapping of random parameters to PDF coordinates is not perfectly even, and we welcome ideas on improvements.
+
+
+## Searching parameter space
+
 
 
 **********
+
 # Part 3
 # SPD simulation testing
 

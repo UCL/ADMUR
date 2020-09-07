@@ -436,4 +436,43 @@ convertPars <- function(pars,years){
 
 return(d)}
 #--------------------------------------------------------------------------------------------
+objectiveFunction <- function(pars,PDarray,type='CPL'){
 
+	# sanity check a few arguments
+	if(!type%in%c('CPL','exponential','uniform'))stop('unknown type')
+	if(type%in%c('exponential','uniform') & length(pars)!=1)stop('multiple parameters only permitted for type=CPL')	
+	if(!is.data.frame(PDarray))stop('PDarray must be a data frame')
+
+	# convert pars to pdf vector
+
+	years <- as.numeric(row.names(PDarray))
+
+	if(type=='CPL'){
+		pdf <- convertPars(pars,years)
+		d.years <- approx(x=pdf$year,y=pdf$pdf,xout=years,ties='ordered',rule=2)$y 
+		}
+
+	if(type=='exponential'){
+		d.years <- dexp(years,pars)
+		}
+
+	if(type=='uniform'){
+		d.years <- dunif(years,min(years),max(years))
+		}
+
+	# normalise
+	d.years <- d.years/sum(d.years)
+
+	# then multiply by the PDs
+	weighted.PDs <- PDarray * d.years
+
+	# then sum weighted PDs across all years (a calibrated date's PDs are OR) to give the lik for each date
+	liks <- colSums(weighted.PDs)
+
+	# finally calculate the overall log lik
+	loglik <- sum(log(liks))
+
+	if(is.nan(loglik))loglik <- -Inf
+
+return(-loglik)}
+#--------------------------------------------------------------------------------------------

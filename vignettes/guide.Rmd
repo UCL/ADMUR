@@ -9,6 +9,7 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+UNDER CONSTRUCTION. COMPLETION DUE SEPT 2020
 
 This vignette provides a comprehensive guide to modelling population dynamics using the R package ADMUR, and accompanies the publication 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates', Philosophical Transactions B, 2020, A. Timpson et al. It assumes the user has some basic familiarity with programming in R. 
 
@@ -117,7 +118,7 @@ data <- subset(arid, site %in% c('Carrizal','Pacopampa'))
 data[,2:7]
 ```
 
-The data have not already been phased (do not include a column 'phase') therefore the default binning algorithm calibrates these dates into 4 phases. this is achieved by binning dates that have a mean ^14^C date within 200 ^14^C years of any other date in that respective bin. Therefore Pacopampa.1 comprises sample 1207, Pacopampa.2 comprises samples 1205 and 1206, Carrizal.1 comprises samples 1196 and 1195 and 1194 and 1193, and Carrizal.2 comprises sample 1192:
+The data have not already been phased (do not include a column 'phase') therefore the default binning algorithm calibrates these dates into 4 phases. this is achieved by binning dates that have a mean ^14^C date within 200 ^14^C years of any other date in that respective bin. Therefore Pacopampa.1 comprises samples 1207 and 1206, Pacopampa.2 comprises sample 1205, Carrizal.1 comprises samples 1196 and 1195 and 1194 and 1193, and Carrizal.2 comprises sample 1192:
 
 
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
@@ -171,7 +172,7 @@ CalArray <- makeCalArray(shcal13, calrange = range(mod.years), inc = 1)
 PD <- phaseCalibrator(data, CalArray)
 ```
 
-Next we remove any calibrated dates with less than 50% of their PD within the modelled date range. This is a crucial step to avoid mischievous edge effects of dates outside the date range. Similarly, notice we constrained the CalArray to the modelled date range. These are important to ensure that we only model the population across a range that is well represented by data. To extend the model beyond the range of available data we would be to assume the absence of evidence means evidence of absence. No doubt there may be occasions when this is reasonable (for example if modelling the first colonisation of an island that has been well excavated, and the period before arrival is evidenced by the absence of datable material), but more often the range of representative data is due to research interest, and therefore the logic of only including dates with at least 50% of their PD within the date range is that their true dates are more likely to be internal (within the date range) than external:
+Next we remove any calibrated dates with less than 50% of their PD within the modelled date range. This is a crucial step to avoid mischievous edge effects of dates outside the date range. Similarly, notice we constrained the CalArray to the modelled date range. These are important to ensure that we only model the population across a range that is well represented by data. To extend the model beyond the range of available data would be to assume the absence of evidence means evidence of absence. No doubt there may be occasions when this is reasonable (for example if modelling the first colonisation of an island that has been well excavated, and the period before arrival is evidenced by the absence of datable material), but more often the range of representative data is due to research interest, and therefore the logic of only including dates with at least 50% of their PD within the date range is that their true dates are more likely to be internal (within the date range) than external:
 
 ```{r, eval = TRUE}
 i <- colSums(PD) >= (0.5 / CalArray$inc) 
@@ -204,7 +205,7 @@ Having established how to calculate the likelihood of any proposed model given a
 
 We achieve this using the Continuous Piecewise Linear (CPL) model, which can be described using the (x,y) coordinates of its hinge points.
 
-![Illustration of the toy model PDF, described using just four coordinate pairs.](model plot.svg)
+![Illustration of the toy 3-CPL model PDF, described using just four coordinate pairs (hinges).](model plot.svg)
 
 When performing a search for the best 3-CPL model coordinates (given a dataset), only five of these eight values are free parameters. The x-coordinates of the start and end (5500 BP and 7500 BP) are fixed by the choice of date range. Additionally, one of the y-coordinates must be constrained by the other parameters, since the total area of this PDF must equal 1. As a result, an n-CPL model will have 2n-1 free parameters.
 
@@ -226,18 +227,46 @@ The algorithm continues until the penultimate hinge, which differs slightly sinc
 Finally the coordinates of the last hinge are not free. This is because the x-coordinate is already defined as 7500 BP and the y-coordinate is calculated exactly using the other coordinates and the constraint that the total area equals 1.
 
 
-The parameters must be provided single vector with an odd length, each between 0 and 1 (y,x,y,x,...y):
+The parameters must be provided single vector with an odd length, each between 0 and 1 (y,x,y,x,...y). For example, a randomly generated 6-CPL model will have 11 parameters and 7 hinges:
 
 ```{r, eval = TRUE}
-set.seed(12345) 
 convertPars(pars = runif(11),years = 5500:7500)
 ```
 
 Note: The Area Breaking Algorithm is a heuristic that performs well and ensures the maximum likelihood parameters are always found, however its mapping of random parameters to PDF coordinates is not perfectly even, and we welcome ideas on improvements.
 
+## Maximum Likelihood parameter search
 
-## Searching parameter space
+Any preferred search algorithm can be used. For example, the JDEoptim function from [DEoptimR](https://cran.r-project.org/web/packages/DEoptimR/index.html) uses a differential evolution optimisation algorithm that performs very nicely for this application. We recommend increasing the default NP parameter to 20 times the number of parameters:
 
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+library(DEoptimR)
+best <- JDEoptim(lower=rep(0,5), upper=rep(1,5), fn=objectiveFunction, PDarray=PD, type='CPL',maxiter=30)
+years <- as.numeric(row.names(PD))
+pdf <- convertPars(best$par,years)
+SPD <- summedPhaseCalibrator(data, shcal13, c(5500,7500))
+plotPD(SPD)
+lines(5500:7500, toy$model$pdf, lwd=2, col='steelblue')
+lines(pdf$year,pdf$pdf,lwd=2,col='firebrick')
+legend(x=6300,y=max(pdf$pdf),cex=0.7,lwd=2,col=c('steelblue', 'firebrick'),bty='n',legend=c('toy','best fitted 3-CPL'))
+```
+
+Notice the maximum log likelihood for this best fit 3-CPL model is better (higher) than for the toy model from which the dataset was randomly sampled:
+
+```{r, eval = TRUE}
+-best$value
+loglik(PD, toy$model)
+```
+This is because the dataset was a small random sample (N=99) generated from the toy model. Therefore the best fitting model should indeed be slightly different to the toy model.
+
+
+## Credible interval parameter search using MCMC
+
+## Full workflow example
+
+This section provides some full workflow examples that bring together several functions described so far, to generate a complete CPL model analysis.
+
+### Example 1:
 
 
 **********

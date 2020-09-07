@@ -9,3 +9,6 @@ export(summedPhaseCalibrator)
 export(uncalibrateCalendarDates)
 export(loglik)
 export(convertPars)
+export(objectiveFunction)
+
+importFrom(DEoptimR, JDEoptim)

@@ -64,8 +64,11 @@ makeCalArray <- function(calcurve,calrange,inc=5){
 	c14.interp[i] <- cal[i]
 	error.interp[i] <- calcurve$error[1]
 
-	# sensible c14 range, at 1 yr resolution
-	c14 <- floor(min(c14.interp)):ceiling(max(c14.interp))
+	# pick a sensible c14 range, at 1 yr resolution
+	min.c14 <- round(min(c14.interp - 4*error.interp))
+	if(min.c14<0)min.c14 <- 0
+	max.c14 <- round(max(c14.interp + 4*error.interp))
+	c14 <- min.c14:max.c14
 
 	# fill the array
 	R <- length(c14)
@@ -205,7 +208,13 @@ internalCalibrator <- function(data, CalArray){
 	# all c14 likelihoods (Gaussians in c14 time)
 	c14 <- as.numeric(row.names(CalArray$prob)) 
 	all.dates <- t(array(c14,c(length(c14),nrow(data)))) 
-	all.c14.lik <- dnorm(all.dates, mean=as.numeric(data$age), sd=as.numeric(data$sd))
+#	all.c14.lik <- dnorm(all.dates, mean=as.numeric(data$age), sd=as.numeric(data$sd))
+# lets try log normal instead!!
+	m <- as.numeric(data$age)
+	v <- as.numeric(data$sd)^2
+	mu <- log(m^2/sqrt(v+m^2))
+	sig <- sqrt(log(v/m^2+1))
+	all.c14.lik <- dlnorm(all.dates, mean=mu, sd=sig)
 
 	#  all c14 probabilities (bayes theorem requires two steps, multiply prior by likelihood, then divide by integral)
 	all.c14.prob <- c14.prior * t(all.c14.lik)

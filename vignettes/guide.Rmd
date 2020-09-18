@@ -103,14 +103,23 @@ plotCalArray(x)
 
 ## Calibration comparison with other software
 
-It is worth noting that the algorithm used by this package to calibrate ^14^C dates gives practically equivalent results to those from [OxCal](https://c14.arch.ox.ac.uk/oxcal.html) generated using [OxcAAR](https://cran.r-project.org/web/packages/oxcAAR/index.html), and these differ only very slightly from [Bchron](https://cran.r-project.org/web/packages/Bchron/index.html) 
+It is worth noting that the algorithm used by this package to calibrate ^14^C dates gives practically equivalent results to those from [OxCal](https://c14.arch.ox.ac.uk/oxcal.html) generated using [OxcAAR](https://cran.r-project.org/web/packages/oxcAAR/index.html) and [Bchron](https://cran.r-project.org/web/packages/Bchron/index.html) 
 
 ![Comparison of calibration software for the ^14^C date: 3000 +/- 50 BP calibrated through intcal13.](software compare 1.svg)
 
-However, there are some fringe circumstances in which results differ substantially. Specifically, at the age limits of a calibration curve. For example, consider the real ^14^C date [MAMS-13035](https://doi.org/10.1016/j.aeae.2015.11.003) age: 50524 +/- 833 BP calibrated through intcal13, which only extends to 46401BP (^14^C). Bchron throws an error, whilst OxCal applies a one-to-one mapping between ^14^C time and calendar time for any date (mean) beyond the range of the calibration curve. The latter is in theory a reasonable way to mitigate the problem, however OxCal applies this in a binary manner that can create peculiarities. Instead ADMUR gradually fades the calibration curve to a one-to-one mapping between the end of the curve and 60,000 BP. 
+However, there are two fringe circumstances where these software programs differ substantially: at the border of the calibration curve; and if a date has a large error.
+
+### Border effects 
+
+Consider the real ^14^C date [MAMS-13035](https://doi.org/10.1016/j.aeae.2015.11.003) age: 50524 +/- 833 BP calibrated through intcal13, which only extends to 46401BP. Bchron throws an error, whilst OxCal applies a one-to-one mapping between Conventional Radiocarbon (CRA) time and calendar time for any date (mean) beyond the range of the calibration curve. The latter is in theory a reasonable way to mitigate the problem, however OxCal applies this in a binary manner that can create peculiarities. Instead ADMUR gradually fades the calibration curve to a one-to-one mapping between the end of the curve and 60,000 BP. 
 
 ![Comparison of calibration software at the limits of intcal13. OxCal and Bchron produce a truncated distribution for date C. Bchron cannot calibrate date D, and OxCal suggests date D is younger than dates A, B and C. ADMUR performs a soft fade at the limit of the calibration curve.](software compare 2.svg)
 
+### Large errors 
+
+A ^14^C date is typically reported as a mean date with an error, which is generally interpreted as representing a symmetric Gaussian distribution before calibration. However, a Gaussian has a non-zero probability at all possible years (between -$\infty$ and +$\infty$), and therefore cannot fairly represent the date uncertainty which must be skewed towards the past. Specifically, if we consider the date in CRA time, it must have a zero probability of occurring in the future. Alternatively, if we consider the date as a 14C/12C ratio, it cannot be smaller than 1 (the present). Therefore ADMUR interprets a ^14^C date as a lognormal distribution. This naturally skews the distribution away from the present. In practice, this difference is undetectably trivial, since a lognormal distribution approximates a normal distribution for typical radiocarbon errors, however, theoretically the differences can be large if considering dates with large errors that are close to the present.
+
+![Comparison of calibration software for the ^14^C date 15000 +/- 10000 BP, using intcal13. Bchron assumes the CRA error is Normally distributed, resulting in a truncated curve with a substantial probability at present. OxCal produces a heavily skewed distribution with a low probability at present and a substantial probability at 50,000 BP that suddenly truncates to zero beyond this (total probability mass of all three curves equals 1). ADMUR assumes the CRA error is Lognormally distributed, such that the mean = 15000 and the variance = 10000^2.](software compare 3.svg)
 
 ## Phased data: adjusting for ascertainment bias
 

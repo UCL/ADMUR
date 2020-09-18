@@ -14,12 +14,7 @@
 	Time costly if CalArray comprises the entire 50,000 year range of the calibration curve.
 	}
 \examples{
-	# generate a CalArray of the intcal13 curve covering 5500 calBP to 6000 calBP
-	x <- makeCalArray(intcal13, c(5500,6000) )
-	plotCalArray(x)
-
-	# The calibration curve has a maximum temporal resolution of 5 cal yrs, however 
-	# a finer resolution CalArray can be generated using the parameter inc which interpolates the calibration curve.
-	x <- makeCalArray( calcurve = shcal13, calrange = c(5500,6000), inc = 1 )
+	# generate a CalArray of the intcal20 curve covering 5500 calBP to 6000 calBP
+	x <- makeCalArray( calcurve = intcal20, calrange = c(5500,6000), inc = 1 )
 	plotCalArray(x)
 	}

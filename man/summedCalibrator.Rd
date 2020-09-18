@@ -24,7 +24,7 @@ Optionally 'datingType' can be provided in the data, but must comprise only 'C14
 	}
 \examples{
 	# SPD of three 14C dates
-	CalArray <- makeCalArray(intcal13, calrange=c(9000,11000) )
+	CalArray <- makeCalArray(intcal20, calrange=c(9000,11000) )
 	data <- data.frame(
 		age = c(8350,8900,9350), 
 		sd = rep(50,3),
@@ -37,7 +37,7 @@ Optionally 'datingType' can be provided in the data, but must comprise only 'C14
 	sum(SPD) * 5
 
 	# At 1 cal yr resolution the SPD area also = 3
-	CalArray <- makeCalArray(intcal13, calrange=c(9000,11000), inc=1 )
+	CalArray <- makeCalArray(intcal20, calrange=c(9000,11000), inc=1 )
 	SPD <- summedCalibrator(data, CalArray, normalise = FALSE)
 	plotCal(SPD)
 	sum(SPD) * 1

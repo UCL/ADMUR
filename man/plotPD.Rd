@@ -13,7 +13,7 @@
 	}
 \examples{
 	data <- data.frame(age=c(9144),sd=c(151))
-	CalArray <- makeCalArray(intcal13,calrange=c(8000,13000))
+	CalArray <- makeCalArray(intcal20,calrange=c(8000,13000))
 	cal <- summedCalibrator(data, CalArray)
 	plotPD(cal)
 	}

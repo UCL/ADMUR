@@ -30,7 +30,7 @@ Each column of the output dataframe is a vector of probabilities representing th
 	}
 \examples{
 
-	CalArray <- makeCalArray(intcal13, calrange = c(9000,11000), inc = 1 )
+	CalArray <- makeCalArray(intcal20, calrange = c(9000,11000), inc = 1 )
 
 	# minimum data requirement includes 'mean' and 'sd' and either 'site' or 'phase'   
 	data <- data.frame(age = c(8350,8500,8900,9250), 

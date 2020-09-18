@@ -13,7 +13,7 @@ checkData <- function(data){
 	if(!is.numeric(data$age)){ warning('age must be numeric');return('bad')}	
 	if(!is.numeric(data$sd)){warning('sd must be numeric');return('bad')}		
 	if(min(data$age)<0){warning('some ages are impossibly young');return('bad')}			
-	if(max(data$age)>50000){warning('some ages are impossibly old');return('bad')}	
+#	if(max(data$age)>60000){warning('some ages are impossibly old');return('bad')}	
 	if(min(data$sd)<0){warning('some sd are impossibly small');return('bad')}	
 
 return(x)}
@@ -34,13 +34,13 @@ return(data)}
 #--------------------------------------------------------------------------------------------
 makeCalArray <- function(calcurve,calrange,inc=5){
 
-	# calcurve: the object intcal13 loaded from intcal13.RData, or any other calibration curve
+	# calcurve: intcal20 or any other calibration curve
 	# calrange: vector of two values giving a calendar range to analyse (BP). Narrowing the range from the default c(0,50000) reduces memory and time.
 	# inc: increments to interpolate calendar years. 
 	
 	# builds a matrix of probabilities representing the calibration curve
 	# rows of the matrix represent c14 years (annual resolution)
-	# columns of the matrix use the calcurve C14 date and error to form Gaussian distributions (5 year resolution)
+	# columns of the matrix use the calcurve C14 date and error to form Gaussian distributions
 	# therefore it is rather memory intensive, and takes a while, but is only required once for any number of dates
 
 	# extract the requested section
@@ -49,16 +49,25 @@ makeCalArray <- function(calcurve,calrange,inc=5){
 
 	# an extra 250 years is required to avoid edge effects
 	calmin.extra <- max((calmin - 250),0)
-	calmax.extra <- min((calmax + 250),max(calcurve$cal))
+	calmax.extra <- calmax + 250
 
-	# interpolate the calcurve to a 5 yr cal resolution
+	# include an extra data row in the calibration curve, to 'feather' extremely old dates onto a 1-to-1 mapping of C14 to cal time
+	calcurve <- rbind(data.frame(cal=60000,C14=60000,error=calcurve$error[1]),calcurve)
+
+	# interpolate the calcurve to the required resolution
 	cal <- seq(calmin.extra,calmax.extra,by=inc)
 	c14.interp <- approx(x=calcurve$cal,y=calcurve$C14,xout=cal)$y
 	error.interp <- approx(x=calcurve$cal,y=calcurve$error,xout=cal)$y
 
-	# sensible c14 range, at 1 yr resolution
-	c14 <- min(c14.interp):max(c14.interp)
+	# assume a one-to-one mapping of cal and c14 beyond 60000
+	i <- is.na(c14.interp)
+	c14.interp[i] <- cal[i]
+	error.interp[i] <- calcurve$error[1]
 
+	# sensible c14 range, at 1 yr resolution
+	c14 <- floor(min(c14.interp)):ceiling(max(c14.interp))
+
+	# fill the array
 	R <- length(c14)
 	C <- length(cal)
 	probs <- array(0,c(R,C))	
@@ -294,7 +303,7 @@ phaseCalibrator <- function(data, CalArray, width = 200){
 	
 return(phase.SPDs)}
 #--------------------------------------------------------------------------------------------	
-summedCalibratorWrapper <- function(data,calcurve=intcal13){
+summedCalibratorWrapper <- function(data,calcurve=intcal20,plot=TRUE){
 
 	# data: data.frame of 14C dates. Requires 'age' and 'sd' and optional datingType
 	# calcurve: the object intcal13 loaded from intcal13.RData, or any other calibration curve
@@ -313,7 +322,7 @@ summedCalibratorWrapper <- function(data,calcurve=intcal13){
 	if(diff(calrange)>25000)int <- 20
 	CalArray <- makeCalArray(calcurve,calrange,int)
 	SPD <- summedCalibrator(data,CalArray)
-	plotPD(SPD)
+	if(plot)plotPD(SPD)
 return(SPD)	}
 #--------------------------------------------------------------------------------------------	
 summedPhaseCalibrator <- function(data, calcurve, calrange, inc=5, width=200){
@@ -335,9 +344,11 @@ uncalibrateCalendarDates <- function(dates, calcurve){
 
 	simC14.means <- approx(x=calcurve$cal,y=calcurve$C14,xout=dates)$y 
 	simC14.errors <- approx(x=calcurve$cal,y=calcurve$error,xout=dates)$y 
+	simC14Samples <- numeric(length(dates))
 	i <- !is.na(simC14.means) & !is.na(simC14.errors)
-	simC14Samples <- rnorm(n=sum(i),mean=simC14.means[i],sd=simC14.errors[i])
-return(round(simC14Samples))}
+	simC14Samples[i] <- round(rnorm(n=sum(i),mean=simC14.means[i],sd=simC14.errors[i]))
+	simC14Samples[!i] <- round(dates[!i])
+return(simC14Samples)}
 #--------------------------------------------------------------------------------------------	
 loglik <- function(PD, model){
 
@@ -414,7 +425,24 @@ parametersToPDFcoords <- function(x.par,y.par){
 	res <- data.frame(x=x,y=y,area=area,stick=stick)
 return(res)}
 #--------------------------------------------------------------------------------------------
-convertPars <- function(pars,years){
+convertPars <- function(pars, years){
+	if('numeric'%in%class(pars))res <- convertParsInner(pars,years)
+	if(!'numeric'%in%class(pars)){
+		N <- nrow(pars)
+		C <- (ncol(pars)+1)/2 +1
+		yr <- pdf <- as.data.frame(matrix(,N,C))
+		names(yr) <- paste('yr',1:C,sep='')
+		names(pdf) <- paste('pdf',1:C,sep='')
+		for(n in 1:N){
+			x <- convertParsInner(pars[n,],years)
+			yr[n,] <- x$year
+			pdf[n,] <- x$pdf
+			}
+		res <- cbind(yr,pdf)
+		}
+return(res)}
+#--------------------------------------------------------------------------------------------
+convertParsInner <- function(pars,years){
 
 	# must be odd, as (2n-1 parameters where n=number of pieces)
  	cond <- ((length(pars)+1) %% 2) == 0
@@ -475,4 +503,42 @@ objectiveFunction <- function(pars,PDarray,type='CPL'){
 	if(is.nan(loglik))loglik <- -Inf
 
 return(-loglik)}
+#--------------------------------------------------------------------------------------------
+proposalFunction <- function(pars, jumps){
+	moves <- rnorm(length(pars),0,jumps)
+	new.pars <- pars + moves
+	new.pars[new.pars>0.999999] <- 0.999999
+	new.pars[new.pars<0] <- 0
+return(new.pars)}
+#--------------------------------------------------------------------------------------------
+mcmc <- function(PDarray, startPars, N = 30000, burn = 2000, thin = 5, jumps = 0.02){ 
+
+	# starting parameters
+	pars <- startPars
+
+	all.pars <- matrix(,N,length(startPars))
+
+	# mcmc loop
+	accepted <- rep(0,N)
+	for(n in 1:N){
+		all.pars[n,] <- pars
+		llik <- -objectiveFunction(pars,PDarray,type='CPL')
+		prop.pars <- proposalFunction(pars, jumps)
+		prop.llik <- -objectiveFunction(prop.pars,PDarray,type='CPL')
+		ratio <- min(exp(prop.llik-llik),1)
+		move <- sample(c(T,F),size=1,prob=c(ratio,1-ratio))
+		if(move){
+			pars <- prop.pars
+			accepted[n] <- 1
+			}
+		if(n%in%seq(0,N,by=1000))print(paste(n,'iterations of',N))
+		}
+
+	ar <- sum(accepted[burn:N])/(N-burn)
+
+	# thinning
+	i <- seq(burn,N,by=thin)
+	res <- all.pars[i,]
+
+return(list(res=res,all.pars=all.pars, acceptance.ratio=ar))}
 #--------------------------------------------------------------------------------------------

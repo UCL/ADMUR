@@ -8,7 +8,7 @@
 	A dataframe of 14C dates. Requires 'age' and 'sd', and at least one of 'site' and 'phase'. Optional 'datingType' comprising 'C14' and/or 'nonC14'.
 	}
   \item{calcurve}{
-	A calibration curve object. Choose from intcal13 or shcal13.
+	A calibration curve object. Choose from intcal20 (default), shcal20, intcal13 or shcal13.
 	}
   \item{calrange}{
 	A vector of two cal dates, giving the calendar range of CalArray. Can be in either order.
@@ -30,6 +30,6 @@ Optionally 'datingType' can be provided in the data, but must comprise only 'C14
 	}
 \examples{
 	data <- subset(arid, site \%in\% c('Carrizal','Pacopampa'))
-	SPD <- summedPhaseCalibrator(data, shcal13, c(2000,6000))
+	SPD <- summedPhaseCalibrator(data, shcal20, c(2000,6000))
 	plotPD(SPD)
 	}

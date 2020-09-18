@@ -5,7 +5,7 @@
 \usage{makeCalArray(calcurve, calrange, inc=5)}
 \arguments{
   \item{calcurve}{
-	A calibration curve object. Choose from intcal13 or shcal13.
+	A calibration curve object. Choose from intcal20 (default), shcal20, intcal13 or shcal13.
 	}
   \item{calrange}{
 	A vector of two cal dates, giving the calendar range of CalArray. Can be in either order.
@@ -30,9 +30,9 @@
 
 	This function is memory and time costly if used to construct the entire 50,000 year range of the calibration curve at a resolution of 5 cal years, therefore typically used only for a constrained date range, by specifying calrange.
 
-	This array only needs constructing once to generate a Summed Probability Distribution of any number of calibrated dates, allowing very efficient downstream calibration.
+	This array only needs constructing once to generate a Summed Probability Distribution of any number of calibrated dates, allowing efficient downstream calibration.
 	}
 \examples{
-	# generate a CalArray of the intcal13 curve covering 5500 calBP to 7000 calBP
-	x <- makeCalArray(intcal13, c(5500,7000) )
+	# generate a CalArray of the intcal20 curve covering 5500 calBP to 7000 calBP
+	x <- makeCalArray(intcal13, c(5500,7000), inc=1 )
 	}

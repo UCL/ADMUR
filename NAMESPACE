@@ -10,5 +10,6 @@ export(uncalibrateCalendarDates)
 export(loglik)
 export(convertPars)
 export(objectiveFunction)
+export(mcmc)
 
 importFrom(DEoptimR, JDEoptim)

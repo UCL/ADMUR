@@ -8,8 +8,11 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
+<style>
+p.caption {font-size: 0.7em;}
+</style>
 
-UNDER CONSTRUCTION. COMPLETION DUE SEPT 2020
+!!UNDER CONSTRUCTION. COMPLETION EXPECTED END OF SEPT 2020!!
 
 This vignette provides a comprehensive guide to modelling population dynamics using the R package ADMUR, and accompanies the publication 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates', Philosophical Transactions B, 2020, A. Timpson et al. It assumes the user has some basic familiarity with programming in R. 
 
@@ -117,9 +120,9 @@ Consider the real ^14^C date [MAMS-13035](https://doi.org/10.1016/j.aeae.2015.11
 
 ### Large errors 
 
-A ^14^C date is typically reported as a mean date with an error, which is generally interpreted as representing a symmetric Gaussian distribution before calibration. However, a Gaussian has a non-zero probability at all possible years (between -$\infty$ and +$\infty$), and therefore cannot fairly represent the date uncertainty which must be skewed towards the past. Specifically, if we consider the date in CRA time, it must have a zero probability of occurring in the future. Alternatively, if we consider the date as a 14C/12C ratio, it cannot be smaller than 1 (the present). Therefore ADMUR interprets a ^14^C date as a lognormal distribution. This naturally skews the distribution away from the present. In practice, this difference is undetectably trivial, since a lognormal distribution approximates a normal distribution for typical radiocarbon errors, however, theoretically the differences can be large if considering dates with large errors that are close to the present.
+A ^14^C date is typically reported as a mean date with an error, which is often interpreted as representing a symmetric Gaussian distribution before calibration. However, a Gaussian has a non-zero probability at all possible years (between -$\infty$ and +$\infty$), and therefore cannot fairly represent the date uncertainty which must be skewed towards the past. Specifically, if we consider the date in CRA time, it must have a zero probability of occurring in the future. Alternatively, if we consider the date as a 14C/12C ratio, it cannot be smaller than 1 (the present). Therefore ADMUR assumes a ^14^C date error is lognormally distributed with a mean equal to the CRA date, and a variance equal to the CRA error squared. This naturally skews the distribution away from the present. In practice, this difference is undetectably trivial for typical radiocarbon errors since the lognormal distribution approximates a normal distribution. However, theoretically the differences can be large if considering dates with large errors that are close to the present.
 
-![Comparison of calibration software for the ^14^C date 15000 +/- 10000 BP, using intcal13. Bchron assumes the CRA error is Normally distributed, resulting in a truncated curve with a substantial probability at present. OxCal produces a heavily skewed distribution with a low probability at present and a substantial probability at 50,000 BP that suddenly truncates to zero beyond this (total probability mass of all three curves equals 1). ADMUR assumes the CRA error is Lognormally distributed, such that the mean = 15000 and the variance = 10000^2.](software compare 3.svg)
+![Comparison of calibration software for the ^14^C dates 15000 +/- 9000 BP, 15000 +/- 3000 BP and 15000 +/- 1000 BP, using intcal13. Differences are apparent if a date has a large error (top tile): Bchron assumes the CRA error is Normally distributed, resulting in a truncated curve with a substantial probability at present. OxCal produces a heavily skewed distribution with a low probability at present and a substantial probability at 50,000 BP that suddenly truncates to zero beyond this (total probability mass of all three curves equals 1). ADMUR assumes the CRA error is Lognormally distributed.](software compare 3.svg)
 
 ## Phased data: adjusting for ascertainment bias
 
@@ -165,7 +168,7 @@ A CPL model lends itself well to the objectives of identifying specific demograp
 
 ## Calculating likelihoods
 
-Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). Because calibration curves have a resolution of 5 years at best, this package generates a calibrated PMF with a default resolution of 5 years, although this can be adjusted to any preferred resolution (see [makeCalArray()](../html/makeCalArray.html) ). This discretisation provides the advantage that numerical methods can be used to easily calculate likelihoods, provided the model is also discretised to the same time points. 
+Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). This discretisation provides the advantage that numerical methods can be used to easily calculate likelihoods, provided the model is also discretised to the same time points. 
 
 A [toy()](../html/toy.html) model and population is provided to demonstrate how this achieved. Notice the toy population covers a slightly wider date range to ensure simulated ^14^C dates are well represented around the edges. First, we simulate a plausible ^14^C dataset and calibrate it:
 
@@ -241,13 +244,13 @@ The algorithm continues until the penultimate hinge, which differs slightly sinc
 Finally the coordinates of the last hinge are not free. This is because the x-coordinate is already defined as 7500 BP and the y-coordinate is calculated exactly using the other coordinates and the constraint that the total area equals 1.
 
 
-The parameters must be provided single vector with an odd length, each between 0 and 1 (y,x,y,x,...y). For example, a randomly generated 6-CPL model will have 11 parameters and 7 hinges:
+The parameters must be provided as a single vector with an odd length, each between 0 and 1 (y,x,y,x,...y). For example, a randomly generated 6-CPL model will have 11 parameters and 7 hinges:
 
 ```{r, eval = TRUE}
 convertPars(pars = runif(11),years = 5500:7500)
 ```
 
-Note: The Area Breaking Algorithm is a heuristic that performs well and ensures the maximum likelihood parameters are always found, however its mapping of random parameters to PDF coordinates is not perfectly even, and we welcome ideas on improvements.
+Note: The Area Breaking Algorithm is a heuristic that performs well and ensures the maximum likelihood parameters are always found, however its mapping of random parameters to PDF coordinates is not perfectly even, and we welcome ideas for a more elegant algorithm.
 
 ## Maximum Likelihood parameter search
 
@@ -278,17 +281,66 @@ legend(x=6300, y=max(CPL$pdf), cex=0.7, lwd=2, col='firebrick', bty='n', legend=
 
 ## Credible interval parameter search using MCMC
 
+The function [mcmc()](../html/mcmc.html) uses the Metropolis-Hastings algorithm to search joint parameter values of an n-CPL model, given a the calibrated probability distributions of phases in a ^14^C dataset.
 
-## Full workflow example
+```{r, eval = FALSE}
+chain <- mcmc(PDarray = PD, startPars = best$par, N = 30000, burn = 2000, thin = 5, jumps = 0.1)
+```
 
-This section provides some full workflow examples that bring together several functions described so far, to generate a complete CPL model analysis.
+```{r, echo = FALSE}
+load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vignette.MCMC.RData')
+```
 
-### Example 1:
+The raw output of one mcmc chain are the 2n-1 parameters between 0 and 1, and distributions can be plotted. Note, because the dataset is small (N = 99) the credible regions are wide.
 
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+require(scales)
+par(mfrow = c(1,2), mar = c(4,4,2,2))
+plot(chain$res[,1], chain$res[,3], pch = 16, col = alpha(1,0.15))
+points(best$par[1], best$par[3], col = 'red', pch = 16, cex = 1.5)
+plot(chain$res[,1], chain$res[,4], pch = 16, col = alpha(1,0.15))
+points(best$par[1], best$par[4], col = 'red', pch = 16, cex = 1.5)
+```
+
+However, we are really interested in converting these parameters into the x,y coordinates of the CPL model's hinge points, which can be achieved using the [convertPars()](../html/convertPars.html) function:
+
+```{r, eval = TRUE}
+hinges <- convertPars(chain$res, 5500:7500)
+```
+
+Again distributions can be viewed, however it is important to note that these are only marginal distributions (attempts to view a 5-dimensional distribution in just 2 dimensions) so their complex shape cannot adequately show the true 5D densities. Therefore the true maximum likelihood (red points) may not perfectly match the densest part of the cloud. 
+
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+par(mfrow=c(1,2) , mar = c(4,4,2,2))
+plot(hinges$yr2, hinges$pdf2, pch=16, col=alpha(1,0.15), ylim=c(0,0.0006))
+points(CPL$year[2], CPL$pdf[2], col='red', pch=16, cex=1.5)
+plot(hinges$yr3, hinges$pdf3, pch=16, col=alpha(1,0.15), ylim=c(0,0.0014))
+points(CPL$year[3], CPL$pdf[3], col='red', pch=16, cex=1.5) 
+```
+
+Alternatively, the joint distributions can be visualised by plotting the CPL model for each iteration of the chain, with the MLE in red:
+
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+plot(NULL, xlim=c(7500,5500),ylim=c(0,0.0013), xlab='calBP', ylab='PD')
+for(n in 1:nrow(hinges)){
+	x <- c(hinges$yr1[n], hinges$yr2[n], hinges$yr3[n], hinges$yr4[n])
+	y <- c(hinges$pdf1[n], hinges$ pdf2[n], hinges$pdf3[n], hinges$pdf4[n])
+	lines(x, y, col= alpha(1,0.02))
+	}
+lines(CPL$year, CPL$pdf, lwd=2, col='firebrick')
+```
+
+## Model selection using BIC 
+
+Continue using this toy example, re-run MLE for various other models, and plot BIC
+
+## Goodness of fit (GOF) test.
+
+Distribution of likelihoods etc.
 
 **********
 
 # Part 3
 # SPD simulation testing
 
-Quote some text from paper about why this isnt a very sophisticated approach. Explain key improvement that the summary statistic is the likelihood.
+Lean on some text from paper about why this isn't a very sophisticated approach. Explain key improvement that the summary statistic is the likelihood.

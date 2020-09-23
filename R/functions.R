@@ -205,11 +205,12 @@ internalCalibrator <- function(data, CalArray){
 	# generate prior (based on calibration curve, some c14 dates are more likely than others)
 	c14.prior <- rowSums(CalArray$prob)
 
-	# all c14 likelihoods (Gaussians in c14 time)
+	# all c14 likelihoods (Either Gaussians  or lognormals in c14 time)
 	c14 <- as.numeric(row.names(CalArray$prob)) 
 	all.dates <- t(array(c14,c(length(c14),nrow(data)))) 
-#	all.c14.lik <- dnorm(all.dates, mean=as.numeric(data$age), sd=as.numeric(data$sd))
-# lets try log normal instead!!
+	# gaussian
+	all.c14.lik <- dnorm(all.dates, mean=as.numeric(data$age), sd=as.numeric(data$sd))
+	# or log normals
 	m <- as.numeric(data$age)
 	v <- as.numeric(data$sd)^2
 	mu <- log(m^2/sqrt(v+m^2))

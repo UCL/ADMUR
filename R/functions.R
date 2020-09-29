@@ -2,34 +2,35 @@
 # Functions for PopCPLmodel package
 #--------------------------------------------------------------------------------------------	
 checkData <- function(data){
-	
 	# data: data.frame of 14C dates. Requires 'age' and 'sd'.
-
-	# helper function to check format of data, and throw warnings / errors if required
+	# helper function to check format of data, and throw warnings
 
 	x <- 'good'
 	if(class(data)!='data.frame'){warning('data must be a data.frame');return('bad')}
 	if(sum(names(data)%in%c('age','sd'))!=2){warning("data must include 'age' and 'sd'");return('bad')}
 	if(!is.numeric(data$age)){ warning('age must be numeric');return('bad')}	
 	if(!is.numeric(data$sd)){warning('sd must be numeric');return('bad')}		
-	if(min(data$age)<0){warning('some ages are impossibly young');return('bad')}			
-#	if(max(data$age)>60000){warning('some ages are impossibly old');return('bad')}	
-	if(min(data$sd)<0){warning('some sd are impossibly small');return('bad')}	
+	if(min(data$age)<0){warning('some ages are negative');return('bad')}			
+	if(min(data$sd)<1){warning('some sd are impossibly small');return('bad')}	
 
 return(x)}
 #--------------------------------------------------------------------------------------------
 checkDatingType <- function(data){
-
 	# used by a couple of functions, so worth avoiding repetition
 
-	# assume all dates are C14 if no datingType is provided
-	if('datingType'%in%names(data)){
-		if(sum(!data$datingType%in%c('C14','nonC14'))!=0){ warning("Column 'datingType' must comprise only 'C14' and/or 'nonC14'");return(NULL)}	
-		}
+	# assume all dates are 14C if no datingType is provided
 	if(!'datingType'%in%names(data)){
-		data$datingType <- 'C14'
-		warning('data did not contain datingType, so all dates are assumed to be C14')
+		data$datingType <- '14C'
+		warning('data did not contain datingType, so all dates are assumed to be 14C')
 		}
+	# avoid misspellings of '14C'
+	bad <- c('14c','C14','c14','14.C','14.c','c.14','C.14','c-14','C-14','14-C')
+	i <- data$datingType%in%bad
+	if(sum(i)>0){
+		warning("Misspelling of '14C' in datingType are assumed to need calibrating")
+		data$datingType[i] <- '14C'
+		}
+		
 return(data)}
 #--------------------------------------------------------------------------------------------
 makeCalArray <- function(calcurve,calrange,inc=5){
@@ -40,7 +41,7 @@ makeCalArray <- function(calcurve,calrange,inc=5){
 	
 	# builds a matrix of probabilities representing the calibration curve
 	# rows of the matrix represent c14 years (annual resolution)
-	# columns of the matrix use the calcurve C14 date and error to form Gaussian distributions
+	# columns of the matrix use the calcurve 14C date and error to form Gaussian distributions
 	# therefore it is rather memory intensive, and takes a while, but is only required once for any number of dates
 
 	# extract the requested section
@@ -51,7 +52,7 @@ makeCalArray <- function(calcurve,calrange,inc=5){
 	calmin.extra <- max((calmin - 250),0)
 	calmax.extra <- calmax + 250
 
-	# include an extra data row in the calibration curve, to 'feather' extremely old dates onto a 1-to-1 mapping of C14 to cal time
+	# include an extra data row in the calibration curve, to 'feather' extremely old dates onto a 1-to-1 mapping of 14C to cal time
 	calcurve <- rbind(data.frame(cal=60000,C14=60000,error=calcurve$error[1]),calcurve)
 
 	# interpolate the calcurve to the required resolution
@@ -104,7 +105,7 @@ plotCalArray <- function(CalArray){
 	P <- CalArray$probs
 	c14 <- as.numeric(row.names(P))
 	cal <- as.numeric(colnames(P))
-	image(cal,c14,t(P)^0.1,xlab='Cal BP',ylab='C14',xlim=rev(range(cal)),col = heat.colors(20),las=1, cex.axis=0.7, cex.lab=0.7)
+	image(cal,c14,t(P)^0.1,xlab='Cal BP',ylab='14C',xlim=rev(range(cal)),col = heat.colors(20),las=1, cex.axis=0.7, cex.lab=0.7)
 	}
 #--------------------------------------------------------------------------------------------	
 plotPD <- function(x){
@@ -125,8 +126,8 @@ chooseCalrange <- function(data,calcurve){
 
 	calmin <- min <- calmax <- max <- NA
 
-	# choose a reasonable calrange for the C14 data
-	C14.data <- subset(data,datingType=='C14')
+	# choose a reasonable calrange for the 14C data
+	C14.data <- subset(data,datingType=='14C')
 	if(nrow(C14.data)>0){
 		c14min <- min(C14.data$age - 5*pmax(C14.data$sd,20))
 		c14max <- max(C14.data$age + 5*pmax(C14.data$sd,20))
@@ -135,7 +136,7 @@ chooseCalrange <- function(data,calcurve){
 		}
 
 	# choose a reasonable calrange for the nonC14 data
-	nonC14.data <- subset(data,datingType=='nonC14')
+	nonC14.data <- subset(data,datingType!='14C')
 	if(nrow(nonC14.data)>0){
 		min <- min(nonC14.data$age - 5*pmax(nonC14.data$sd,20))
 		max <- max(nonC14.data$age + 5*pmax(nonC14.data$sd,20))
@@ -145,7 +146,7 @@ chooseCalrange <- function(data,calcurve){
 return(calrange)}
 #--------------------------------------------------------------------------------------------	
 binner <- function(data, width, calcurve){
-	# Arguments:
+
 	#	data:	data.frame containing at least the following columns :"age", "site", "datingType"
 	#	width:  any time interval in c14 time, default = 200 c14 years
 	#	calcurve: the object 'intcal13' loaded from intcal13.RData, or any other calibration curve
@@ -157,8 +158,8 @@ binner <- function(data, width, calcurve){
 	if(sum(names(calcurve)%in%c('cal','C14','error'))!=3)stop('calcurve format must be data frame with cal, C14 and error')
 
 	# approximate nonC14 dates ito C14 time, so they can also be binned
-	data.C14 <- subset(data,datingType=='C14')
-	data.nonC14 <- subset(data,datingType=='nonC14')
+	data.C14 <- subset(data,datingType=='14C')
+	data.nonC14 <- subset(data,datingType!='14C')
 	data.C14$c14age <- data.C14$age
 	if(nrow(data.nonC14)>0)data.nonC14$c14age <- approx(x=calcurve$cal, y=calcurve$C14, xout=data.nonC14$age)$y
 	data <- rbind(data.C14,data.nonC14)
@@ -261,12 +262,12 @@ summedCalibrator <- function(data, CalArray, normalise = TRUE){
 	data <- checkDatingType(data)
 
 	# C14
-	C14.data <- subset(data, datingType=='C14')
+	C14.data <- subset(data, datingType=='14C')
 	C14.PD <- internalCalibrator(C14.data, CalArray)$prob
 	C14.PD <- C14.PD/CalArray$inc # PD needs adjusting by inc, but not for nonC14, as done automatically by dnorm()
 
 	# nonC14
-	nonC14.data <- subset(data, datingType=='nonC14')
+	nonC14.data <- subset(data, datingType!='14C')
 	n <- nrow(nonC14.data)
 	nonC14.PD <- colSums(matrix(dnorm(rep(CalArray$cal,each=n), nonC14.data$age, nonC14.data$sd),n,length(CalArray$cal)))
 
@@ -435,28 +436,61 @@ parametersToPDFcoords <- function(x.par,y.par){
 	res <- data.frame(x=x,y=y,area=area,stick=stick)
 return(res)}
 #--------------------------------------------------------------------------------------------
-convertPars <- function(pars, years){
-	if('numeric'%in%class(pars))res <- convertParsInner(pars,years)
-	if(!'numeric'%in%class(pars)){
-		N <- nrow(pars)
-		C <- (ncol(pars)+1)/2 +1
-		yr <- pdf <- as.data.frame(matrix(,N,C))
-		names(yr) <- paste('yr',1:C,sep='')
-		names(pdf) <- paste('pdf',1:C,sep='')
-		for(n in 1:N){
-			x <- convertParsInner(pars[n,],years)
-			yr[n,] <- x$year
-			pdf[n,] <- x$pdf
+convertPars <- function(pars, years, type){
+
+	# sanity checks
+	if(!type%in%c('CPL','exp'))stop('unknown type')
+	if('data.frame'%in%class(pars))pars <- as.matrix(pars)
+	if('integer'%in%class(years))years <- as.numeric(years)
+	if(!'numeric'%in%class(years))stop('years must be a numeric vector')
+
+	if(type=='CPL'){
+		# if a single parameter set, generates a few extras
+		if('numeric'%in%class(pars))res <- convertParsCPL(pars,years)
+
+		# if a matrix of parameters, only generates the x,y coords
+		if(!'numeric'%in%class(pars)){
+			N <- nrow(pars)
+			C <- (ncol(pars)+1)/2 +1
+			yr <- pdf <- as.data.frame(matrix(,N,C))
+			names(yr) <- paste('yr',1:C,sep='')
+			names(pdf) <- paste('pdf',1:C,sep='')
+			for(n in 1:N){
+				x <- convertParsCPL(pars[n,],years)
+				yr[n,] <- x$year
+				pdf[n,] <- x$pdf
+				}
+			res <- cbind(yr,pdf)
 			}
-		res <- cbind(yr,pdf)
+		}
+
+	if(type=='exp'){
+
+		# if a single parameter, generates a two-column data frame
+		if('numeric'%in%class(pars)){
+			pdf <- exp(years*pars)
+			res <- data.frame(years=years, pdf=pdf/sum(pdf))
+			}
+
+		# if matrix of parameters, each row is a converted parameter set
+		if(!'numeric'%in%class(pars)){
+			N <- nrow(pars)
+			C <- length(years)
+			res <- as.data.frame(matrix(,N,C))
+			names(res) <- years
+			for(n in 1:N){
+				pdf <- exp(years*pars[n,])
+				res[n,] <- pdf/sum(pdf)
+				}
+			}
 		}
 return(res)}
 #--------------------------------------------------------------------------------------------
-convertParsInner <- function(pars,years){
+convertParsCPL <- function(pars, years){
 
 	# must be odd, as (2n-1 parameters where n=number of pieces)
  	cond <- ((length(pars)+1) %% 2) == 0
-	if(!cond)stop('need an odd number of parameters')
+	if(!cond)stop('A CPL model must have an odd number of parameters')
 
 	if(length(pars)==1){
 		x.par <- c()
@@ -474,11 +508,12 @@ convertParsInner <- function(pars,years){
 
 return(d)}
 #--------------------------------------------------------------------------------------------
-objectiveFunction <- function(pars,PDarray,type='CPL'){
+objectiveFunction <- function(pars, PDarray, type){
 
 	# sanity check a few arguments
-	if(!type%in%c('CPL','exponential','uniform'))stop('unknown type')
-	if(type%in%c('exponential','uniform') & length(pars)!=1)stop('multiple parameters only permitted for type=CPL')	
+	if(!type%in%c('CPL','exponential','uniform'))stop('unknown model type')
+	if(type=='exponential' & length(pars)!=1)stop('exponential model requires just one rate parameter')
+	if(type=='uniform' & length(pars)!=0)stop('uniform model requires no parameters')	
 	if(!is.data.frame(PDarray))stop('PDarray must be a data frame')
 
 	# convert pars to pdf vector
@@ -486,16 +521,16 @@ objectiveFunction <- function(pars,PDarray,type='CPL'){
 	years <- as.numeric(row.names(PDarray))
 
 	if(type=='CPL'){
-		pdf <- convertPars(pars,years)
+		pdf <- convertPars(pars,years,type='CPL')
 		d.years <- approx(x=pdf$year,y=pdf$pdf,xout=years,ties='ordered',rule=2)$y 
 		}
 
-	if(type=='exponential'){
-		d.years <- dexp(years,pars)
+	if(type=='exp'){
+		d.years <- exp(years*pars)
 		}
 
 	if(type=='uniform'){
-		d.years <- dunif(years,min(years),max(years))
+		d.years <- rep(1,length(years))
 		}
 
 	# normalise

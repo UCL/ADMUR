@@ -13,3 +13,4 @@ export(objectiveFunction)
 export(mcmc)
 
 importFrom(DEoptimR, JDEoptim)
+importFrom(scales, alpha)

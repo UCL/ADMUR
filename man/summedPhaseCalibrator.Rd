@@ -5,7 +5,7 @@
 \usage{summedPhaseCalibrator(data, calcurve, calrange, inc=5, width=200)}
 \arguments{
   \item{data}{
-	A dataframe of 14C dates. Requires 'age' and 'sd', and at least one of 'site' and 'phase'. Optional 'datingType' comprising 'C14' and/or 'nonC14'.
+	A dataframe of 14C dates. Requires 'age' and 'sd', and at least one of 'site' and 'phase'. Optional 'datingType' comprising '14C' and/or anything else.
 	}
   \item{calcurve}{
 	A calibration curve object. Choose from intcal20 (default), shcal20, intcal13 or shcal13.
@@ -17,7 +17,7 @@
 	Increments to interpolate calendar years. Default = 5.
 	}
   \item{width}{
-	A timespan in C14 years used to automatically bin dates if they have not been phased, i.e., 'phase' is missing from the data. Default = 200.
+	A timespan in 14C years used to automatically bin dates if they have not been phased, i.e., 'phase' is missing from the data. Default = 200.
 	}
 }
 \value{
@@ -26,7 +26,7 @@
 \details{
 Wrapper function to generate an overall SPD for phased dates. Internally this first generates an SPD for each phase. Data may be phased already, alternatively if 'phase' is not provided, this function will automatically bin dates into phases, see \code{\link[=phaseCalibrator]{phaseCalibrator}}. Each phase's distribution is then summed, and the final SPD is normalised to unity.
 
-Optionally 'datingType' can be provided in the data, but must comprise only 'C14' and 'nonC14'. The former will be calibrated in the usual way, the latter are assumed to be provided in calendar time. If 'datingType' is not provided, all dates are assumed to be C14.
+Optionally 'datingType' can be provided in the data. Only '14C' will be calibrated in the usual way, anything else is assumed to be provided in calendar time. If 'datingType' is not provided, all dates are assumed to be 14C.
 	}
 \examples{
 	data <- subset(arid, site \%in\% c('Carrizal','Pacopampa'))

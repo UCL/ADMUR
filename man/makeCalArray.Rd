@@ -26,7 +26,7 @@
 
 	Each column represents a Gaussian distribution constructed from the C14 date and error of the calibration curve assigned to each Cal year (typically a column every 5 cal years).
 
-	Row names of CalArray are C14 dates, column names are cal dates.
+	Row names of CalArray are 14C dates, column names are cal dates.
 
 	This function is memory and time costly if used to construct the entire 50,000 year range of the calibration curve at a resolution of 5 cal years, therefore typically used only for a constrained date range, by specifying calrange.
 

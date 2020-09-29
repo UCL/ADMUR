@@ -33,6 +33,6 @@ Function to easily plot a calibrated Summed Probability Distribution from 14C da
 	data <- data.frame(
 		age = c(6562,7144),
 		sd = c(44,51),
-		datingType = c('C14','nonC14')
+		datingType = c('14C','TL')
 		)
 	x <- summedCalibratorWrapper(data)	}

@@ -19,7 +19,7 @@ Row names of both PD and model arguments must exactly match, since the probabili
 	}
 \examples{
 	# calibrate a dataset comprising just two phases
-	data <- data.frame(age=c(5800, 5100),sd=c(40, 35),phase=c('p1', 'p2'), datingType='C14')
+	data <- data.frame(age=c(5800, 5100),sd=c(40, 35),phase=c('p1', 'p2'), datingType='14C')
 	calrange <- range(as.numeric(row.names(toy$model)))
 	CalArray <- makeCalArray(shcal13, calrange = calrange ,inc=1)
 	PD <- phaseCalibrator(data, CalArray)	

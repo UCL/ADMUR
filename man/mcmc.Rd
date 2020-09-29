@@ -43,7 +43,7 @@ cal <- sample(x = pop.years, size = 99, replace = TRUE, prob = toy$population$in
 # Convert to 14C dates. 14C errors are borrowed from the real dataset 'arid' for realism.
 age <- uncalibrateCalendarDates(cal, shcal20)
 sd <- sample(x = arid$sd, size = 99, replace = TRUE)
-data <- data.frame(age = age, sd = sd, phase = 1:99, datingType = 'C14')
+data <- data.frame(age = age, sd = sd, phase = 1:99, datingType = '14C')
 
 # Calibrate each phase, taking care to restrict to the modelled date range
 CalArray <- makeCalArray(shcal20, calrange = range(mod.years), inc = 1)

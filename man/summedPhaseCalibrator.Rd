@@ -1,7 +1,7 @@
 \name{summedPhaseCalibrator} 
 \alias{summedPhaseCalibrator} 
 \title{Generates a summed probability distribution (SPD) after phasing dates} 
-\description{Generates a Summed Probability Distribution (SPD) after phasing dates. Handles both C14 and other date types e.g., thermoluminescence.}
+\description{Generates a Summed Probability Distribution (SPD) after phasing dates.}
 \usage{summedPhaseCalibrator(data, calcurve, calrange, inc=5, width=200)}
 \arguments{
   \item{data}{

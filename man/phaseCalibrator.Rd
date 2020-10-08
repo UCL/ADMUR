@@ -1,8 +1,8 @@
 \name{phaseCalibrator} 
 \alias{phaseCalibrator} 
 \title{Generates an SPD for each phase in a dataset} 
-\description{Generates a data frame of SPDs, one for each phase. Handles both C14 and other date types e.g., thermoluminescence.}
-\usage{phaseCalibrator(data, CalArray, width = 200)}
+\description{Generates a data frame of SPDs, one for each phase. }
+\usage{phaseCalibrator(data, CalArray, width = 200, remove.external = FALSE)}
 \arguments{
   \item{data}{
 	A dataframe of 14C dates. Requires 'age' and 'sd', and at least one of 'site' and 'phase'. Optional 'datingType' comprising '14C' and/or anything else.
@@ -13,6 +13,9 @@
   \item{width}{
 	A timespan in C14 years used to automatically bin dates if they have not been phased, i.e., 'phase' is missing from the data. Default = 200.
 	}
+  \item{remove.external}{
+	Default FALSE retains the SPDs of all phases, even if some have little or no probability mass inside the date range. If TRUE, those phases with the majority of their probability mass outside the date range are removed. 
+	}	
 }
 \value{
 	Returns a data frame of probabilities. Each column provides the SPD of a phase. Column names are the phase names, row names are the calendar years.
@@ -26,14 +29,16 @@ As a minimum requirement the data must include either 'phase' or 'site'. If 'pha
 
 Optionally 'datingType' can be provided in the data. Only '14C' will be calibrated in the usual way, anything else is assumed to be provided in calendar time. If 'datingType' is not provided, all dates are assumed to be 14C.
 
-Each column of the output dataframe is a vector of probabilities representing the SPD of a phase, after normalisation,  i.e. the total SPD area of each phase is equal to 1. However, if the date range used to generate CalArray does not encompass the entire dataset, some phases will have PD outside the date range, giving a SPD area < 1. This avoids deleterious edge effects.
+Each column of the output data frame is a vector of probabilities representing the SPD of a phase. However, if the date range used to generate CalArray does not encompass the entire dataset, some phases will have PD outside the date range, giving a SPD area < 1. This avoids deleterious edge effects.
+
+If using the output data frame to search for a population model, it is crucial to exclude dates outside (or mostly outside) the date range. This is achieved with remove.external = TRUE. 
 	}
 \examples{
 
 	CalArray <- makeCalArray(intcal20, calrange = c(9000,11000), inc = 1 )
 
 	# minimum data requirement includes 'mean' and 'sd' and either 'site' or 'phase'   
-	data <- data.frame(age = c(8350,8500,8900,9250), 
+	data <- data.frame(age = c(8350,8500,8900,9200), 
 			sd = c(50,50,50,50), 
 			site = c('field','field','field','garden'))
 	x <- phaseCalibrator(data, CalArray)
@@ -43,7 +48,7 @@ Each column of the output dataframe is a vector of probabilities representing th
 
 	# in contrast, three dates are specified as coming from the same phase, 
 	# and the 'garden.1' phase is partly outside the date range
-	data <- data.frame(age = c(8350,8500,8900,9450), 
+	data <- data.frame(age = c(8350,8500,8900,9480), 
 			sd = c(50,50,50,50), 
 			phase = c('field.1','field.1','field.1','garden.1'))
 	x <- phaseCalibrator(data, CalArray)

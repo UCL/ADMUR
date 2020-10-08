@@ -20,6 +20,9 @@ Conceptually this can be thought of as the reverse process of calibrating a 14C 
 \examples{
 	uncalibrateCalendarDates(c(4500,5000), shcal20)
 
-	# note the date outside the calcurve range is unchanged
-	uncalibrateCalendarDates(c(4500,500000), intcal20)
+	# note the date outside the calcurve range has a 1 to 1 mapping between cal and c14 time
+	uncalibrateCalendarDates(c(4500,70000), intcal20)
+
+	# however, a soft fade is performed between the end of the calcurve and 60000
+	uncalibrateCalendarDates(c(4500,58000), intcal20)
 	}

@@ -105,11 +105,14 @@ plotCalArray <- function(CalArray){
 	P <- CalArray$probs
 	c14 <- as.numeric(row.names(P))
 	cal <- as.numeric(colnames(P))
-	image(cal,c14,t(P)^0.1,xlab='Cal BP',ylab='14C',xlim=rev(range(cal)),col = heat.colors(20),las=1, cex.axis=0.7, cex.lab=0.7)
+	par(mar=c(5,4,1.5,1.5))
+	colfunc <- colorRampPalette(c('white','steelblue'))
+	image(cal,c14,t(P)^0.1,xlab='Cal BP',ylab='14C',xlim=rev(range(cal)),col = colfunc(20),las=1, cex.axis=0.7, cex.lab=0.7)
 	}
 #--------------------------------------------------------------------------------------------	
 plotPD <- function(x){
 	years <- as.numeric(row.names(x))
+	par(mar=c(5,4,1.5,1.5))
 	plot(NULL, type = "n", bty = "n", xlim = rev(range(years)), ylim=c(0,max(x)*1.2),las = 1, cex.axis = 0.7, cex.lab = 0.7, ylab='PD',xlab='calBP')
 	for(n in 1:ncol(x)){
 		prob <- x[,n]
@@ -117,7 +120,6 @@ plotPD <- function(x){
 		}
 	if(ncol(x)>1)text(x=colSums(x*years)/colSums(x), y=apply(x, 2, max), labels=names(x),cex=0.7, srt=90)
 }
-
 #--------------------------------------------------------------------------------------------	
 chooseCalrange <- function(data,calcurve){
 
@@ -189,8 +191,8 @@ internalCalibrator <- function(data, CalArray){
 
 	# generate a summed probability distribution (SPD) of calibrated 14C dates
 	# This is acheived quickly by converting the uncalibrated dates using a prior, summing, then calibrating once
-	# This is equivalent to calibrating each date, then summing, but hugely faster
-	# calibrates across the full range of CalArray. Truncation is performed outside this function
+	# This is equivalent to calibrating each date, then summing, but faster
+	# calibrates across the full range of CalArray. 
 
 	# data: data.frame of 14C dates. Requires 'age' and 'sd'.
 	# CalArray: object created by makeCalArray(). Requires row and col names corresponding to c14 and cal years respectively
@@ -210,7 +212,7 @@ internalCalibrator <- function(data, CalArray){
 	c14 <- as.numeric(row.names(CalArray$prob)) 
 	all.dates <- t(array(c14,c(length(c14),nrow(data)))) 
 	# gaussian
-	all.c14.lik <- dnorm(all.dates, mean=as.numeric(data$age), sd=as.numeric(data$sd))
+	# all.c14.lik <- dnorm(all.dates, mean=as.numeric(data$age), sd=as.numeric(data$sd))
 	# or log normals
 	m <- as.numeric(data$age)
 	v <- as.numeric(data$sd)^2
@@ -241,7 +243,7 @@ internalCalibrator <- function(data, CalArray){
 
 return(result)}
 #--------------------------------------------------------------------------------------------
-summedCalibrator <- function(data, CalArray, normalise = TRUE){
+summedCalibrator <- function(data, CalArray, normalise = 'standard'){
 
 	# 1. performs a few checks
 	# 2. separates data into C14 for calibration using internalCalibrator(), and nonC14 dates
@@ -251,6 +253,7 @@ summedCalibrator <- function(data, CalArray, normalise = TRUE){
 	# check arguments
 	if(checkData(data)=='bad')stop()
 	if(attr(CalArray, 'creator')!= 'makeCalArray') stop('CalArray was not made by makeCalArray()' )
+	if(!normalise %in% c('none','standard','full')) stop('normalise must be none, standard or full')
 
 	if(nrow(data)==0){
 		result <- data.frame(rep(0,length(CalArray$cal)))
@@ -264,25 +267,44 @@ summedCalibrator <- function(data, CalArray, normalise = TRUE){
 	# C14
 	C14.data <- subset(data, datingType=='14C')
 	C14.PD <- internalCalibrator(C14.data, CalArray)$prob
-	C14.PD <- C14.PD/CalArray$inc # PD needs adjusting by inc, but not for nonC14, as done automatically by dnorm()
+	C14.PD <- C14.PD/CalArray$inc # PD needs dividing by inc to convert area to height (PMF to PDF). Not required for nonC14, as dnorm() already generated PDF
 
 	# nonC14
 	nonC14.data <- subset(data, datingType!='14C')
 	n <- nrow(nonC14.data)
 	nonC14.PD <- colSums(matrix(dnorm(rep(CalArray$cal,each=n), nonC14.data$age, nonC14.data$sd),n,length(CalArray$cal)))
 
-	# combine and adjust
+	# combine
 	PD <- nonC14.PD + C14.PD
-	if(normalise)PD <- PD / nrow(data) 	# normalise by number of samples, not by total PD. This means total normalised PD can be less than 1, in cases where CalArray is badly specified to the dataset, or visaversa
 
-	result <- data.frame(PD)
+	# No normalisation. Results in a PD with an area equal to the total number of samples minus any probability mass outside the date range. For example in cases where CalArray is badly specified to the dataset, or visaversa.
+	# Rarely required.
+	if(normalise=='none'){
+		result <- data.frame(PD)
+		}
+
+	# Standard normalisation adjusts for the number of samples. Results in a PD with a total area of 1 minus any probability mass outside the date range. For example in cases where CalArray is badly specified to the dataset, or visaversa.
+	# should be used with phaseCalibrator().
+	if(normalise=='standard'){
+		PD <- PD / nrow(data) 
+		result <- data.frame(PD)
+		}
+
+	# Full normalisation results in a true PDF with a total area equal to 1.
+	# Should be used when all dates are of equal importance, and the resulting SPD is the final product. For example when generating simulated SPDs.
+	if(normalise=='full'){
+		PD <- PD / (sum(PD) * CalArray$inc)
+		result <- data.frame(PD)
+		}
+
 	row.names(result) <- CalArray$cal
 	names(result) <- NULL
 return(result)}
 #--------------------------------------------------------------------------------------------	
-phaseCalibrator <- function(data, CalArray, width = 200){
+phaseCalibrator <- function(data, CalArray, width = 200, remove.external = FALSE){
 	
 	# generates a normalised SPD for every phase, phasing data through binner if required
+	# remove.external: exludes phases (columns) with less than half their probability mass outside the date range. Useful for modelling.
 
 	# argument checks
 	if(!is.numeric(width))stop('width must be numeric')
@@ -306,15 +328,21 @@ phaseCalibrator <- function(data, CalArray, width = 200){
 	for(p in 1:length(phases)){
 		phase.data <- subset(data,phase==phases[p])
 		if(p==2)options(warn=(-1)) # only need to report for first iteration
-		phase.SPDs[,p] <- summedCalibrator(phase.data, CalArray, normalise = TRUE)[,1]
+		phase.SPDs[,p] <- summedCalibrator(phase.data, CalArray, normalise = 'standard')[,1]
 		}
 	options(warn=0) # back to default
 
 	phase.SPDs <- as.data.frame(phase.SPDs); names(phase.SPDs) <- phases; row.names(phase.SPDs) <- CalArray$cal
-	
+
+	# remove phases that are mostly outside the date range
+	if(remove.external){
+		keep.i <- colSums(phase.SPDs)>=(0.5 / CalArray$inc)
+		phase.SPDs <- phase.SPDs[,keep.i, drop=FALSE]
+		}
+
 return(phase.SPDs)}
 #--------------------------------------------------------------------------------------------	
-summedCalibratorWrapper <- function(data,calcurve=intcal20,plot=TRUE){
+summedCalibratorWrapper <- function(data, calcurve=intcal20, plot=TRUE){
 
 	# data: data.frame of 14C dates. Requires 'age' and 'sd' and optional datingType
 	# calcurve: the object intcal13 loaded from intcal13.RData, or any other calibration curve
@@ -332,26 +360,28 @@ summedCalibratorWrapper <- function(data,calcurve=intcal20,plot=TRUE){
 	if(diff(calrange)>10000)int <- 10
 	if(diff(calrange)>25000)int <- 20
 	CalArray <- makeCalArray(calcurve,calrange,int)
-	SPD <- summedCalibrator(data,CalArray)
+	SPD <- summedCalibrator(data,CalArray, normalise='standard')
 	if(plot)plotPD(SPD)
 return(SPD)	}
 #--------------------------------------------------------------------------------------------	
 summedPhaseCalibrator <- function(data, calcurve, calrange, inc=5, width=200){
 	CalArray <- makeCalArray(calcurve=calcurve, calrange=calrange, inc=inc)
-	x <- phaseCalibrator(data=data, CalArray=CalArray, width=width)
+	x <- phaseCalibrator(data=data, CalArray=CalArray, width=width, remove.external = FALSE)
 	SPD <- as.data.frame(rowSums(x))
 
 	# normalise
-	SPD <- SPD/sum(SPD)
-	SPD <- SPD/CalArray$inc
-
+	SPD <- SPD/(sum(SPD) * CalArray$inc)
 	names(SPD) <- NULL
 return(SPD)}
 #--------------------------------------------------------------------------------------------	
 uncalibrateCalendarDates <- function(dates, calcurve){
+
 	# dates: vector of calendar dates (point estimates)
 	# randomly samples dates the calcurve error, at the corresponding cal date
 	# returns a vector of point estimates on 14C scale 
+
+	# include an extra data row in the calibration curve, to 'feather' extremely old dates onto a 1-to-1 mapping of 14C to cal time
+	calcurve <- rbind(data.frame(cal=60000,C14=60000,error=calcurve$error[1]),calcurve)
 
 	simC14.means <- approx(x=calcurve$cal,y=calcurve$C14,xout=dates)$y 
 	simC14.errors <- approx(x=calcurve$cal,y=calcurve$error,xout=dates)$y 
@@ -363,17 +393,36 @@ return(simC14Samples)}
 #--------------------------------------------------------------------------------------------	
 loglik <- function(PD, model){
 
-	# ensure the date ranges exactly match
+	# relative likelihood of a perfectly precise date is the model PDF
+	# therefore the relative likelihood of a date with uncertainty is an average of the model PDF, weighted by the date probabilities.
+	# Numerically (discretely) this is the sum of (model PDF x date PMFs).
+
+	years <- as.numeric(row.names(PD))
+	inc <- (years[2]-years[1])
+
+	# ensure the date ranges exactly match. If not, interpolate model pdf to match PD.
 	check <- identical(row.names(PD),row.names(model))
-	if(!check)stop('dates of PD and model dont match!')
+	if(!check){
+		x <- as.numeric(row.names(model))
+		y <- model$pdf
+		y.out <- approx(x=x, y=y, xout=years)$y
+		model <- data.frame(pdf = y.out); row.names(model) <- years
+		model$pdf <- model$pdf/(sum(model$pdf)*inc)
+		}
 
-	# multiply phase PDs by model PD
-	weighted.PD <- PD * model$pdf
+	# ensure model PD is provided as a discretised PDF
+	model$pdf <- model$pdf/(sum(model$pdf)*inc)
 
-	# sum weighted PDs across all years (a calibrated date's probabilities are OR) to give the lik for each date
+	# convert the date PD pdfs to discrete PMFs to perform a weighted average
+	PMF <- PD * inc
+
+	# likelihoods weighted by the observational uncertainty
+	weighted.PD <- PMF * model$pdf
+
+	# sum all possibilities for each date (a calibrated date's probabilities are OR) to give the likelihood for each date. 
 	liks <- colSums(weighted.PD)
 
-	# calculate the overall log lik
+	# calculate the overall log lik given all the dates
 	loglik <- sum(log(liks))
 
 	if(is.nan(loglik))loglik <- -Inf
@@ -438,6 +487,8 @@ return(res)}
 #--------------------------------------------------------------------------------------------
 convertPars <- function(pars, years, type){
 
+	# Important: the model must be returned as a PDF. I.e, the total area must sum to 1.
+
 	# sanity checks
 	if(!type%in%c('CPL','exp'))stop('unknown type')
 	if('data.frame'%in%class(pars))pars <- as.matrix(pars)
@@ -445,6 +496,7 @@ convertPars <- function(pars, years, type){
 	if(!'numeric'%in%class(years))stop('years must be a numeric vector')
 
 	if(type=='CPL'){
+
 		# if a single parameter set, generates a few extras
 		if('numeric'%in%class(pars))res <- convertParsCPL(pars,years)
 
@@ -466,21 +518,25 @@ convertPars <- function(pars, years, type){
 
 	if(type=='exp'){
 
+		inc <- years[2]-years[1]
+		
 		# if a single parameter, generates a two-column data frame
 		if('numeric'%in%class(pars)){
-			pdf <- exp(years*pars)
-			res <- data.frame(years=years, pdf=pdf/sum(pdf))
+			if(length(pars)!=1)stop('A CPL model must have an odd number of parameters')
+			approx.pdf <- pars*exp(pars*years - pars*max(years)) # an intermediate fiddle to avoid computing nutty numbers beyond floating point limits
+			res <- data.frame(year = years, pdf = approx.pdf/(sum(approx.pdf)*inc))
 			}
 
 		# if matrix of parameters, each row is a converted parameter set
 		if(!'numeric'%in%class(pars)){
+			if(ncol(pars)!=1)stop('A CPL model must have an odd number of parameters')
 			N <- nrow(pars)
 			C <- length(years)
 			res <- as.data.frame(matrix(,N,C))
 			names(res) <- years
 			for(n in 1:N){
-				pdf <- exp(years*pars[n,])
-				res[n,] <- pdf/sum(pdf)
+				approx.pdf <- pars[n,]*exp(pars[n,]*years - pars[n,]*max(years))
+				res[n,] <- approx.pdf/(sum(approx.pdf)*inc)
 				}
 			}
 		}
@@ -504,48 +560,42 @@ convertParsCPL <- function(pars, years){
 
 	d <- parametersToPDFcoords(x.par,y.par)
 	d$year <- d$x* (max(years)-min(years)) + min(years)
-	d$pdf <- d$y / length(years)
+
+	# generates the true pdf at the hinges
+	d$pdf <- d$y / diff(range(d$year))
 
 return(d)}
 #--------------------------------------------------------------------------------------------
 objectiveFunction <- function(pars, PDarray, type){
 
 	# sanity check a few arguments
-	if(!type%in%c('CPL','exponential','uniform'))stop('unknown model type')
+	if(!type%in%c('CPL','exp','uniform'))stop('unknown model type')
 	if(type=='exponential' & length(pars)!=1)stop('exponential model requires just one rate parameter')
 	if(type=='uniform' & length(pars)!=0)stop('uniform model requires no parameters')	
 	if(!is.data.frame(PDarray))stop('PDarray must be a data frame')
 
-	# convert pars to pdf vector
-
 	years <- as.numeric(row.names(PDarray))
+	inc <- years[2]-years[1]
 
 	if(type=='CPL'){
 		pdf <- convertPars(pars,years,type='CPL')
-		d.years <- approx(x=pdf$year,y=pdf$pdf,xout=years,ties='ordered',rule=2)$y 
+		model.pdf <- approx(x=pdf$year,y=pdf$pdf,xout=years,ties='ordered',rule=2)$y 
 		}
 
 	if(type=='exp'){
-		d.years <- exp(years*pars)
+		model.pdf <- convertPars(pars,years,type='exp')$pdf
 		}
 
 	if(type=='uniform'){
-		d.years <- rep(1,length(years))
+		model.pdf <- dunif(years, min(years), max(years))
 		}
+ 
+	# sometimes a tiny adjustment is required, due to the discretisation
+	model.pdf <- model.pdf/(sum(model.pdf)*inc)
 
-	# normalise
-	d.years <- d.years/sum(d.years)
-
-	# then multiply by the PDs
-	weighted.PDs <- PDarray * d.years
-
-	# then sum weighted PDs across all years (a calibrated date's PDs are OR) to give the lik for each date
-	liks <- colSums(weighted.PDs)
-
-	# finally calculate the overall log lik
-	loglik <- sum(log(liks))
-
-	if(is.nan(loglik))loglik <- -Inf
+	# calculate loglik
+	model <- data.frame(pdf=model.pdf); row.names(model) <- row.names(PD)
+	loglik <- loglik(PD, model)
 
 return(-loglik)}
 #--------------------------------------------------------------------------------------------

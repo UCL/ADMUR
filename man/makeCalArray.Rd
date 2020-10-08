@@ -8,7 +8,7 @@
 	A calibration curve object. Choose from intcal20 (default), shcal20, intcal13 or shcal13.
 	}
   \item{calrange}{
-	A vector of two cal dates, giving the calendar range of CalArray. Can be in either order.
+	A vector of two calendar dates BP, giving the calendar range of CalArray. Can be in either order.
 	}
   \item{inc}{
 	Increments to interpolate calendar years. Default = 5
@@ -24,11 +24,11 @@
 \details{
 	Generates an array of probabilities mapping the calibration curve and its error ribbon.
 
-	Each column represents a Gaussian distribution constructed from the C14 date and error of the calibration curve assigned to each Cal year (typically a column every 5 cal years).
+	Each column represents a Gaussian PDF constructed from the C14 date and error of the calibration curve (typically a column every 5 cal years).
 
 	Row names of CalArray are 14C dates, column names are cal dates.
 
-	This function is memory and time costly if used to construct the entire 50,000 year range of the calibration curve at a resolution of 5 cal years, therefore typically used only for a constrained date range, by specifying calrange.
+	This function is memory and time costly if used to construct the entire 50,000 year range of the calibration curve at a resolution of 1 cal years, therefore typically used only for a constrained date range, by specifying calrange.
 
 	This array only needs constructing once to generate a Summed Probability Distribution of any number of calibrated dates, allowing efficient downstream calibration.
 	}

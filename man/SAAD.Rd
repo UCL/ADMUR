@@ -1,12 +1,12 @@
-\name{arid} 
+\name{SAAD} 
 \docType{data}
-\alias{arid} 
+\alias{SAAD} 
 \title{Radiocarbon dataset for South American Arid Diagonal (SAAD)} 
 \description{
 	Dataset of terrestrial 14C dates for SAAD. Specified by using data from sites falling within the geographically contiguous 'Arid' climatic categories of the SAAD as described in the World Köppen climate classification (2006).
 	}
 \usage{
-	arid
+	SAAD
 	}
 \format{
 	A data frame comprising 1527 rows and 10 columns

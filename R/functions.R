@@ -48,9 +48,9 @@ makeCalArray <- function(calcurve,calrange,inc=5){
 	calmin <- min(calrange)
 	calmax <- max(calrange)
 
-	# an extra 250 years is required to avoid edge effects
-	calmin.extra <- max((calmin - 250),0)
-	calmax.extra <- calmax + 250
+	# an extra 200 years is required to avoid edge effects
+	calmin.extra <- max((calmin - 200),0)
+	calmax.extra <- calmax + 200
 
 	# include an extra data row in the calibration curve, to 'feather' extremely old dates onto a 1-to-1 mapping of 14C to cal time
 	calcurve <- rbind(data.frame(cal=60000,C14=60000,error=calcurve$error[1]),calcurve)
@@ -243,12 +243,13 @@ internalCalibrator <- function(data, CalArray){
 
 return(result)}
 #--------------------------------------------------------------------------------------------
-summedCalibrator <- function(data, CalArray, normalise = 'standard'){
+summedCalibrator <- function(data, CalArray, normalise = 'standard', remove.external = FALSE){
 
-	# 1. performs a few checks
-	# 2. separates data into C14 for calibration using internalCalibrator(), and nonC14 dates
-	# 3. combines PDs to produce an SPD
-	# 4. reduces the SPD to the orginal required range and applies normalisation if required
+	# performs a few checks
+	# separates data into C14 for calibration using internalCalibrator(), and nonC14 dates
+	# combines PDs to produce an SPD
+	# reduces the SPD to the orginal required range and applies normalisation if required
+	# remove.external: exludes dates (columns) with less than half their probability mass outside the date range. Useful for modelling.
 
 	# check arguments
 	if(checkData(data)=='bad')stop()
@@ -401,12 +402,12 @@ loglik <- function(PD, model){
 	inc <- (years[2]-years[1])
 
 	# ensure the date ranges exactly match. If not, interpolate model pdf to match PD.
-	check <- identical(row.names(PD),row.names(model))
+	check <- identical(row.names(PD),model$year)
 	if(!check){
-		x <- as.numeric(row.names(model))
+		x <- as.numeric(model$year)
 		y <- model$pdf
 		y.out <- approx(x=x, y=y, xout=years)$y
-		model <- data.frame(pdf = y.out); row.names(model) <- years
+		model <- data.frame(pdf = y.out, year = years)
 		model$pdf <- model$pdf/(sum(model$pdf)*inc)
 		}
 
@@ -490,10 +491,15 @@ convertPars <- function(pars, years, type){
 	# Important: the model must be returned as a PDF. I.e, the total area must sum to 1.
 
 	# sanity checks
-	if(!type%in%c('CPL','exp'))stop('unknown type')
+	if(!type%in%c('CPL','exp','uniform'))stop('unknown model type. Only CPL exp or uniform currently handled')
 	if('data.frame'%in%class(pars))pars <- as.matrix(pars)
 	if('integer'%in%class(years))years <- as.numeric(years)
 	if(!'numeric'%in%class(years))stop('years must be a numeric vector')
+
+	if(type=='uniform'){
+		if(!is.null(pars))stop('A uniform model must have NULL parameters')
+		res <- data.frame( year=range(years), pdf=dunif(range(years),min(years),max(years)) )
+		}
 
 	if(type=='CPL'){
 
@@ -522,7 +528,7 @@ convertPars <- function(pars, years, type){
 		
 		# if a single parameter, generates a two-column data frame
 		if('numeric'%in%class(pars)){
-			if(length(pars)!=1)stop('A CPL model must have an odd number of parameters')
+			if(length(pars)!=1)stop('An exponential model must have exactly one parameter')
 			approx.pdf <- pars*exp(pars*years - pars*max(years)) # an intermediate fiddle to avoid computing nutty numbers beyond floating point limits
 			res <- data.frame(year = years, pdf = approx.pdf/(sum(approx.pdf)*inc))
 			}
@@ -569,9 +575,9 @@ return(d)}
 objectiveFunction <- function(pars, PDarray, type){
 
 	# sanity check a few arguments
-	if(!type%in%c('CPL','exp','uniform'))stop('unknown model type')
+	if(!type%in%c('CPL','exp','uniform'))stop('unknown model type. Only CPL, exp or uniform currently handled')
 	if(type=='exponential' & length(pars)!=1)stop('exponential model requires just one rate parameter')
-	if(type=='uniform' & length(pars)!=0)stop('uniform model requires no parameters')	
+	if(type=='uniform' & !is.null(pars))stop('A uniform model must have NULL parameters')
 	if(!is.data.frame(PDarray))stop('PDarray must be a data frame')
 
 	years <- as.numeric(row.names(PDarray))
@@ -594,19 +600,21 @@ objectiveFunction <- function(pars, PDarray, type){
 	model.pdf <- model.pdf/(sum(model.pdf)*inc)
 
 	# calculate loglik
-	model <- data.frame(pdf=model.pdf); row.names(model) <- row.names(PD)
-	loglik <- loglik(PD, model)
+	model <- data.frame(pdf=model.pdf, year=years)
+	loglik <- loglik(PDarray, model)
 
 return(-loglik)}
 #--------------------------------------------------------------------------------------------
-proposalFunction <- function(pars, jumps){
+proposalFunction <- function(pars, jumps, type){
 	moves <- rnorm(length(pars),0,jumps)
 	new.pars <- pars + moves
 	new.pars[new.pars>0.999999] <- 0.999999
-	new.pars[new.pars<0] <- 0
+	if(type=='CPL')new.pars[new.pars<0] <- 0
 return(new.pars)}
 #--------------------------------------------------------------------------------------------
-mcmc <- function(PDarray, startPars, N = 30000, burn = 2000, thin = 5, jumps = 0.02){ 
+mcmc <- function(PDarray, startPars, type, N = 30000, burn = 2000, thin = 5, jumps = 0.02){ 
+
+	if(!type%in%c('CPL','exp'))stop('unknown model type. Only CPL or exp')
 
 	# starting parameters
 	pars <- startPars
@@ -617,9 +625,9 @@ mcmc <- function(PDarray, startPars, N = 30000, burn = 2000, thin = 5, jumps = 0
 	accepted <- rep(0,N)
 	for(n in 1:N){
 		all.pars[n,] <- pars
-		llik <- -objectiveFunction(pars,PDarray,type='CPL')
-		prop.pars <- proposalFunction(pars, jumps)
-		prop.llik <- -objectiveFunction(prop.pars,PDarray,type='CPL')
+		llik <- -objectiveFunction(pars,PDarray,type)
+		prop.pars <- proposalFunction(pars, jumps, type)
+		prop.llik <- -objectiveFunction(prop.pars,PDarray,type)
 		ratio <- min(exp(prop.llik-llik),1)
 		move <- sample(c(T,F),size=1,prob=c(ratio,1-ratio))
 		if(move){
@@ -636,4 +644,80 @@ mcmc <- function(PDarray, startPars, N = 30000, burn = 2000, thin = 5, jumps = 0
 	res <- all.pars[i,]
 
 return(list(res=res,all.pars=all.pars, acceptance.ratio=ar))}
+#--------------------------------------------------------------------------------------------
+simulateCalendarDates <- function(model, n){
+
+	# sanity check a few arguments
+	if(!is.data.frame(model))stop('model must be a data frame')
+	cond <- sum(c('year','pdf')%in%names(model))
+	if(cond!=2)stop('model must include year and pdf')
+
+	x <- range(model$year) + c(-150,150)
+	years.wide <- min(x):max(x)
+	pdf.wider <- approx(x=model$year,y=model$pdf,xout=years.wide,ties='ordered',rule=2)$y 
+	dates <- sample(years.wide, replace=T, size=n, prob=pdf.wider)
+return(dates)}
+#--------------------------------------------------------------------------------------------
+estimateDataDomain <- function(data, calcurve){
+
+	thresholds <- c(60000,30000,10000,4000)
+	incs <- c(200,100,25,10)
+	min.year <- 0
+	max.year <- 60000
+	for(n in 1:4){
+		if((max.year - min.year) > thresholds[n])return(c(min.year, max.year))
+		if((max.year - min.year) <= thresholds[n]){
+
+			CalArray <- makeCalArray(calcurve, calrange = c(min.year, max.year), inc = incs[n])
+			SPD <- summedCalibrator(data, CalArray)
+			cum <- cumsum(SPD[,1])/sum(SPD)
+			min.year <- CalArray$cal[min(which(cum>0.000001)-1)]
+			max.year <- CalArray$cal[max(which(cum<0.999999)+1)]
+			}
+		}
+return(c(min.year, max.year))}
+#--------------------------------------------------------------------------------------------
+GOF <- function(data, calcurve, calrange, pars, type, S=1000){
+
+	# makeCalArray (once, used for observed and each simulation)
+	CalArray <- makeCalArray(calcurve, calrange)
+
+	# convert best pars to a model
+	model <- convertPars(pars, years=CalArray$cal, type)
+
+	# estimate a slightly larger number of dates to simulate, to ensure they are thinned later to exactly match the observed effective sample size.
+	PD <- phaseCalibrator(data, CalArray, remove.external = TRUE)
+	n.obs <- ncol(PD)
+	n.sim <- round( n.obs * (1 + 300/abs(diff(calrange))) + 10)
+
+	# calculate observed loglik
+	loglik.obs <- -objectiveFunction(pars, PD, type)
+
+	loglik.sim <- numeric(S)
+	for(s in 1:S){
+        
+		# simulate Calendar Dates: generate random cal samples from 'best' model
+		cal <- simulateCalendarDates(model, n.sim)
+
+		# uncalibrate calendar dates
+		age <- uncalibrateCalendarDates(cal, calcurve)
+
+		# make data frame with errors and phases
+		sim.data <- data.frame(age = age, sd = sample(data$sd, replace=T, size=n.sim), phase = 1:n.sim, datingType = '14C')
+
+		# phaseCalibrator (remove externals, and thin to match observed)
+		sim.PD <- phaseCalibrator(sim.data, CalArray, remove.external = TRUE)
+		sim.PD <- sim.PD[,sample(1:ncol(sim.PD),size=n.obs, replace=T),drop=FALSE]
+
+		# objective function: get likelihood
+		loglik.sim[s] <- -objectiveFunction(pars, sim.PD, type)
+
+		print(paste(s,'of',S,'simulations completed'))
+		if(loglik.sim[s] > (loglik.obs + 1e-8))stop()
+		}
+
+	# proportion of sims with smaller loglik (more extreme), therefore a 1-tailed test
+	# add a tiny constant, to allow for floating point bullshit
+	p <- sum(loglik.sim <= (loglik.obs + 1e-10))/S
+return(p)}
 #--------------------------------------------------------------------------------------------

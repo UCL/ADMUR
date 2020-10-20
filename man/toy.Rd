@@ -1,17 +1,15 @@
 \name{toy} 
 \docType{data}
 \alias{toy} 
-\title{Toy population history and model} 
+\title{Toy population model} 
 \description{
-	List containing 'population' and 'model', both data frame timeseries of a toy population. 'Population' provides counts of individuals in the time range 7.75kyr to 5.25kyr BP in 1 year intervals, whilst 'model' provides a discretised PDF across the narrower time range of interest of 7.5kyr to 5.5kyr BP. The model PDF outside this range is zero. The broader 'true' population range permits simulation of radiocarbon dates without causing edge effects.
-
-Row names of each data frame are calendar years BP.
+	Data frame of a toy population model. Provides a discretised PDF across the time range of 7.5kyr to 5.5kyr BP. The model PDF outside this range is zero. Comprises two columns: year, pdf.
 	}
 \usage{
 	toy
 	}
 \format{
-	A list of two data frames.
+	A data frame.
 	}
 \references{
 	Timpson, A., Barberena, R., Thomas, M.G., Méndez, C., Manning, K. 2020 Directly modelling population dynamics in the South American Arid Diagonal using 14C dates. Philosophical Transactions of the Royal Society B.

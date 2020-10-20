@@ -47,14 +47,14 @@ A summary of the available help files and data sets included in the package can 
 
 ```{r, eval = FALSE}
 help(ADMUR)
-help(arid)
+help(SAAD)
 ```
 
 Datasets must be structured as a data frame that include columns 'age' and 'sd', which represent the uncalibrated ^14^C age and its error, respectively.
 
 
 ```{r, eval = TRUE}
-arid[1:5,1:8]
+SAAD[1:5,1:8]
 ```
 **********
 # Part 1
@@ -134,11 +134,11 @@ A naive approach to generating an SPD as a proxy for population dynamics would b
 Therefore [phaseCalibrator()](../html/phaseCalibrator.html) generates an SPD for each phase in a dataset, and includes a binning algorithm which provides a useful solution to handling large datasets that have not been phased. For example, consider the following 8 dates from 2 sites:
 
 ```{r, eval = TRUE}
-data <- subset( arid, site %in% c('Carrizal','Pacopampa') )
+data <- subset( SAAD, site %in% c('Carrizal','Pacopampa') )
 data[,2:7]
 ```
 
-The data have not already been phased (do not include a column 'phase') therefore the default binning algorithm calibrates these dates into 4 phases. this is achieved by binning dates that have a mean ^14^C date within 200 ^14^C years of any other date in that respective bin. Therefore Pacopampa.1 comprises samples 1207 and 1206, Pacopampa.2 comprises sample 1205, Carrizal.1 comprises samples 1196 and 1195 and 1194 and 1193, and Carrizal.2 comprises sample 1192:
+The data have not already been phased (do not include a column 'phase') therefore the default binning algorithm calibrates these dates into four phases. this is achieved by binning dates that have a mean ^14^C date within 200 ^14^C years of any other date in that respective bin. Therefore Pacopampa.1 comprises samples 1207 and 1206, Pacopampa.2 comprises sample 1205, Carrizal.1 comprises samples 1196 and 1195 and 1194 and 1193, and Carrizal.2 comprises sample 1192:
 
 
 ```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
@@ -173,26 +173,25 @@ A CPL model lends itself well to the objectives of identifying specific demograp
 
 Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). This discretisation provides the advantage that numerical methods can be used to easily calculate likelihoods, provided the model is also discretised to the same time points. 
 
-A [toy()](../html/toy.html) model and population is provided to demonstrate how this achieved. Notice the toy population covers a slightly wider date range to ensure simulated ^14^C dates are well represented around the edges. First, we simulate a plausible ^14^C dataset and calibrate it:
+A [toy()](../html/toy.html) model is provided to demonstrate how this achieved. First, we simulate a plausible ^14^C dataset and calibrate it. The function [simulateCalendarDates()](../html/simulateCalendarDates.html) automatically covers a slightly wider date range to ensure simulated ^14^C dates are well represented around the edges:
 
 ```{r, eval = TRUE}
-# Simulate 350 archaeological samples in proportion to the toy population dynamics
-pop.years <- as.numeric( row.names(toy$population) )
-mod.years <- as.numeric( row.names(toy$model) )
-set.seed(12345)
+set.seed(12345) 
 N <- 350
-cal <- sample(x=pop.years, size=N, replace=TRUE, prob=toy$population$individuals ) 
 
-# Convert to 14C dates with an arbitrary 50 yr error.
-age <- uncalibrateCalendarDates(dates=cal, calcurve=shcal20)
-data <- data.frame(age=age, sd=50, phase=1:N, datingType='14C')
+# randomly sample calendar dates from the toy model
+cal <- simulateCalendarDates(toy, N)
 
-# Calibrate each phase, taking care to exclude those that are outside the modelled date range
-CalArray <- makeCalArray( calcurve=shcal20, calrange=range(mod.years))
-PD <- phaseCalibrator(data=data, CalArray=CalArray, remove.external = TRUE)
+# Convert to 14C dates. 
+age <- uncalibrateCalendarDates(cal, shcal20)
+data <- data.frame(age = age, sd = 50, phase = 1:N, datingType = '14C')
+
+# Calibrate each phase, taking care to restrict to the modelled date range with 'remove.external'
+CalArray <- makeCalArray(shcal20, calrange = range(toy$year))
+PD <- phaseCalibrator(data, CalArray, remove.external = TRUE)
 ```
 
-The argument 'remove.external = TRUE' ensures any calibrated phases with less than 50% of their probability mass within the modelled date range are excluded, reducing the effective sample size from 350 to 294. This is a crucial step to avoid mischievous edge effects of dates outside the date range. Similarly, notice we constrained the CalArray to the modelled date range. These are important to ensure that we only model the population across a range that is well represented by data. To extend the model beyond the range of available data would be to assume the absence of evidence means evidence of absence. No doubt there may be occasions when this is reasonable (for example if modelling the first colonisation of an island that has been well excavated, and the period before arrival is evidenced by the absence of datable material), but more often the range of representative data is due to research interest, and therefore the logic of only including dates with at least 50% of their probability within the date range is that their true dates are more likely to be internal (within the date range) than external.
+The argument 'remove.external = TRUE' ensures any calibrated phases with less than 50% of their probability mass within the modelled date range are excluded, reducing the effective sample size from 350 to 303. This is a crucial step to avoid mischievous edge effects of dates outside the date range. Similarly, notice we constrained the CalArray to the modelled date range. These are important to ensure that we only model the population across a range that is well represented by data. To extend the model beyond the range of available data would be to assume the absence of evidence means evidence of absence. No doubt there may be occasions when this is reasonable (for example if modelling the first colonisation of an island that has been well excavated, and the period before arrival is evidenced by the absence of datable material), but more often the range of representative data is due to research interest, and therefore the logic of only including dates with at least 50% of their probability within the date range is that their true dates are more likely to be internal (within the date range) than external.
 
 ```{r, eval = TRUE}
 print( ncol(PD) )
@@ -201,21 +200,19 @@ print( ncol(PD) )
 Finally we calculate the overall log likelihood of the model given the data:
 
 ```{r, eval = TRUE}
-loglik(PD=PD, model=toy$model)
+loglik(PD=PD, model=toy)
 ```
 
 For comparison, we can calculate the overall likelihood of a uniform model given exactly the same data. Intuitively this should have a lower likelihood, since our dataset was randomly generated from the non-uniform toy population history:
 
 ```{r, eval = TRUE}
-years <- as.numeric(row.names(toy$model))
-uniform.model <- data.frame(pdf=dunif(years,min(years),max(years)))
-row.names(uniform.model) <- years
+uniform.model <- convertPars(pars=NULL, years=5500:7500, type='uniform')
 loglik(PD=PD, model=uniform.model)
 ```
 
-And indeed the toy model is forty million trillion times more likely than the uniform model:
+And indeed the toy model is thirty nine million trillion times more likely than the uniform model:
 ```{r, eval = TRUE}
-exp( loglik(PD=PD, model=toy$model) - loglik(PD=PD, model=uniform.model) )
+exp( loglik(PD=PD, model=toy) - loglik(PD=PD, model=uniform.model) )
 ```
 
 
@@ -288,7 +285,7 @@ legend(x=6300, y=max(CPL$pdf), cex=0.7, lwd=2, col='firebrick', bty='n', legend=
 The ADMUR function [mcmc()](../html/mcmc.html) uses the Metropolis-Hastings algorithm to search joint parameter values of an n-CPL model, given a the calibrated probability distributions of phases in a ^14^C dataset (PDarray). In principle the starting parameters do not matter if burn is of an appropriate length, but in practice it is more efficient to start in a sensible place such as the maximum likelihood parameters: 
 
 ```{r, eval = FALSE}
-chain <- mcmc(PDarray=PD, startPars=best$par, N=30000, burn=2000, thin=5, jumps =0.05)
+chain <- mcmc(PDarray=PD, startPars=best$par, type='CPL', N=30000, burn=2000, thin=5, jumps =0.05)
 ```
 
 ```{r, echo = FALSE}
@@ -302,13 +299,14 @@ par(mfrow=c(2,3))
 c1 <- 'steelblue'
 c2 <- 'firebrick'
 lwd <- 3
-breaks <- 50
-hist(hinges$yr2, border=c1);abline(v=CPL$year[2],col=c2,lwd=lwd,breaks=breaks)
-hist(hinges$yr3, border=c1);abline(v=CPL$year[3],col=c2,lwd=lwd,breaks=breaks)
-hist(hinges$pdf1, border=c1);abline(v=CPL$pdf[1],col=c2,lwd=lwd,breaks=breaks)
-hist(hinges$pdf2, border=c1);abline(v=CPL$pdf[2],col=c2,lwd=lwd,breaks=breaks)
-hist(hinges$pdf3, border=c1);abline(v=CPL$pdf[3],col=c2,lwd=lwd,breaks=breaks)
-hist(hinges$pdf4, border=c1);abline(v=CPL$pdf[4],col=c2,lwd=lwd,breaks=breaks)
+pdf.breaks <- seq(0,0.0015, length.out=30)
+yr.breaks <- seq(5500,7500,length.out=30)
+hist(hinges$yr2,border=c1,breaks=yr.breaks);abline(v=CPL$year[2],col=c2,lwd=lwd)
+hist(hinges$yr3, border=c1,breaks=yr.breaks);abline(v=CPL$year[3],col=c2,lwd=lwd)
+hist(hinges$pdf1, border=c1,breaks=pdf.breaks);abline(v=CPL$pdf[1],col=c2,lwd=lwd)
+hist(hinges$pdf2, border=c1,breaks=pdf.breaks);abline(v=CPL$pdf[2],col=c2,lwd=lwd)
+hist(hinges$pdf3, border=c1,breaks=pdf.breaks);abline(v=CPL$pdf[3],col=c2,lwd=lwd)
+hist(hinges$pdf4, border=c1,breaks=pdf.breaks);abline(v=CPL$pdf[4],col=c2,lwd=lwd)
 ```
 
 
@@ -337,7 +335,7 @@ lines(x=CPL$year, y=CPL$pdf, lwd=2, col=c2)
 
 ## Model selection using BIC 
 
-A fundamentally important issue in modelling is the need to avoid overfitting an unjustifiably complex model to data, by using a formal model selection approach. In the example above we arbitrarily chose a 3-CPL model to fit to the data (since the data was randomly sampled from a 3-CPL toy population), however, given the small sample size (n = 211) it is possible a simpler model may have better predictive power. ADMUR achieves this using the so-called Bayesian Information Criterion (BIC) aka Schwarz Information Criterion, which balances the model likelihood against the number of parameters and sample size.
+A fundamentally important issue in modelling is the need to avoid overfitting an unjustifiably complex model to data, by using a formal model selection approach. In the example above we arbitrarily chose a 3-CPL model to fit to the data (since the data was randomly sampled from a 3-CPL toy population), however, given the small sample size (n = 303) it is possible a simpler model may have better predictive power. ADMUR achieves this using the so-called Bayesian Information Criterion (BIC) aka Schwarz Information Criterion, which balances the model likelihood against the number of parameters and sample size.
 
 Therefore we should also find the Maximum Likelihood for other plausible models such as a 4-CPL, 2-CPL, 1-CPL, exponential and even a uniform:
 
@@ -369,11 +367,11 @@ data.frame(L1= -CPL.1$value,
 	L4= -CPL.4$value,
 	Lexp= -exp$value,
 	Lunif= -uniform)
-BIC.1 <- 1*log(294) - 2*(-CPL.1$value)
-BIC.2 <- 3*log(294) - 2*(-CPL.2$value)
-BIC.3 <- 5*log(294) - 2*(-CPL.3$value)
-BIC.4 <- 7*log(294) - 2*(-CPL.4$value)
-BIC.exp <- 1*log(294) - 2*(-exp$value)
+BIC.1 <- 1*log(303) - 2*(-CPL.1$value)
+BIC.2 <- 3*log(303) - 2*(-CPL.2$value)
+BIC.3 <- 5*log(303) - 2*(-CPL.3$value)
+BIC.4 <- 7*log(303) - 2*(-CPL.4$value)
+BIC.exp <- 1*log(303) - 2*(-exp$value)
 BIC.uniform <- 0 - 2*(-uniform)
 data.frame(BIC.1,BIC.2,BIC.3,BIC.4,BIC.exp,BIC.uniform)
 ```
@@ -382,11 +380,11 @@ Clearly the 4-CPL has the highest likelihood, however the 3-CPL model has the lo
 
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
 # convert parameters to model PDs
-CPL1 <- convertPars(pars=CPL.1$par, years=mod.years, type='CPL') 
-CPL2 <- convertPars(pars=CPL.2$par, years=mod.years, type='CPL')  
-CPL3 <- convertPars(pars=CPL.3$par, years=mod.years, type='CPL')  
-CPL4 <- convertPars(pars=CPL.4$par, years=mod.years, type='CPL')  
-EXP <- convertPars(pars=exp$par, years=mod.years, type='exp')  
+CPL1 <- convertPars(pars=CPL.1$par, years=5500:7500, type='CPL') 
+CPL2 <- convertPars(pars=CPL.2$par, years=5500:7500, type='CPL')  
+CPL3 <- convertPars(pars=CPL.3$par, years=5500:7500, type='CPL')  
+CPL4 <- convertPars(pars=CPL.4$par, years=5500:7500, type='CPL')  
+EXP <- convertPars(pars=exp$par, years=5500:7500, type='exp')  
 
 # Plot SPD and five competing models:
 plotPD(SPD)
@@ -408,7 +406,19 @@ Typically a GOF quantifies how unusual it would be for the observed data to be g
 
 For complex data types the choice of a suitable summary statistic can often be difficult, as different statistics represent different aspects of the data, and therefore can vary in plausibility under a selected model. We avoid this problem by using the likelihood (the probability of our data given the selected model) as our summary statistic, which provides a direct quantification of how 'extreme' the data are. As such, the proportion of simulated datasets with a lower probability than the observed dataset provides the perfect definition of *more extreme*. 
 
+The GOF test below provides a p-value of 0.44 for the best model (3-CPL) providing a sanity check that the data cannot be rejected under this model, and therefore is a plausible model:
 
+```{r, eval = FALSE}
+p <- GOF(data, calcurve=shcal20, calrange=c(5500,7500), pars=best$par, type='CPL')
+```
+
+```{r, echo = FALSE}
+load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vignette.3CPL.GOF.RData')
+```
+
+```{r, eva = TRUE}
+print(p)
+```
 **********
 
 # Part 3

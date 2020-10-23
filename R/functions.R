@@ -1,5 +1,5 @@
 #--------------------------------------------------------------------------------------------
-# Functions for PopCPLmodel package
+# R functions for ADMUR package
 #--------------------------------------------------------------------------------------------	
 checkData <- function(data){
 	# data: data.frame of 14C dates. Requires 'age' and 'sd'.
@@ -447,6 +447,10 @@ parametersToPDFcoords <- function(x.par,y.par){
 	K <- length(y.par)+1
 	y <- x <- area <- stick <- numeric(K) 
 
+	# avoid y.par reaching the boundary of 1, where qgamma is Infinite, with a tiny constant
+	lim <- 1 - 1e-10
+	y.par[y.par>lim] <- lim
+
 	# step 1
 	if(K==2)y[1] <- qbeta(y.par[1],1,1)*2
 	if(K>2)y[1] <- qgamma(y.par[1],1,1)
@@ -672,7 +676,7 @@ estimateDataDomain <- function(data, calcurve){
 			SPD <- summedCalibrator(data, CalArray)
 			cum <- cumsum(SPD[,1])/sum(SPD)
 			min.year <- CalArray$cal[min(which(cum>0.000001)-1)]
-			max.year <- CalArray$cal[max(which(cum<0.999999)+1)]
+			max.year <- CalArray$cal[max(which(cum<0.999999)+2)]
 			}
 		}
 return(c(min.year, max.year))}
@@ -721,3 +725,45 @@ GOF <- function(data, calcurve, calrange, pars, type, S=1000){
 	p <- sum(loglik.sim <= (loglik.obs + 1e-10))/S
 return(p)}
 #--------------------------------------------------------------------------------------------
+relativeDeclineRate <- function(x, y, generation, N){
+
+	if('numeric'%in%class(x)){
+		x <- sort(x, decreasing=T)
+		y <- sort(y, decreasing=T)
+		X <- seq(x[1],x[2], length.out=N)
+		Y <- seq(y[1],y[2], length.out=N)
+		k <- exp(log(Y[2:N]/Y[1:(N-1)])/((X[1:(N-1)]-X[2:N])/25))
+		res <- 100*(mean(k)-1)
+		}
+
+	if(!'numeric'%in%class(x)){
+		x <- t(apply(x, MARGIN=1, FUN=sort, decreasing=T))
+		y <- t(apply(y, MARGIN=1, FUN=sort, decreasing=T))
+		C <- nrow(x)
+		X <- Y <- matrix(,N, C)
+		for(c in 1:C){
+			X[,c] <- seq(x[c,1],x[c,2],length.out=N)
+			Y[,c] <- seq(y[c,1],y[c,2],length.out=N)
+			}
+		km <- matrix(,N-1,C)
+		for(c in 1:C)km[,c] <- exp(log(Y[2:N,c]/Y[1:(N-1),c])/((X[1:(N-1),c]-X[2:N,c])/25))
+		res <- 100*(colMeans(km)-1)
+		}
+return(res)	}
+#----------------------------------------------------------------------------------------------
+relativeRate <- function(x, y, generation=25, N=5000){
+
+	if('numeric'%in%class(x)){
+		grad <- diff(y)/diff(x)
+		if(grad==0)return(0)
+		res <- relativeDeclineRate(x, y, generation, N)
+		if(grad<0)res <- res*(-1)
+		}
+
+	if(!'numeric'%in%class(x)){
+		grad <- apply(x, MARGIN=1, FUN=diff)/apply(y, MARGIN=1, FUN=diff)
+		res <- relativeDeclineRate(x, y, generation, N)
+		res[grad<0] <- res[grad<0]*(-1) 
+		}
+return(res)}
+#----------------------------------------------------------------------------------------------

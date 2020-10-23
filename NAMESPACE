@@ -14,6 +14,7 @@ export(mcmc)
 export(simulateCalendarDates)
 export(estimateDataDomain)
 export(GOF)
+export(relativeRate)
 
 importFrom(DEoptimR, JDEoptim)
 importFrom(scales, alpha)

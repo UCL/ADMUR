@@ -278,6 +278,7 @@ SPD <- summedPhaseCalibrator( data=data, calcurve=shcal20, calrange=c(5500,7500)
 plotPD(SPD)
 lines(CPL$year, CPL$pdf, lwd=2, col='firebrick')
 legend(x=6300, y=max(CPL$pdf), cex=0.7, lwd=2, col='firebrick', bty='n', legend='best fitted 3-CPL')
+text(x=CPL$year, y=CPL$pdf, pos=3, labels=c('H1','H2','H3','H4'))
 ```
 
 ## Credible interval parameter search using MCMC
@@ -292,6 +293,16 @@ chain <- mcmc(PDarray=PD, startPars=best$par, type='CPL', N=30000, burn=2000, th
 load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vignette.3CPL.MCMC.RData')
 ```
 
+The acceptance ratio (AR) and raw chain (before burn-in and thinning) can be sanity checked. Ideally we want the AR somewhere in the range 0.2 to 0.5 (this can be tuned with the 'jumps' argument), and the raw chain to resemble 'hairy caterpillars':
+```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+print(chain$acceptance.ratio)
+par(mfrow=c(2,3))
+col <- 'steelblue'
+for(n in 1:5){
+	plot(chain$all.pars[,n], type='l', ylim=c(0,1), col=col, xlab='', ylab='', main=paste('par',n))
+	}
+```
+
 These parameters can then be converted to the hinge coordinates using the [convertPars()](../html/convertPars.html) function, and their marginal distributions plotted. Note, the MLE parameters (red lines) are unlikely to exactly match the peaks of these distributions because they are only marginals. Note also the dates of hinge 1 and 2 are fixed at 5500 and 7500: 
 ```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
 hinges <- convertPars(pars=chain$res, years=5500:7500, type='CPL')
@@ -299,14 +310,15 @@ par(mfrow=c(2,3))
 c1 <- 'steelblue'
 c2 <- 'firebrick'
 lwd <- 3
-pdf.breaks <- seq(0,0.0015, length.out=30)
-yr.breaks <- seq(5500,7500,length.out=30)
-hist(hinges$yr2,border=c1,breaks=yr.breaks);abline(v=CPL$year[2],col=c2,lwd=lwd)
-hist(hinges$yr3, border=c1,breaks=yr.breaks);abline(v=CPL$year[3],col=c2,lwd=lwd)
-hist(hinges$pdf1, border=c1,breaks=pdf.breaks);abline(v=CPL$pdf[1],col=c2,lwd=lwd)
-hist(hinges$pdf2, border=c1,breaks=pdf.breaks);abline(v=CPL$pdf[2],col=c2,lwd=lwd)
-hist(hinges$pdf3, border=c1,breaks=pdf.breaks);abline(v=CPL$pdf[3],col=c2,lwd=lwd)
-hist(hinges$pdf4, border=c1,breaks=pdf.breaks);abline(v=CPL$pdf[4],col=c2,lwd=lwd)
+pdf.brk <- seq(0,0.0015, length.out=30)
+yr.brk <- seq(5500,7500,length.out=30)
+names <- c('Date of H2','Date of H3','PD of H1','PD of H2','PD of H3','PD of H4')
+hist(hinges$yr2,border=c1,breaks=yr.brk, main=names[1], xlab='');abline(v=CPL$year[2],col=c2,lwd=lwd)
+hist(hinges$yr3, border=c1,breaks=yr.brk, main=names[2], xlab='');abline(v=CPL$year[3],col=c2,lwd=lwd)
+hist(hinges$pdf1, border=c1,breaks=pdf.brk, main=names[3], xlab='');abline(v=CPL$pdf[1],col=c2,lwd=lwd)
+hist(hinges$pdf2, border=c1,breaks=pdf.brk, main=names[4], xlab='');abline(v=CPL$pdf[2],col=c2,lwd=lwd)
+hist(hinges$pdf3, border=c1,breaks=pdf.brk, main=names[5], xlab='');abline(v=CPL$pdf[3],col=c2,lwd=lwd)
+hist(hinges$pdf4, border=c1,breaks=pdf.brk, main=names[6], xlab='');abline(v=CPL$pdf[4],col=c2,lwd=lwd)
 ```
 
 
@@ -316,9 +328,9 @@ Some two-dimensional combinations of joint parameters may be preferred, but stil
 require(scales)
 par( mfrow=c(1,2) , mar=c(4,4,1.5,2), cex=0.7 )
 plot(hinges$yr2, hinges$pdf2, pch=16, col=alpha(1,0.03), ylim=c(0,0.0005))
-points(CPL$year[2], CPL$pdf[2], col=c2, pch=16, cex=1.2)
+points(CPL$year[2], CPL$pdf[2], col='red', pch=16, cex=1.2)
 plot(hinges$yr3, hinges$pdf3, pch=16, col=alpha(1,0.03), ylim=c(0,0.0015))
-points(CPL$year[3], CPL$pdf[3], col=c2, pch=16, cex=1.2) 
+points(CPL$year[3], CPL$pdf[3], col='red', pch=16, cex=1.2) 
 ```
 
 Alternatively, the joint distributions can be visualised by plotting the CPL model for each iteration of the chain, with the MLE in red:
@@ -419,9 +431,43 @@ load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vigne
 ```{r, eva = TRUE}
 print(p)
 ```
+
+## Relative growth/decline rates
+
+Percentage growth rates per generation provide an intuitive statistic to quantify and compare population changes through time. However there are two key issues to overcome, when estimating growth rates for a CPL model.
+
+1. CPL modelling allows for the possibility of hiatus periods, defined by pieces between hinges with a zero or near zero PD. Conventionally, the total percentage change from ay value to zero is a 100% decrease, however the equivalent percentage increase from zero is undefined.
+2. Each section of the CPL is a straight line with a constant gradient. However, a straight line has a constantly changing growth/decline rate.
+
+The first problem is an extreme manifestation of the asymmetry from conventionally reporting change always with respect to the first value. For example, if we consider a population of 80 individuals at time $t_1$, changing to to 100 at $t_2$ and to 80 at $t_3$, this would be conventionally described as a 25% increase followed by a 20% decrease.
+This asymmetry is unintuitive and unhelpful in the context of population change, and instead we use a *relative rate* which is always calculated with respect to the larger value (e.g., the example above is reported as '20% relative growth' followed by '20% relative decline').
+
+We overcome the second problem by calculating the expected (mean average) rate across the entire linear piece. This is achieved by notionally breaking the line into $N$ equal pieces, such that the coordinates of the ends of the $i^{th}$ piece are $(x_1,y_1)$ and $(x_2,y_2)$.
+The generational rate $r$ of this $i^{th}$ piece is $$r_i=e^{\ln(\frac{y_1}{y_2})/\frac{x_1-x_2}{25}}$$ and the expected rate across the entire line is $$\sum_{i=1}^{N}r_i/N-1$$
+
+For example, a population decline from n=200 to n=160 across 100 years is conventionally considered to have a generational (25 years) decline rate of $1-exp(\ln(160/200)/(100/25))$ = 5.42584% loss per generation.
+If partitioned into just two equal sections (n=200, n=180, n=160), we require two generational decline rates:
+$1-exp(log(180/200)/(50/25))$ = 5.13167% and $1-exp(log(160/180)/(50/25))$ = 5.71910%, giving a mean of 5.42538%. 
+As the number of sections $N$ approaches infinity, the mean rate asymptoticly approaches 5.50724%. 
+The similarity to the conventional rate of 5.42584% is because the total percentage loss is small (20%), therefore an exponential curve between n=200 and n=160 is similar to a straight line.
+In contrast, a huge percentage loss of 99.5% illustrates the importance of calculating the expected growth rate, averaged across the whole line:
+An exponential curve between n=200 and n=1 across the same 100 years has a decline rate of $1-exp(log(1/200)/(100/25))$ = 73.409% loss per 25 yr generation.
+Meanwhile a linear model between n=200 and n=1 across the same 100 years has an expected decline rate of 47.83539% loss per generation.
+
+
 **********
 
 # Part 3
 # SPD simulation testing
 
-Lean on some text from paper about why this isn't a very sophisticated approach. Explain key improvement that the summary statistic is the likelihood.
+Part 2 provides a framework to directly estimate the best model from  dataset, including CPL models, exponential, uniform, or in theory any other model. In contrast, a less sophisticated albeit currently common approach the SPD simulation methodology. This requires the researcher to *a priori* specify a single null model, then generate many simulated datasets under this null model which are compared with the observed dataset to generate a p-value. This SPD simulation approach has several shortcomings which render it inferior to the CPL modelling approach: 
+
+1. Recent studies increasingly suggest population fluctuations are ubiquitous thought history, rendering the concept of a single null model untenable for this problem. In contrast this new methodology does not assume a null, and instead allows any number of models to be compared. 
+1. A low p-value merely allows us to reject the null, but does not provide us with a plausible alternative explanation. It is common for researchers to assign colourful demographic narratives to periods outside the 95% CI, but these are only interpretive and not directly supported by the test statistic. Instead the CPL framework provides a single best explanation, in the form of specific demographic events (hinge coordinates), event dates, growth rates, and CIs.
+1. Fitting the null model (and therefore estimating its parameters) is commonly achieved by discretising the SPD, then incorrectly assuming these points somehow represent data points, to which the null model is fitted my minimising their residuals. In contrast, the CPL framework correctly calculates the probability of the data given some proposed model parameters. 
+1. Generating a meaningful p-value relies on the use of one or more suitable summary statistics that can appropriately summarise an entire dataset (or SPD), such that the p-value fairly describes the probability of the null model generating a dataset that is *as or more extreme* than the observed dataset. Commonly used summary statistics are a variation on the theme of the proportion of the SPD that falls outside the simulated confidence interval. In contrast, the CPL framework uses a Goodness Of Fit (GOF) test that uses the likelihood, providing a direct and complete measure of *as or more extreme*.
+
+Despite these short comings, and purely for comparative purposes, the ADMUR package also provides tools to apply the SPD simulation methodology, with a key improvement that resolves problems 3 and 4 above. Specifically, we calculate the null model likelihood given the data. Therefore the null model parameters are fitted to the data using the maximum likelihood; and the p-value is calculated using the distribution of null model likelihoods given each simulated dataset. 
+
+
+**********

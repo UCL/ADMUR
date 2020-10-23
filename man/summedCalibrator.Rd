@@ -24,7 +24,7 @@ Optionally 'datingType' can be provided in the data. Only '14C' will be calibrat
 
 If normalise is 'none', the output is a PD with an area equal to the total number of samples. This option is rarely required, but can be useful for example when plotting several SPDs and would also like to illustrate that one dataset is larger than another. However, if the date range used to generate CalArray does not encompass the entire dataset, some dates will have some probability mass outside the date range. Therefore the total probability can be less than the sample size to avoid deleterious edge effects. 
 
-If normalise is 'standard', the output is adjusted by the number of samples, such that the total area equals 1. However, as with the 'none' option, if the date range used to generate CalArray does not encompass the entire dataset, some dates will have some probability mass outside the date range. Therefore the total probability can be less than the sample size to avoid deleterious edge effects.
+If normalise is 'standard', the output is adjusted by the number of samples. However, if the date range used to generate CalArray does not encompass the entire dataset, some dates will have some probability mass outside the date range. Therefore the total probability can be less than the sample size to avoid deleterious edge effects.
 
 If normalise is 'full', the output PD always has an area equal to 1, even if there are dates with a substantial probability mass outside the date range. This option should only be used when all dates are of equal importance, and the resulting SPD is the final product. For example when generating simulated SPDs.
 

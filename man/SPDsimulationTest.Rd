@@ -1,8 +1,8 @@
-\name{GOF} 
-\alias{GOF} 
-\title{Goodness of Fit test} 
+\name{SPDsimulationTest} 
+\alias{SPDsimulationTest} 
+\title{Goodness of Fit test, using SPD simulation} 
 \description{Calculates the data p-value given a model.}
-\usage{GOF(data, calcurve, calrange, pars, type, S=1000)}
+\usage{SPDsimulationTest(data, calcurve, calrange, pars, type, S=1000)}
 \arguments{
   \item{data}{
 	A dataframe of 14C dates. Requires 'age' and 'sd', and at least one of 'site' and 'phase'. Optional 'datingType' comprising '14C' and/or anything else.

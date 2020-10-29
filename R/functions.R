@@ -357,10 +357,10 @@ summedCalibratorWrapper <- function(data, calcurve=intcal20, plot=TRUE){
 
 	calrange <- chooseCalrange(data,calcurve)
 
-	int <- 5
-	if(diff(calrange)>10000)int <- 10
-	if(diff(calrange)>25000)int <- 20
-	CalArray <- makeCalArray(calcurve,calrange,int)
+	inc <- 5
+	if(diff(calrange)>10000)inc <- 10
+	if(diff(calrange)>25000)inc <- 20
+	CalArray <- makeCalArray(calcurve,calrange,inc)
 	SPD <- summedCalibrator(data,CalArray, normalise='standard')
 	if(plot)plotPD(SPD)
 return(SPD)	}
@@ -420,7 +420,7 @@ loglik <- function(PD, model){
 	# likelihoods weighted by the observational uncertainty
 	weighted.PD <- PMF * model$pdf
 
-	# sum all possibilities for each date (a calibrated date's probabilities are OR) to give the likelihood for each date. 
+	# sum all possibilities for each date (a calibrated date's probabilities are OR) to give the relative likelihood for each date. 
 	liks <- colSums(weighted.PD)
 
 	# calculate the overall log lik given all the dates
@@ -681,49 +681,89 @@ estimateDataDomain <- function(data, calcurve){
 		}
 return(c(min.year, max.year))}
 #--------------------------------------------------------------------------------------------
-GOF <- function(data, calcurve, calrange, pars, type, S=1000){
+SPDsimulationTest <- function(data, calcurve, calrange, pars, type, inc=5, N=10000){
 
-	# makeCalArray (once, used for observed and each simulation)
-	CalArray <- makeCalArray(calcurve, calrange)
+	# 1. generate observed data SPD
+	print('Generating SPD for observed data')
+	CalArray <- makeCalArray(calcurve, calrange, inc) # makeCalArray, used for obs and each simulation
+	x <- phaseCalibrator(data, CalArray, width=200, remove.external = FALSE)
+	SPD.obs <- as.data.frame(rowSums(x))
+	SPD.obs <- SPD.obs/(sum(SPD.obs) * CalArray$inc)
+	SPD.obs <- SPD.obs[,1]
 
-	# convert best pars to a model
+	# number of phases that contribute to the date range
+	n.phases <- sum(x)*inc
+
+	# number of date that contribute to the date range
+	tmp <- summedCalibrator(data, CalArray, normalise = 'none', remove.external = FALSE)
+	n.dates <- sum(tmp)*inc
+
+	# 2. convert best pars to a model
+	print('Converting model parameters into a PDF')
 	model <- convertPars(pars, years=CalArray$cal, type)
 
-	# estimate a slightly larger number of dates to simulate, to ensure they are thinned later to exactly match the observed effective sample size.
-	PD <- phaseCalibrator(data, CalArray, remove.external = TRUE)
-	n.obs <- ncol(PD)
-	n.sim <- round( n.obs * (1 + 300/abs(diff(calrange))) + 10)
+	# 3. Generate N simulations
+	print('Generating simulated SPDs under the model')
+	SPD.sims <- matrix(,length(SPD.obs),N) # blank matrix
 
-	# calculate observed loglik
-	loglik.obs <- -objectiveFunction(pars, PD, type)
+	# how many phases to simulate, increasing slightly to account for sampling across a range 300 yrs wider 
+	np <- round(sum(x)*inc * (1+300/diff(calrange)))
 
-	loglik.sim <- numeric(S)
-	for(s in 1:S){
-        
-		# simulate Calendar Dates: generate random cal samples from 'best' model
-		cal <- simulateCalendarDates(model, n.sim)
-
-		# uncalibrate calendar dates
+	# Generate simulations
+	for(n in 1:N){
+		cal <- simulateCalendarDates(model=model, n=np)
 		age <- uncalibrateCalendarDates(cal, calcurve)
-
-		# make data frame with errors and phases
-		sim.data <- data.frame(age = age, sd = sample(data$sd, replace=T, size=n.sim), phase = 1:n.sim, datingType = '14C')
-
-		# phaseCalibrator (remove externals, and thin to match observed)
-		sim.PD <- phaseCalibrator(sim.data, CalArray, remove.external = TRUE)
-		sim.PD <- sim.PD[,sample(1:ncol(sim.PD),size=n.obs, replace=T),drop=FALSE]
-
-		# objective function: get likelihood
-		loglik.sim[s] <- -objectiveFunction(pars, sim.PD, type)
-
-		print(paste(s,'of',S,'simulations completed'))
-		if(loglik.sim[s] > (loglik.obs + 1e-8))stop()
+		d <- data.frame(age = age, sd = sample(data$sd, replace=T, size=length(age)), datingType = '14C')
+		SPD.sims[,n] <- summedCalibrator(d, CalArray, normalise = 'full', remove.external = FALSE)[,1]
+	
+		# house-keeping
+		if(n>1 & n%in%seq(0,N,length.out=11))print(paste(n,'of',N,'simulations completed'))
 		}
 
-	# proportion of sims with smaller loglik (more extreme), therefore a 1-tailed test
-	# add a tiny constant, to allow for floating point bullshit
-	p <- sum(loglik.sim <= (loglik.obs + 1e-10))/S
-return(p)}
+	# 4. Construct various timeseries summaries
+	
+	# calBP years
+	calBP <- CalArray$cal
+
+	# expected simulation
+	expected.sim <- rowMeans(SPD.sims)
+
+	# local standard deviation
+	SD <- apply(SPD.sims,1,sd)
+
+	# CIs
+	CI <- t(apply(SPD.sims,1,quantile,prob=c(0.025,0.125,0.25,0.75,0.875,0.975)))
+	
+	# model
+	mod <- approx(x=model$year,y=model$pdf,xout=calBP,ties='ordered',rule=2)$y 
+	
+	# index of SPD.obs above (+1) and below(-1) the 95% CI
+	upper.95 <- CI[,dimnames(CI)[[2]]=="97.5%"]
+	lower.95 <- CI[,dimnames(CI)[[2]]=="2.5%"]
+	index <- as.numeric(SPD.obs>=upper.95)-as.numeric(SPD.obs<=lower.95) #  -1,0,1 values
+
+	# 5. calculate summary statistic for each sim and obs; and GOF p-value
+	print('Generating summary statistics')
+
+	# for observed
+	# summary stat (SS) is simply the proportion of years outside the 95%CI
+	SS.obs <- sum(SPD.obs>upper.95 | SPD.obs<lower.95) / length(SPD.obs)
+
+	# for each simulation
+	SS.sims <- numeric(N)
+	for(n in 1:N){
+		SPD <- SPD.sims[,n]
+		SS.sims[n] <-sum(SPD>upper.95 | SPD<lower.95) / length(SPD.obs)
+		}
+
+	# calculate p-value
+	pvalue <- sum(SS.sims>=SS.obs)/N
+
+	# 6. summarise and return
+	timeseries <- cbind(data.frame(calBP=calBP, expected.sim=expected.sim, local.sd=SD, model=mod, SPD=SPD.obs, index=index),CI)
+
+return(list(timeseries=timeseries, pvalue=pvalue, observed.stat=SS.obs, simulated.stat=SS.sims, n.phases=n.phases, n.dates=n.dates))}
+
 #--------------------------------------------------------------------------------------------
 relativeDeclineRate <- function(x, y, generation, N){
 

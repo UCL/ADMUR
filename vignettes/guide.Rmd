@@ -171,7 +171,7 @@ A CPL model lends itself well to the objectives of identifying specific demograp
 
 ## Calculating likelihoods
 
-Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). This discretisation provides the advantage that numerical methods can be used to easily calculate likelihoods, provided the model is also discretised to the same time points. 
+Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). This discretisation provides the advantage that numerical methods can be used to easily calculate relative likelihoods, provided the model is also discretised to the same time points. 
 
 A [toy()](../html/toy.html) model is provided to demonstrate how this achieved. First, we simulate a plausible ^14^C dataset and calibrate it. The function [simulateCalendarDates()](../html/simulateCalendarDates.html) automatically covers a slightly wider date range to ensure simulated ^14^C dates are well represented around the edges:
 
@@ -218,7 +218,7 @@ exp( loglik(PD=PD, model=toy) - loglik(PD=PD, model=uniform.model) )
 
 ## The anatomy of a CPL model
 
-Having established how to calculate the likelihood of any proposed model given a dataset, we can use any out-of-the-box search algorithm to find the maximum likelihood model. This first requires us to describe the PD of any population model in terms of a small number of parameters, rather than a vector of probabilities for each year.
+Having established how to calculate the relative likelihood of any proposed model given a dataset, we can use any out-of-the-box search algorithm to find the maximum likelihood model. This first requires us to describe the PD of any population model in terms of a small number of parameters, rather than a vector of probabilities for each year.
 
 We achieve this using the Continuous Piecewise Linear (CPL) model, which can be described using the (x,y) coordinates of its hinge points.
 
@@ -286,7 +286,7 @@ text(x=CPL$year, y=CPL$pdf, pos=3, labels=c('H1','H2','H3','H4'))
 The ADMUR function [mcmc()](../html/mcmc.html) uses the Metropolis-Hastings algorithm to search joint parameter values of an n-CPL model, given a the calibrated probability distributions of phases in a ^14^C dataset (PDarray). In principle the starting parameters do not matter if burn is of an appropriate length, but in practice it is more efficient to start in a sensible place such as the maximum likelihood parameters: 
 
 ```{r, eval = FALSE}
-chain <- mcmc(PDarray=PD, startPars=best$par, type='CPL', N=30000, burn=2000, thin=5, jumps =0.05)
+chain <- mcmc(PDarray=PD, startPars=best$par, type='CPL', N=100000, burn=2000, thin=5, jumps =0.05)
 ```
 
 ```{r, echo = FALSE}
@@ -310,8 +310,8 @@ par(mfrow=c(2,3))
 c1 <- 'steelblue'
 c2 <- 'firebrick'
 lwd <- 3
-pdf.brk <- seq(0,0.0015, length.out=30)
-yr.brk <- seq(5500,7500,length.out=30)
+pdf.brk <- seq(0,0.0015, length.out=40)
+yr.brk <- seq(5500,7500,length.out=40)
 names <- c('Date of H2','Date of H3','PD of H1','PD of H2','PD of H3','PD of H4')
 hist(hinges$yr2,border=c1,breaks=yr.brk, main=names[1], xlab='');abline(v=CPL$year[2],col=c2,lwd=lwd)
 hist(hinges$yr3, border=c1,breaks=yr.brk, main=names[2], xlab='');abline(v=CPL$year[3],col=c2,lwd=lwd)
@@ -327,9 +327,9 @@ Some two-dimensional combinations of joint parameters may be preferred, but stil
 ```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
 require(scales)
 par( mfrow=c(1,2) , mar=c(4,4,1.5,2), cex=0.7 )
-plot(hinges$yr2, hinges$pdf2, pch=16, col=alpha(1,0.03), ylim=c(0,0.0005))
+plot(hinges$yr2, hinges$pdf2, pch=16, col=alpha(1,0.02), ylim=c(0,0.0005))
 points(CPL$year[2], CPL$pdf[2], col='red', pch=16, cex=1.2)
-plot(hinges$yr3, hinges$pdf3, pch=16, col=alpha(1,0.03), ylim=c(0,0.0015))
+plot(hinges$yr3, hinges$pdf3, pch=16, col=alpha(1,0.02), ylim=c(0,0.0015))
 points(CPL$year[3], CPL$pdf[3], col='red', pch=16, cex=1.2) 
 ```
 
@@ -340,7 +340,7 @@ plot(NULL, xlim=c(7500,5500),ylim=c(0,0.0011), xlab='calBP', ylab='PD', cex=0.7)
 for(n in 1:nrow(hinges)){
 	x <- c(hinges$yr1[n], hinges$yr2[n], hinges$yr3[n], hinges$yr4[n])
 	y <- c(hinges$pdf1[n], hinges$pdf2[n], hinges$pdf3[n], hinges$pdf4[n])
-	lines( x, y, col=alpha(1,0.008) )
+	lines( x, y, col=alpha(1,0.005) )
 	}
 lines(x=CPL$year, y=CPL$pdf, lwd=2, col=c2)
 ```
@@ -369,7 +369,7 @@ uniform <- objectiveFunction(NULL, PD, type='uniform')
 load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vignette.model.comparison.RData')
 ```
 
-The objective function returns the negative log-likelihood since the search algorithm seeks to minimise the objective function. It is therefore trivial to extract the log-likelihoods, and calculate the BIC scores using the formula $BIC=k\ln(n)-2L$ where $k$ is the number of parameters, $n$ is the effective sample size (i.e. the number of phases = 211), and $L$ is the maximum log-likelihood.
+The objective function returns the negative log-likelihood since the search algorithm seeks to minimise the objective function. It is therefore trivial to extract the log-likelihoods, and calculate the BIC scores using the formula $BIC=k\ln(n)-2L$ where $k$ is the number of parameters, $n$ is the effective sample size (i.e. the number of phases = 303), and $L$ is the maximum log-likelihood.
 
 ```{r, eval = TRUE}
 # likelihoods
@@ -416,43 +416,51 @@ it is crucial to test if the selected model is plausible, or in other words, to 
 
 Typically a GOF quantifies how unusual it would be for the observed data to be generated by the model. Of course the probability of any particular dataset being generated by any particular model is vanishingly small, so instead we estimate how probable it is for the model to produce the observed data, *or data that are more extreme*. This is a similar concept to the p-value, but instead of using a null hypothesis we use the best selected model. We can generate many simulated datasets under this model, and calculate a summary statistic for each simulation. A one-tailed test will then establish the proportion of simulations that have a poorer summary statistic (more extreme) than the observed data's summary statistic.
 
-For complex data types the choice of a suitable summary statistic can often be difficult, as different statistics represent different aspects of the data, and therefore can vary in plausibility under a selected model. We avoid this problem by using the likelihood (the probability of our data given the selected model) as our summary statistic, which provides a direct quantification of how 'extreme' the data are. As such, the proportion of simulated datasets with a lower probability than the observed dataset provides the perfect definition of *more extreme*. 
-
-The GOF test below provides a p-value of 0.44 for the best model (3-CPL) providing a sanity check that the data cannot be rejected under this model, and therefore is a plausible model:
+For each dataset (simulated and observed) we generate an SPD and use a statistic that measures how divergent each SPD is from expectation, by calculating the total probability that sits outside the 95% CI, scaled by the local standard deviation. 
 
 ```{r, eval = FALSE}
-p <- GOF(data, calcurve=shcal20, calrange=c(5500,7500), pars=best$par, type='CPL')
+summary <- SPDsimulationTest(data, 
+	calcurve=shcal20, 
+	calrange=c(5500,7500), 
+	pars=best$par, 
+	type='CPL', 
+	N=20000)
 ```
+
+The test provides a p-value of 1.00 for the best model (3-CPL), since all of the 20,000 simulated SPDs were as or more extreme than the observed SPD, providing a sanity check that the data cannot be rejected under this model, and therefore is a plausible model:
 
 ```{r, echo = FALSE}
-load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vignette.3CPL.GOF.RData')
+load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vignette.3CPL.SPDsimulationTest.RData')
 ```
 
-```{r, eva = TRUE}
-print(p)
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+print(summary$pvalue)
+hist(summary$simulated.stat, main='Summary statistic', xlab='')
+abline(v=summary$observed.stat, col='red')
+legend(0.3,6000, bty='n', lwd=c(1,3), col=c('red','grey'), legend=c('observed','simulated'))
 ```
 
 ## Relative growth/decline rates
 
-Percentage growth rates per generation provide an intuitive statistic to quantify and compare population changes through time. However there are two key issues to overcome, when estimating growth rates for a CPL model.
+Percentage growth rates per generation provide an intuitive statistic to quantify and compare population changes through time. However there are two key issues to overcome when estimating growth rates for a CPL model.
 
-1. CPL modelling allows for the possibility of hiatus periods, defined by pieces between hinges with a zero or near zero PD. Conventionally, the total percentage change from ay value to zero is a 100% decrease, however the equivalent percentage increase from zero is undefined.
+1. CPL modelling allows for the possibility of hiatus periods, defined by pieces between hinges with a zero or near zero PD. Conventionally, the total percentage change from any value to zero is a 100% decrease, however the equivalent percentage increase from zero is undefined.
 2. Each section of the CPL is a straight line with a constant gradient. However, a straight line has a constantly changing growth/decline rate.
 
-The first problem is an extreme manifestation of the asymmetry from conventionally reporting change always with respect to the first value. For example, if we consider a population of 80 individuals at time $t_1$, changing to to 100 at $t_2$ and to 80 at $t_3$, this would be conventionally described as a 25% increase followed by a 20% decrease.
+The first problem is an extreme manifestation of the asymmetry from conventionally reporting change always with respect to the first value. For example, if we consider a population of 80 individuals at time $t_1$, changing to 100 at $t_2$ and to 80 at $t_3$, this would be conventionally described as a 25% increase followed by a 20% decrease.
 This asymmetry is unintuitive and unhelpful in the context of population change, and instead we use a *relative rate* which is always calculated with respect to the larger value (e.g., the example above is reported as '20% relative growth' followed by '20% relative decline').
 
 We overcome the second problem by calculating the expected (mean average) rate across the entire linear piece. This is achieved by notionally breaking the line into $N$ equal pieces, such that the coordinates of the ends of the $i^{th}$ piece are $(x_1,y_1)$ and $(x_2,y_2)$.
-The generational rate $r$ of this $i^{th}$ piece is $$r_i=e^{\ln(\frac{y_1}{y_2})/\frac{x_1-x_2}{25}}$$ and the expected rate across the entire line is $$\sum_{i=1}^{N}r_i/N-1$$
+The generational rate $r$ of this $i^{th}$ piece is $$r_i=1-exp[\ln(\frac{y_1}{y_2})/\frac{x_1-x_2}{25}]$$ and the expected rate across the entire line as $N$ approaches +$\infty$ is $$\sum_{i=1}^{N}r_i/N$$
 
-For example, a population decline from n=200 to n=160 across 100 years is conventionally considered to have a generational (25 years) decline rate of $1-exp(\ln(160/200)/(100/25))$ = 5.42584% loss per generation.
-If partitioned into just two equal sections (n=200, n=180, n=160), we require two generational decline rates:
-$1-exp(log(180/200)/(50/25))$ = 5.13167% and $1-exp(log(160/180)/(50/25))$ = 5.71910%, giving a mean of 5.42538%. 
-As the number of sections $N$ approaches infinity, the mean rate asymptoticly approaches 5.50724%. 
-The similarity to the conventional rate of 5.42584% is because the total percentage loss is small (20%), therefore an exponential curve between n=200 and n=160 is similar to a straight line.
+For example, a population decline from n=200 to n=160 across 100 years is conventionally considered to have a generational (25 years) decline rate of $1-exp[\ln(\frac{160}{200})/\frac{100}{25}]$ = 5.426% loss per generation.
+If partitioned into just $N=2$ equal sections (n=200, n=180, n=160), we require two generational decline rates:
+$1-exp[\ln(\frac{180}{200})/\frac{50}{25}]$ = 5.132% and  $1-exp[\ln(\frac{160}{180})/\frac{50}{25}]$ = 5.719%, giving a mean of 5.425%. 
+As the number of sections $N$ approaches +$\infty$, the mean rate asymptoticly approaches 5.507%. 
+The similarity to the conventional rate of 5.426% is because the total percentage loss is small (20%), therefore an exponential curve between n=200 and n=160 is similar to a straight line.
 In contrast, a huge percentage loss of 99.5% illustrates the importance of calculating the expected growth rate, averaged across the whole line:
-An exponential curve between n=200 and n=1 across the same 100 years has a decline rate of $1-exp(log(1/200)/(100/25))$ = 73.409% loss per 25 yr generation.
-Meanwhile a linear model between n=200 and n=1 across the same 100 years has an expected decline rate of 47.83539% loss per generation.
+An exponential curve between n=200 and n=1 across the same 100 years has a decline rate of $1-exp[\ln(\frac{1}{200})/\frac{100}{25}]$ = 73.409% loss per 25 yr generation.
+Meanwhile a linear model between n=200 and n=1 across the same 100 years has an expected decline rate of 47.835% loss per generation.
 
 
 **********
@@ -460,14 +468,26 @@ Meanwhile a linear model between n=200 and n=1 across the same 100 years has an 
 # Part 3
 # SPD simulation testing
 
-Part 2 provides a framework to directly estimate the best model from  dataset, including CPL models, exponential, uniform, or in theory any other model. In contrast, a less sophisticated albeit currently common approach the SPD simulation methodology. This requires the researcher to *a priori* specify a single null model, then generate many simulated datasets under this null model which are compared with the observed dataset to generate a p-value. This SPD simulation approach has several shortcomings which render it inferior to the CPL modelling approach: 
+Part 2 provided a framework to directly select the best model from  dataset, from CPL models, exponential, uniform, or in theory any other model. This contrasts with the SPD simulation methodology which requires the researcher to *a priori* specify a single null model, then generate many simulated datasets under this null model which are compared with the observed dataset to generate a p-value. This SPD simulation approach has several shortcomings which render it inferior to the CPL modelling approach: 
 
-1. Recent studies increasingly suggest population fluctuations are ubiquitous thought history, rendering the concept of a single null model untenable for this problem. In contrast this new methodology does not assume a null, and instead allows any number of models to be compared. 
-1. A low p-value merely allows us to reject the null, but does not provide us with a plausible alternative explanation. It is common for researchers to assign colourful demographic narratives to periods outside the 95% CI, but these are only interpretive and not directly supported by the test statistic. Instead the CPL framework provides a single best explanation, in the form of specific demographic events (hinge coordinates), event dates, growth rates, and CIs.
-1. Fitting the null model (and therefore estimating its parameters) is commonly achieved by discretising the SPD, then incorrectly assuming these points somehow represent data points, to which the null model is fitted my minimising their residuals. In contrast, the CPL framework correctly calculates the probability of the data given some proposed model parameters. 
-1. Generating a meaningful p-value relies on the use of one or more suitable summary statistics that can appropriately summarise an entire dataset (or SPD), such that the p-value fairly describes the probability of the null model generating a dataset that is *as or more extreme* than the observed dataset. Commonly used summary statistics are a variation on the theme of the proportion of the SPD that falls outside the simulated confidence interval. In contrast, the CPL framework uses a Goodness Of Fit (GOF) test that uses the likelihood, providing a direct and complete measure of *as or more extreme*.
+1. Recent studies increasingly suggest population fluctuations are ubiquitous thought history, rendering the application of a null model inappropriate. In contrast this new methodology does not assume a null, and instead allows any number of models to be compared. 
+1. A low p-value merely allows us to reject (or fail to reject) the tested model, but does not provide us with a plausible alternative explanation. This leaves an inferential vacuum in which it is common for researchers to assign colourful demographic narratives to periods outside the 95% CI, but these are only interpretive and not directly supported by the test statistic. Instead the CPL framework provides a single best explanation.
+1. Fitting the null model (and therefore estimating its parameters) is commonly achieved by discretising the SPD, then incorrectly assuming these points somehow represent data points, to which the null model is fitted my minimising their residuals. In contrast, the CPL framework correctly calculates the relative likelihood of the proposed model parameters given the data, and therefore can correctly fit a model. 
 
-Despite these short comings, and purely for comparative purposes, the ADMUR package also provides tools to apply the SPD simulation methodology, with a key improvement that resolves problems 3 and 4 above. Specifically, we calculate the null model likelihood given the data. Therefore the null model parameters are fitted to the data using the maximum likelihood; and the p-value is calculated using the distribution of null model likelihoods given each simulated dataset. 
+Nevertheless, the p-value from the SPD simulation framework is hugely useful in providing a Goodness of Fit test for the best selected model.
+Therefore the summary generated in the previous section *'Goodness of fit test'* provides a number of other useful outputs that can be plotted, including:
 
+1. the SPD vector
+1. the model vector
+1. expected simulation vector (mean of simulations)
+1. confidence intervals (various quantiles of simulations)
+1. p-value for Goodness of Fit test
+1. summary statistic of observed dataset
+1. summary statistic of each simulated dataset
+1. Index of SPD values that are above or below the 95% CI (+1 and -1 respetively, or 0 if within the 95% CI)
+1. effective number of 14C dates within the specified date range (not the total sample size of the dataset)
+1. effective number of phases in the specified date range
+
+The function ???? represents these data in a single plot:
 
 **********

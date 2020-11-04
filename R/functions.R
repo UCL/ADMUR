@@ -1,6 +1,12 @@
 #--------------------------------------------------------------------------------------------
 # R functions for ADMUR package
 #--------------------------------------------------------------------------------------------	
+
+#--------------------------------------------------------------------------------------------	
+# global variables
+if(getRversion() >= "2.15.1")  utils::globalVariables(c('datingType','site','calBP','phase','intcal20'))
+#--------------------------------------------------------------------------------------------
+
 checkData <- function(data){
 	# data: data.frame of 14C dates. Requires 'age' and 'sd'.
 	# helper function to check format of data, and throw warnings
@@ -158,6 +164,7 @@ binner <- function(data, width, calcurve){
 	if(width<1)stop('width must be > 1')
 	if(!is.data.frame(calcurve))stop('calcurve format must be data frame with cal, C14 and error')
 	if(sum(names(calcurve)%in%c('cal','C14','error'))!=3)stop('calcurve format must be data frame with cal, C14 and error')
+	if('phase'%in%names(data))warning('Data was already phased, so should not have been handed to binner(). Check for internal bug')
 
 	# approximate nonC14 dates ito C14 time, so they can also be binned
 	data.C14 <- subset(data,datingType=='14C')
@@ -165,7 +172,7 @@ binner <- function(data, width, calcurve){
 	data.C14$c14age <- data.C14$age
 	if(nrow(data.nonC14)>0)data.nonC14$c14age <- approx(x=calcurve$cal, y=calcurve$C14, xout=data.nonC14$age)$y
 	data <- rbind(data.C14,data.nonC14)
-	data <- data[order(data$site,data$c14age),]
+	if(length(unique(data$site))>1)data <- data[order(data$site,data$c14age),]
 	data$phase <- NA
 
 	# binning
@@ -218,7 +225,7 @@ internalCalibrator <- function(data, CalArray){
 	v <- as.numeric(data$sd)^2
 	mu <- log(m^2/sqrt(v+m^2))
 	sig <- sqrt(log(v/m^2+1))
-	all.c14.lik <- dlnorm(all.dates, mean=mu, sd=sig)
+	all.c14.lik <- dlnorm(all.dates, meanlog=mu, sdlog=sig)
 
 	#  all c14 probabilities (bayes theorem requires two steps, multiply prior by likelihood, then divide by integral)
 	all.c14.prob <- c14.prior * t(all.c14.lik)
@@ -243,13 +250,12 @@ internalCalibrator <- function(data, CalArray){
 
 return(result)}
 #--------------------------------------------------------------------------------------------
-summedCalibrator <- function(data, CalArray, normalise = 'standard', remove.external = FALSE){
+summedCalibrator <- function(data, CalArray, normalise = 'standard'){
 
 	# performs a few checks
 	# separates data into C14 for calibration using internalCalibrator(), and nonC14 dates
 	# combines PDs to produce an SPD
 	# reduces the SPD to the orginal required range and applies normalisation if required
-	# remove.external: exludes dates (columns) with less than half their probability mass outside the date range. Useful for modelling.
 
 	# check arguments
 	if(checkData(data)=='bad')stop()
@@ -396,7 +402,7 @@ loglik <- function(PD, model){
 
 	# relative likelihood of a perfectly precise date is the model PDF
 	# therefore the relative likelihood of a date with uncertainty is an average of the model PDF, weighted by the date probabilities.
-	# Numerically (discretely) this is the sum of (model PDF x date PMFs).
+	# Numerically this is the scalar product: sum of (model PDF x date PDF).
 
 	years <- as.numeric(row.names(PD))
 	inc <- (years[2]-years[1])
@@ -681,7 +687,7 @@ estimateDataDomain <- function(data, calcurve){
 		}
 return(c(min.year, max.year))}
 #--------------------------------------------------------------------------------------------
-SPDsimulationTest <- function(data, calcurve, calrange, pars, type, inc=5, N=10000){
+SPDsimulationTest <- function(data, calcurve, calrange, pars, type, inc=5, N=20000){
 
 	# 1. generate observed data SPD
 	print('Generating SPD for observed data')
@@ -691,18 +697,30 @@ SPDsimulationTest <- function(data, calcurve, calrange, pars, type, inc=5, N=100
 	SPD.obs <- SPD.obs/(sum(SPD.obs) * CalArray$inc)
 	SPD.obs <- SPD.obs[,1]
 
-	# number of phases that contribute to the date range
-	n.phases <- sum(x)*inc
+	# 2. various sample sizes and effective sample sizes
 
-	# number of date that contribute to the date range
-	tmp <- summedCalibrator(data, CalArray, normalise = 'none', remove.external = FALSE)
-	n.dates <- sum(tmp)*inc
+	# number of dates in the entire dataset
+	n.dates.all <- nrow(data)
 
-	# 2. convert best pars to a model
+	# effective number of dates that contribute to the date range. Some dates may be slightly outside, giving non-integer.
+	tmp <- summedCalibrator(data, CalArray, normalise = 'none')
+	n.dates.effective <- round(sum(tmp)*inc,1)
+
+	# number of phases in entire dataset
+	if(!'phase'%in%names(data))data <- binner(data, width=200, calcurve)
+	n.phases.all <- length(unique(data$phase))
+
+	# effective number of phases that contribute to the date range. Some phases may be slightly outside, giving non-integer.
+	n.phases.effective <- round(sum(x)*inc,1)
+
+	# number of phases that are mostly internal to date range, used for likelihoods
+	n.phases.internal <- sum(colSums(x)>=(0.5 /inc))
+
+	# 3. convert best pars to a model
 	print('Converting model parameters into a PDF')
 	model <- convertPars(pars, years=CalArray$cal, type)
 
-	# 3. Generate N simulations
+	# 4. Generate N simulations
 	print('Generating simulated SPDs under the model')
 	SPD.sims <- matrix(,length(SPD.obs),N) # blank matrix
 
@@ -714,13 +732,13 @@ SPDsimulationTest <- function(data, calcurve, calrange, pars, type, inc=5, N=100
 		cal <- simulateCalendarDates(model=model, n=np)
 		age <- uncalibrateCalendarDates(cal, calcurve)
 		d <- data.frame(age = age, sd = sample(data$sd, replace=T, size=length(age)), datingType = '14C')
-		SPD.sims[,n] <- summedCalibrator(d, CalArray, normalise = 'full', remove.external = FALSE)[,1]
+		SPD.sims[,n] <- summedCalibrator(d, CalArray, normalise = 'full')[,1]
 	
 		# house-keeping
 		if(n>1 & n%in%seq(0,N,length.out=11))print(paste(n,'of',N,'simulations completed'))
 		}
 
-	# 4. Construct various timeseries summaries
+	# 5. Construct various timeseries summaries
 	
 	# calBP years
 	calBP <- CalArray$cal
@@ -742,7 +760,7 @@ SPDsimulationTest <- function(data, calcurve, calrange, pars, type, inc=5, N=100
 	lower.95 <- CI[,dimnames(CI)[[2]]=="2.5%"]
 	index <- as.numeric(SPD.obs>=upper.95)-as.numeric(SPD.obs<=lower.95) #  -1,0,1 values
 
-	# 5. calculate summary statistic for each sim and obs; and GOF p-value
+	# 6. calculate summary statistic for each sim and obs; and GOF p-value
 	print('Generating summary statistics')
 
 	# for observed
@@ -759,11 +777,18 @@ SPDsimulationTest <- function(data, calcurve, calrange, pars, type, inc=5, N=100
 	# calculate p-value
 	pvalue <- sum(SS.sims>=SS.obs)/N
 
-	# 6. summarise and return
+	# 7. summarise and return
 	timeseries <- cbind(data.frame(calBP=calBP, expected.sim=expected.sim, local.sd=SD, model=mod, SPD=SPD.obs, index=index),CI)
 
-return(list(timeseries=timeseries, pvalue=pvalue, observed.stat=SS.obs, simulated.stat=SS.sims, n.phases=n.phases, n.dates=n.dates))}
-
+return(list(timeseries=timeseries, 
+	pvalue=pvalue, 
+	observed.stat=SS.obs, 
+	simulated.stat=SS.sims, 
+	n.dates.all=n.dates.all, 
+	n.dates.effective=n.dates.effective,
+	n.phases.all=n.phases.all,
+	n.phases.effective=n.phases.effective,
+	n.phases.internal=n.phases.internal))}
 #--------------------------------------------------------------------------------------------
 relativeDeclineRate <- function(x, y, generation, N){
 
@@ -806,4 +831,55 @@ relativeRate <- function(x, y, generation=25, N=5000){
 		res[grad<0] <- res[grad<0]*(-1) 
 		}
 return(res)}
+#----------------------------------------------------------------------------------------------
+plotSimulationSummary <- function(summary, title=NULL, legend.x=NULL, legend.y=NULL){
+
+	X <- summary$timeseries$calBP
+	Y <- summary$timeseries$SPD
+	ymax <- max(Y,summary$timeseries$model,summary$timeseries$'97.5%')*1.05
+	P <- paste(', p =',round(summary$pvalue,3))
+	if(round(summary$pvalue,3)==0)P <- ', p < 0.001'
+	xticks <- seq(max(X),min(X),by=-1000)
+	if(is.null(title))title <- paste('Samples N = ',round(summary$n.dates.effective),', bins N = ',round(summary$n.phases.effective),P,sep='')
+	if(is.null(legend.x))legend.x <- max(X)*0.75
+	if(is.null(legend.y))legend.y <- ymax*0.8
+
+	plot(NULL,xlim=rev(range(X)),ylim=c(0,ymax), main='', xlab='calBP', ylab='PD', xaxt='n',las=1, cex.axis=0.6)
+	axis(1,at=xticks,labels=paste(xticks/1000,'kyr'),cex.axis=0.7)
+	text(title,x=mean(X),y=ymax*0.9,cex=1)
+
+
+	polygon(x=c(X,rev(X)) ,y=c(summary$timeseries$`2.5%`,rev(summary$timeseries$`97.5%`)) ,col='grey90',border=F)
+	polygon(x=c(X,rev(X)) ,y=c(summary$timeseries$`12.5%`,rev(summary$timeseries$`87.5%`)) ,col='grey70',border=F)
+	polygon(x=c(X,rev(X)) ,y=c(summary$timeseries$`25%`,rev(summary$timeseries$`75%`)) ,col='grey50',border=F)
+
+	upperpoly <- which(summary$timeseries$index != 1) 
+	lowerpoly <- which(summary$timeseries$index != -1) 
+	upper.y <- lower.y <- Y
+	upper.y[upperpoly] <- summary$timeseries$model[upperpoly]
+	lower.y[lowerpoly] <- summary$timeseries$model[lowerpoly]
+	polygon(c(X,rev(X)),c(upper.y,rev(summary$timeseries$model)),border=NA, col=scales::alpha('firebrick',alpha=0.6))
+	polygon(c(X,rev(X)),c(lower.y,rev(summary$timeseries$model)),border=NA, col=scales::alpha('firebrick',alpha=0.6))
+
+	lines(x=X, y=summary$timeseries$model, col='steelblue',lty=3, lwd=2)
+	lines(y=Y,x=X,lty=2)
+
+	smooth <- round(200/mean(diff(X)))			
+	Y.smooth <- zoo::rollmean(Y,smooth)
+	X.smooth <- zoo::rollmean(X,smooth)
+	lines(y=Y.smooth,X.smooth,lty=1,lwd=2)
+
+	legend(legend=c('SPD (200 yrs rolling mean)','SPD','Null model','50% CI','75% CI','95% CI','Outside 95% CI'),
+	x = legend.x,
+	y = legend.y,
+	cex = 0.7,
+	bty = 'n',
+	lty = c(1,2,3,NA,NA,NA,NA),
+	lwd = c(2,1,2,NA,NA,NA,NA),
+	col = c(1,1,'steelblue',NA,NA,NA,NA),
+	fill = c(NA,NA,NA,'grey50','grey70','grey90','firebrick'), 
+	border = NA,
+	xjust = 1,
+	x.intersp = c(1,1,1,-0.5,-0.5,-0.5,-0.5))
+	}
 #----------------------------------------------------------------------------------------------

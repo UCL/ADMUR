@@ -2,7 +2,7 @@
 \alias{objectiveFunction} 
 \title{Objective function to be minimised in a search. Returns the negative log likelihood.} 
 \description{Calculates the negative log likelihood of a model given a calibrated date matrix.}
-\usage{objectiveFunction(pars, PDarray, type='CPL')}
+\usage{objectiveFunction(pars, PDarray, type)}
 \arguments{
   \item{pars}{
 	A numeric vector of parameters. 
@@ -22,7 +22,7 @@
 	}
 \examples{
 	# generate a PD array from a handful of dates
-	data <- subset(arid, site %in% c('Carrizal','Pacopampa'))
+	data <- subset(SAAD, site \%in\% c('Carrizal','Pacopampa'))
 	CalArray <- makeCalArray(shcal13, calrange = c(2000,6000))
 	PD <- phaseCalibrator(data, CalArray)
 

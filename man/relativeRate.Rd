@@ -13,8 +13,8 @@
   \item{generation}{
 	Years per generation. Default = 25.
 	}
-  \item{N. Default = 5000}{
-	Number of sections to average the growth rate across.. 
+  \item{N}{
+	Number of sections to average the growth rate across.  
 	}	
 }
 \value{
@@ -29,29 +29,37 @@
 \examples{
 
 	x <- c(5600,5500)
-	y <- c(80,75)
+	y <- c(75,80)
 
 	# conventional growth/decline rate per 25 yr generation
-	100 * (1 - exp(log(y[2]/y[1])/((x[2]-x[1])/25)))
+	100 * exp(log(y[2]/y[1])/((x[1]-x[2])/25)) - 100
 
 	# relative growth/decline rate per 25 yr generation
-	relative.rate(x,y)
+	relativeRate(x,y)
 
 	x <- c(5600,5500)
 	y <- c(480,75)
 
 	# conventional growth/decline rate per 25 yr generation
-	100 * (1 - exp(log(y[2]/y[1])/((x[2]-x[1])/25)))
+	100 * exp(log(y[2]/y[1])/((x[1]-x[2])/25)) - 100
 
 	# relative growth/decline rate per 25 yr generation
-	relative.rate(x,y)
+	relativeRate(x,y)
 
 	x <- c(5600,5500)
 	y <- c(480,0)
 
 	# conventional growth/decline rate per 25 yr generation
-	100 * (1 - exp(log(y[2]/y[1])/((x[2]-x[1])/25)))
+	100 * exp(log(y[2]/y[1])/((x[1]-x[2])/25)) - 100
 
 	# relative growth/decline rate per 25 yr generation
-	relative.rate(x,y)
+	relativeRate(x,y)
+
+	# various random rates between 6000 and 5500 BP
+	x <- t(matrix(c(6000,5500),2,1000))
+	y <- matrix(runif(2000),1000,2)
+	conventional <- 100 * exp(log(y[,2]/y[,1])/((x[,1]-x[,2])/25)) - 100
+	relative <- relativeRate(x,y)
+	plot(relative, conventional)
+
 	}

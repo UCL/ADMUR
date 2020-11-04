@@ -9,7 +9,10 @@
 	toy
 	}
 \format{
-	A data frame.
+	A data frame comprising 4rows and 2 columns
+	}
+\source{
+	Toy used in Timpson et al (2020).
 	}
 \references{
 	Timpson, A., Barberena, R., Thomas, M.G., Méndez, C., Manning, K. 2020 Directly modelling population dynamics in the South American Arid Diagonal using 14C dates. Philosophical Transactions of the Royal Society B.

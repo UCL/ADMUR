@@ -1,0 +1,36 @@
+citHeader("To cite the ADMUR package in publications please use both the following:")
+
+citEntry(entry="article",
+	author = personList(	as.person("Adrian Timpson"), 
+				as.person("Ramiro Barberena"), 
+				as.person("Mark G. Thomas"), 
+				as.person("César Méndez"), 
+				as.person("Katie Manning")),
+	title		= "Directly modelling population dynamics in the South American Arid Diagonal using 14C dates",
+	journal	= "Philosophical Transactions of the Royal Society B",
+	volume 	= "Cross-disciplinary approaches to prehistoric demography",
+ 	year		= 2020,
+         
+         textVersion = 
+         paste(	"A. Timpson, R. Barberena, M. G. Thomas, C. Méndez, K. Manning.", 
+		"Directly modelling population dynamics in the South American Arid Diagonal using 14C dates.",
+		"2020.",
+		"Philosophical Transactions of the Royal Society B.")
+	)
+
+citEntry(entry="manual",
+	title			= "ADMUR: Ancient Demographic Modelling Using Radiocarbon",
+	author 		= personList(as.person("Adrian Timpson")), 
+	organization	= "University College London (UCL)",
+	address		= "Research Department of Genetics, Environment and Evolution (GEE), Darwin Building, Gower Street, London, WC1E 6BT",
+ 	year			= 2020,
+	url			= "https://github.com/UCL/ADMUR",
+         
+         textVersion = 
+         paste(	"ADMUR: Ancient Demographic Modelling Using Radiocarbon.", 
+		"Adrian Timpson.",
+		"University College London.",
+		"Research Department of Genetics, Environment and Evolution (GEE), Darwin Building, Gower Street, London, WC1E 6BT.",
+		"2020",
+		"https://github.com/UCL/ADMUR")
+	)

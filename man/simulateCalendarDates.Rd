@@ -18,11 +18,18 @@
 Samples n random calendar dates from a model pdf. This model must be defined in terms of a PDF vector and the corresponding calendar years. This can be provided at any preferred temporal resolution. For example, an exponential model can be provided with the PDF in annual intervals, whilst CPL model needs only the hinge points. \code{\link[=convertPars]{convertPars}} will convert parameters into the required model format.
 	}
 \examples{
-	uncalibrateCalendarDates(c(4500,5000), shcal20)
-
-	# note the date outside the calcurve range has a 1 to 1 mapping between cal and c14 time
-	uncalibrateCalendarDates(c(4500,70000), intcal20)
-
-	# however, a soft fade is performed between the end of the calcurve and 60000
-	uncalibrateCalendarDates(c(4500,58000), intcal20)
+	# under a uniform model
+	model <- convertPars(pars=NULL, years=5000:6000,type='uniform')
+	sims <- simulateCalendarDates(model, 1000)
+	range(sims)
+	
+	# simulate under an exponential model
+	model <- convertPars(pars=0.001, years=5000:6000,type='exp')
+	sims <- simulateCalendarDates(model, 1000)
+	range(sims)
+	
+	# under a CPL model
+	model <- convertPars(pars=runif(5), years=5000:6000,type='CPL')
+	sims <- simulateCalendarDates(model, 1000)
+	range(sims)
 	}

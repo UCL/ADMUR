@@ -4,16 +4,16 @@ author: "Adrian Timpson"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Guide to using ADMUR}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+  %\VignetteIndexEntry{Guide to using ADMUR}
+  %\usepackage[utf8]{inputenc}
 ---
 <style>
 p.caption {font-size: 0.7em;}
 </style>
 
 
-This vignette provides a comprehensive guide to modelling population dynamics using the R package ADMUR, and accompanies the publication 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates', Philosophical Transactions B, 2020, A. Timpson et al. https://doi.org/10.1098/rstb.2019.0723  
+This vignette provides a comprehensive guide to modelling population dynamics using the R package ADMUR, and accompanies the publication 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates', Philosophical Transactions B, 2020, A. Timpson et al. https://doi.org/10.1098/rstb.2019.0723 
 
 **NOTE: The ADMUR package is still under construction and the paper is in press. Both are due for publication on 30th November 2020**
 
@@ -21,14 +21,13 @@ Throughout this vignette, R code blocks often use objects created earlier in the
 
 In addition to some basic information on getting started, this vignette is divided into three main parts:
 
-1. **Date calibration and SPDs:**  Calibrate individual radiocarbon dates, generate Summed Probability Distributions, and automatically phase large datasets to adjust for ascertainment bias. Comparison with other software.
-1. **Continuous Piecewise Linear (CPL) Modelling:** Maximum Likelihood Parameter estimation using the likelihood function. MCMC for estimating credible intervals. Model selection using BIC, and goodness-of-fit (GOF) test.
-1. **SPD simulation testing:** Null hypothesis testing by simulating SPDs and comparing to the observed SPD. P-values generated using likelihoods, improving on the summary statistics originally devised in Shennan et al 2013 and Timpson et al 2014.
+1. **Date calibration and SPDs:**  Calibrate individual radiocarbon dates; generate Summed Probability Distributions; automatically phase large datasets to adjust for ascertainment bias; comparison with other software.
+1. **Continuous Piecewise Linear (CPL) Modelling:** Maximum Likelihood Parameter estimation using the likelihood function; MCMC for estimating credible intervals; model selection using BIC; goodness-of-fit (GOF) test.
+1. **SPD simulation testing:** Null hypothesis testing by simulating SPDs and comparing to the observed SPD; p-values; plotting simulation summary.
 
 ## Installation
 
 The ADMUR package can be installed directly from GitHub, after installing and loading the 'devtools' package on the CRAN:
-
 ```{r, eval = FALSE}
 install.packages('devtools')
 library(devtools)
@@ -36,7 +35,6 @@ install_github('UCL/ADMUR')
 ```
 
 The ADMUR package can then be locally loaded:
-
 ```{r, message = FALSE}
 library(ADMUR)
 ```
@@ -44,17 +42,21 @@ library(ADMUR)
 ## 14C datasets
 
 A summary of the available help files and data sets included in the package can be browsed, which include a terrestrial anthropogenic ^14^C dataset from the South American Arid Diagonal:
-
 ```{r, eval = FALSE}
 help(ADMUR)
 help(SAAD)
 ```
 
 Datasets must be structured as a data frame that include columns 'age' and 'sd', which represent the uncalibrated ^14^C age and its error, respectively.
-
-
 ```{r, eval = TRUE}
 SAAD[1:5,1:8]
+```
+
+## Citing ADMUR
+
+Citations are available as follows:
+```{r, eval = TRUE}
+citation('ADMUR')
 ```
 **********
 # Part 1
@@ -75,7 +77,7 @@ data <- data.frame( age=c(6562,7144), sd=c(44,51) )
 x <- summedCalibratorWrapper(data)
 ```
 
-Notice the function automatically assumed the data provided were all ^14^C dates. However, if you have other kinds of date such as thermoluminescence you can specify this. Non-^14^C types are assumed to be in calendar time, BP. You can also specify a particular calibration curve:
+Notice the function assumes the data provided were all ^14^C dates. However, if you have other kinds of date such as thermoluminescence you can specify this. Non-^14^C types are assumed to be in calendar time, BP. You can also specify a particular calibration curve:
 
 ```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
 data <- data.frame( age=c(6562,7144), sd=c(44,51), datingType=c('14C','TL') )
@@ -109,23 +111,23 @@ plotCalArray(x)
 
 ## Calibration comparison with other software
 
-It is worth noting that the algorithm used by this package to calibrate ^14^C dates gives practically equivalent results to those from [OxCal](https://c14.arch.ox.ac.uk/oxcal.html) generated using [OxcAAR](https://cran.r-project.org/web/packages/oxcAAR/index.html) and [Bchron](https://cran.r-project.org/web/packages/Bchron/index.html) 
+It is worth noting that the algorithm used by this package to calibrate ^14^C dates gives practically equivalent results to those from [OxCal](https://c14.arch.ox.ac.uk/oxcal.html) generated using [oxcAAR](https://cran.r-project.org/package=oxcAAR) and [Bchron](https://cran.r-project.org/package=Bchron) 
 
-![Comparison of calibration software for the ^14^C date: 3000 +/- 50 BP calibrated through intcal13.](software compare 1.svg)
+![Comparison of calibration software for the ^14^C date: 3000 +/- 50 BP calibrated through intcal13.](software_compare_1.png)
 
 However, there are two fringe circumstances where these software programs differ substantially: at the border of the calibration curve; and if a date has a large error.
 
 ### Edge effects 
 
-Consider the real ^14^C date [MAMS-13035](https://doi.org/10.1016/j.aeae.2015.11.003) age: 50524 +/- 833 BP calibrated through intcal13, which only extends to 46401BP. Bchron throws an error, whilst OxCal applies a one-to-one mapping between Conventional Radiocarbon (CRA) time and calendar time for any date (mean) beyond the range of the calibration curve. The latter is in theory a reasonable way to mitigate the problem, however OxCal applies this in a binary manner that can create peculiarities. Instead ADMUR gradually fades the calibration curve to a one-to-one mapping between the end of the curve and 60,000 BP. 
+Consider the real ^14^C date [MAMS-13035] <https://doi.org/10.1016/j.aeae.2015.11.003>  age: 50524 +/- 833 BP calibrated through intcal13, which only extends to 46401BP. Bchron throws an error, whilst OxCal applies a one-to-one mapping between Conventional Radiocarbon (CRA) time and calendar time for any date (mean) beyond the range of the calibration curve. The latter is in theory a reasonable way to mitigate the problem, however OxCal applies this in a binary manner that can create peculiarities. Instead ADMUR gradually fades the calibration curve to a one-to-one mapping between the end of the curve and 60,000 BP. 
 
-![Comparison of calibration software at the limits of intcal13. OxCal and Bchron produce a truncated distribution for date C. Bchron cannot calibrate date D, and OxCal suggests date D is younger than dates A, B and C. ADMUR performs a soft fade at the limit of the calibration curve.](software compare 2.svg)
+![Comparison of calibration software at the limits of intcal13. OxCal and Bchron produce a truncated distribution for date C. Bchron cannot calibrate date D, and OxCal suggests date D is younger than dates A, B and C. ADMUR performs a soft fade at the limit of the calibration curve.](software_compare_2.png)
 
 ### Large errors 
 
 A ^14^C date is typically reported as a mean date with an error, which is often interpreted as representing a symmetric Gaussian distribution before calibration. However, a Gaussian has a non-zero probability at all possible years (between -$\infty$ and +$\infty$), and therefore cannot fairly represent the date uncertainty which must be skewed towards the past. Specifically, if we consider the date in CRA time, it must have a zero probability of occurring in the future. Alternatively, if we consider the date as a ^14^C/^12^C ratio, it cannot be smaller than 1 (the present). Therefore ADMUR assumes a ^14^C date error is lognormally distributed with a mean equal to the CRA date, and a variance equal to the CRA error squared. This naturally skews the distribution away from the present. In practice, this difference is undetectably trivial for typical radiocarbon errors since the lognormal distribution approximates a normal distribution away from zero. However, theoretically the differences can be large if considering dates with large errors that are close to the present.
 
-![Comparison of calibration software for the ^14^C dates 15000 +/- 9000 BP, 15000 +/- 3000 BP and 15000 +/- 1000 BP, using intcal13. The total probability mass of each of the nine curves equals 1. Differences are apparent if a date has a large error (top tile): Bchron assumes the CRA error is Normally distributed, resulting in a truncated curve with a substantial probability at present. OxCal produces a heavily skewed distribution with a low probability at present and a substantial probability at 50,000 BP that suddenly truncates to zero beyond this. ADMUR assumes the CRA error is Lognormally distributed, which is indistinguishable from a normal distribution for typical errors, but naturally prevents any probability mass occurring at the present or future when errors are large.](software compare 3.svg)
+![Comparison of calibration software for the ^14^C dates 15000 +/- 9000 BP, 15000 +/- 3000 BP and 15000 +/- 1000 BP, using intcal13. The total probability mass of each of the nine curves equals 1. Differences are apparent if a date has a large error (top tile): Bchron assumes the CRA error is Normally distributed, resulting in a truncated curve with a substantial probability at present. OxCal produces a heavily skewed distribution with a low probability at present and a substantial probability at 50,000 BP that suddenly truncates to zero beyond this. ADMUR assumes the CRA error is Lognormally distributed, which is indistinguishable from a normal distribution for typical errors, but naturally prevents any probability mass occurring at the present or future when errors are large.](software_compare_3.png)
 
 ## Phased data: adjusting for ascertainment bias
 
@@ -222,7 +224,7 @@ Having established how to calculate the relative likelihood of any proposed mode
 
 We achieve this using the Continuous Piecewise Linear (CPL) model, which can be described using the (x,y) coordinates of its hinge points.
 
-![Illustration of the toy 3-CPL model PD, described using just four coordinate pairs (hinges).](model plot.svg)
+![Illustration of the toy 3-CPL model PD, described using just four coordinate pairs (hinges).](model_plot.svg)
 
 When performing a search for the best 3-CPL model coordinates (given a dataset), only five of these eight values are free parameters. The x-coordinates of the start and end (5500 BP and 7500 BP) are fixed by the choice of date range. Additionally, one of the y-coordinates must be constrained by the other parameters, since the total probability (area) must equal 1. As a result, an n-CPL model will have 2n-1 free parameters.
 
@@ -255,7 +257,7 @@ Note: The Area Breaking Algorithm is a heuristic that ensures all parameter spac
 
 ## Maximum Likelihood parameter search
 
-Any preferred search algorithm can be used. For example, the JDEoptim function from [DEoptimR](https://cran.r-project.org/web/packages/DEoptimR/index.html) uses a differential evolution optimisation algorithm that performs very nicely for this application. We recommend increasing the default NP parameter to at least 20 times the number of parameters, and repeating the search to ensure consistency:
+Any preferred search algorithm can be used. For example, the JDEoptim function from [DEoptimR](https://cran.r-project.org/package=DEoptimR) uses a differential evolution optimisation algorithm that performs very nicely for this application. We recommend increasing the default NP parameter to at least 20 times the number of parameters, and repeating the search to ensure consistency:
 
 ```{r, eval = FALSE}
 library(DEoptimR)
@@ -294,7 +296,7 @@ load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vigne
 ```
 
 The acceptance ratio (AR) and raw chain (before burn-in and thinning) can be sanity checked. Ideally we want the AR somewhere in the range 0.2 to 0.5 (this can be tuned with the 'jumps' argument), and the raw chain to resemble 'hairy caterpillars':
-```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='jpeg', warning=FALSE}
 print(chain$acceptance.ratio)
 par(mfrow=c(2,3))
 col <- 'steelblue'
@@ -303,7 +305,7 @@ for(n in 1:5){
 	}
 ```
 
-These parameters can then be converted to the hinge coordinates using the [convertPars()](../html/convertPars.html) function, and their marginal distributions plotted. Note, the MLE parameters (red lines) are unlikely to exactly match the peaks of these distributions because they are only marginals. Note also the dates of hinge 1 and 2 are fixed at 5500 and 7500: 
+These parameters can then be converted to the hinge coordinates using the [convertPars()](../html/convertPars.html) function, and their marginal distributions plotted. Note, the MLE parameters (red lines) may not exactly match the peaks of these distributions because they are only marginals. Note also the dates of hinge 1 and 2 are fixed at 5500 and 7500: 
 ```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
 hinges <- convertPars(pars=chain$res, years=5500:7500, type='CPL')
 par(mfrow=c(2,3))
@@ -324,7 +326,7 @@ hist(hinges$pdf4, border=c1,breaks=pdf.brk, main=names[6], xlab='');abline(v=CPL
 
 Some two-dimensional combinations of joint parameters may be preferred, but still these are 2D marginal representations of 5D parameters, again with MLE in red:
 
-```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='jpeg', warning=FALSE}
 require(scales)
 par( mfrow=c(1,2) , mar=c(4,4,1.5,2), cex=0.7 )
 plot(hinges$yr2, hinges$pdf2, pch=16, col=alpha(1,0.02), ylim=c(0,0.0005))
@@ -335,7 +337,7 @@ points(CPL$year[3], CPL$pdf[3], col='red', pch=16, cex=1.2)
 
 Alternatively, the joint distributions can be visualised by plotting the CPL model for each iteration of the chain, with the MLE in red:
 
-```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='jpeg', warning=FALSE}
 plot(NULL, xlim=c(7500,5500),ylim=c(0,0.0011), xlab='calBP', ylab='PD', cex=0.7)
 for(n in 1:nrow(hinges)){
 	x <- c(hinges$yr1[n], hinges$yr2[n], hinges$yr3[n], hinges$yr4[n])
@@ -412,19 +414,14 @@ legend(x=6300, y=max(CPL$pdf), cex=0.7, lwd=2, col=cols, bty='n', legend=legend)
 
 ## Goodness of fit (GOF) test
 
-it is crucial to test if the selected model is plausible, or in other words, to test if the observed data is a reasonable outcome of the model. If the observed data is highly unlikely, then the model must be rejected, even if it was the best model selected.
+it is crucial to test if the selected model is plausible, or in other words, to test if the observed data is a reasonable outcome of the model. If the observed data is highly unlikely the model must be rejected, even if it was the best model selected.
 
 Typically a GOF quantifies how unusual it would be for the observed data to be generated by the model. Of course the probability of any particular dataset being generated by any particular model is vanishingly small, so instead we estimate how probable it is for the model to produce the observed data, *or data that are more extreme*. This is a similar concept to the p-value, but instead of using a null hypothesis we use the best selected model. We can generate many simulated datasets under this model, and calculate a summary statistic for each simulation. A one-tailed test will then establish the proportion of simulations that have a poorer summary statistic (more extreme) than the observed data's summary statistic.
 
-For each dataset (simulated and observed) we generate an SPD and use a statistic that measures how divergent each SPD is from expectation, by calculating the total probability that sits outside the 95% CI, scaled by the local standard deviation. 
+For each dataset (simulated and observed) we generate an SPD and use a statistic that measures how divergent each SPD is from expectation, by calculating the proportion of the SPD that sits outside the 95% CI. 
 
 ```{r, eval = FALSE}
-summary <- SPDsimulationTest(data, 
-	calcurve=shcal20, 
-	calrange=c(5500,7500), 
-	pars=best$par, 
-	type='CPL', 
-	N=20000)
+summary <- SPDsimulationTest(data, calcurve=shcal20, calrange=c(5500,7500), pars=CPL.3$par, type='CPL')
 ```
 
 The test provides a p-value of 1.00 for the best model (3-CPL), since all of the 20,000 simulated SPDs were as or more extreme than the observed SPD, providing a sanity check that the data cannot be rejected under this model, and therefore is a plausible model:
@@ -451,43 +448,69 @@ The first problem is an extreme manifestation of the asymmetry from conventional
 This asymmetry is unintuitive and unhelpful in the context of population change, and instead we use a *relative rate* which is always calculated with respect to the larger value (e.g., the example above is reported as '20% relative growth' followed by '20% relative decline').
 
 We overcome the second problem by calculating the expected (mean average) rate across the entire linear piece. This is achieved by notionally breaking the line into $N$ equal pieces, such that the coordinates of the ends of the $i^{th}$ piece are $(x_1,y_1)$ and $(x_2,y_2)$.
-The generational rate $r$ of this $i^{th}$ piece is $$r_i=1-exp[\ln(\frac{y_1}{y_2})/\frac{x_1-x_2}{25}]$$ and the expected rate across the entire line as $N$ approaches +$\infty$ is $$\sum_{i=1}^{N}r_i/N$$
+The generational (25 yr) rate $r$ of this $i^{th}$ piece is: $$r_i=100\times exp[\ln(\frac{y_2}{y_1})/\frac{x_1-x_2}{25}]-100$$ and the expected rate across the entire line as $N$ approaches +$\infty$ is: $$\sum_{i=1}^{N}r_i/N$$
 
-For example, a population decline from n=200 to n=160 across 100 years is conventionally considered to have a generational (25 years) decline rate of $1-exp[\ln(\frac{160}{200})/\frac{100}{25}]$ = 5.426% loss per generation.
+For example, a population decline from n=200 to n=160 across 100 years is conventionally considered to have a generational decline rate of $100\times exp[\ln(\frac{160}{200})/\frac{100}{25}]-100$ = 5.426% loss per generation.
 If partitioned into just $N=2$ equal sections (n=200, n=180, n=160), we require two generational decline rates:
-$1-exp[\ln(\frac{180}{200})/\frac{50}{25}]$ = 5.132% and  $1-exp[\ln(\frac{160}{180})/\frac{50}{25}]$ = 5.719%, giving a mean of 5.425%. 
+$100\times exp[\ln(\frac{180}{200})/\frac{50}{25}]-100$ = 5.132% and  $100\times exp[\ln(\frac{160}{180})/\frac{50}{25}]-100$ = 5.719%, giving a mean of 5.425%. 
 As the number of sections $N$ approaches +$\infty$, the mean rate asymptoticly approaches 5.507%. 
 The similarity to the conventional rate of 5.426% is because the total percentage loss is small (20%), therefore an exponential curve between n=200 and n=160 is similar to a straight line.
 In contrast, a huge percentage loss of 99.5% illustrates the importance of calculating the expected growth rate, averaged across the whole line:
-An exponential curve between n=200 and n=1 across the same 100 years has a decline rate of $1-exp[\ln(\frac{1}{200})/\frac{100}{25}]$ = 73.409% loss per 25 yr generation.
+An exponential curve between n=200 and n=1 across the same 100 years has a decline rate of $100\times exp[\ln(\frac{1}{200})/\frac{100}{25}]-100$ = 73.409% loss per 25 yr generation.
 Meanwhile a linear model between n=200 and n=1 across the same 100 years has an expected decline rate of 47.835% loss per generation.
 
+The relationship between the conventional rate and relative rate is almost identical for realistic rates of change (c. -10% to +10% per generation) and can be viewed as follows:
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+N <- 1000
+x <- cbind(rep(5100,N),rep(5000,N))
+y <- cbind(seq(1,100,length.out=N),seq(100,1,length.out=N))
+conventional <- 100 * exp(log(y[,2]/y[,1])/((x[,1]-x[,2])/25))-100
+relative <- relativeRate(x,y)
+plot(conventional, relative, type='l')
+```
 
 **********
 
 # Part 3
 # SPD simulation testing
 
-Part 2 provided a framework to directly select the best model from  dataset, from CPL models, exponential, uniform, or in theory any other model. This contrasts with the SPD simulation methodology which requires the researcher to *a priori* specify a single null model, then generate many simulated datasets under this null model which are compared with the observed dataset to generate a p-value. This SPD simulation approach has several shortcomings which render it inferior to the CPL modelling approach: 
+Part 2 provided a framework to directly select the best CPL, exponential, uniform (or any other) model given a dataset. This contrasts with the SPD simulation methodology which requires the researcher to *a priori* specify a single null model, then generate many simulated datasets under this null model which are compared with the observed dataset to generate a p-value. Without the model selection framework, the SPD simulation approach alone has several inferential shortcomings: 
 
-1. Recent studies increasingly suggest population fluctuations are ubiquitous thought history, rendering the application of a null model inappropriate. In contrast this new methodology does not assume a null, and instead allows any number of models to be compared. 
-1. A low p-value merely allows us to reject (or fail to reject) the tested model, but does not provide us with a plausible alternative explanation. This leaves an inferential vacuum in which it is common for researchers to assign colourful demographic narratives to periods outside the 95% CI, but these are only interpretive and not directly supported by the test statistic. Instead the CPL framework provides a single best explanation.
-1. Fitting the null model (and therefore estimating its parameters) is commonly achieved by discretising the SPD, then incorrectly assuming these points somehow represent data points, to which the null model is fitted my minimising their residuals. In contrast, the CPL framework correctly calculates the relative likelihood of the proposed model parameters given the data, and therefore can correctly fit a model. 
+* Recent studies increasingly suggest population fluctuations are ubiquitous thought history, rendering the application of a null model inappropriate. In contrast this new model selection framework allows any number of models to be compared. 
+* A low p-value merely allows us to reject (or fail to reject) the tested model, but does not provide us with a plausible alternative explanation. This leaves an inferential vacuum in which it is common for researchers to assign colourful demographic narratives to periods outside the 95% CI, which are not directly supported by the test statistic. Instead the CPL framework provides a single best explanation.
+* Fitting the null model (and therefore estimating its parameters) is commonly achieved by discretising the SPD, then incorrectly assuming these points somehow represent data points, to which the null model is fitted my minimising their residuals. In contrast, the CPL framework correctly calculates the relative likelihood of the proposed model parameters given the data, and therefore can correctly fit a model. 
 
 Nevertheless, the p-value from the SPD simulation framework is hugely useful in providing a Goodness of Fit test for the best selected model.
-Therefore the summary generated in the previous section *'Goodness of fit test'* provides a number of other useful outputs that can be plotted, including:
+Therefore the summary generated in the section *'Goodness of fit test'* by the [SPDsimulationTest()](../html/SPDsimulationTest.html) function provides a number of other useful outputs that can be plotted, including:
 
-1. the SPD vector
-1. the model vector
-1. expected simulation vector (mean of simulations)
-1. confidence intervals (various quantiles of simulations)
-1. p-value for Goodness of Fit test
-1. summary statistic of observed dataset
-1. summary statistic of each simulated dataset
-1. Index of SPD values that are above or below the 95% CI (+1 and -1 respetively, or 0 if within the 95% CI)
-1. effective number of 14C dates within the specified date range (not the total sample size of the dataset)
-1. effective number of phases in the specified date range
+* **timeseries**: a data frame containing various CIs and: 
+  * **calBP**: a vector of calendar years BP 
+  * **expected.sim**: a vector of the expected simulation (mean average of all N simulations) 
+  * **local.sd**: a vector of the local (each year) standard deviation of all N simulations
+  * **model**: a vector of the model PDF
+  * **SPD**: a vector of the observed SPD PDF, generated from data
+  * **index**: a vector of -1,0,+1 corresponding to the SPD points that are above, within or below the 95% CI of all N simulations.
+* **pvalue**: the proportion of N simulated SPDs that have more points outside the 95%CI than the observed SPD has.
+* **observed.stat**: the summary statistic for the observed data (number of points outside the 95% CI)
+* **simulated.stat**: a vector of summary statistics (number of points outside the 95% CI), one for each simulated SPD
+* **n.dates.all**: the total number of date in the whole data set. Trivially, the number of rows in data.
+* **n.dates.effective**: the effective number of dates within the date range. Will be non-integer since a proportion of some dates will be outside the date range
+* **n.phases.all**: the total number of phases in the whole data set. 
+* **n.phases.effective**: the effective number of phases within the date range. Will be non-integer since a proportion of some phases will be outside the date range
+* **n.phases.internal**: an integer subset of n.phases.all that have more than 50% of their total probability mass within the date range.
 
-The function ???? represents these data in a single plot:
+```{r, eval = FALSE}
+summary <- SPDsimulationTest(data, calcurve=shcal20, calrange=c(5500,7500), pars=exp$par, type='exp')
+```
+
+The function [plotSimulationSummary()](../html/plotSimulationSummary.html) then represents these summary results in a single plot:
+```{r, echo = FALSE}
+load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vignette.exp.SPDsimulationTest.RData')
+```
+
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE, message=FALSE}
+plotSimulationSummary(summary, legend.y=0.0012)
+```
 
 **********
+

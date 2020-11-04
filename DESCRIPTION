@@ -1,14 +1,16 @@
 Package: ADMUR
+Version: 0.1-0
+Date: 2020-11-05
 Title: Ancient Demographic Modelling Using Radiocarbon
-Version: 1.0
-Date: 2020-07-01
-Authors@R: person("Adrian", "Timpson", email = "a.timpson@ucl.ac.uk", role = c("aut", "cre"))
+Authors@R: person("Adrian", "Timpson", email = "a.timpson@ucl.ac.uk", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-0292-8729"))
+Author: Adrian Timpson [aut, cre]
 Maintainer: Adrian Timpson <a.timpson@ucl.ac.uk>
-Description: Tools to directly model underlying dynamics of radiocarbon date datasets using a Continuous Piecewise Linear (CPL) model framework, or Summed Probability Distributions (SPD) within a simulation framework. This package accompanies 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates' by Adrian Timpson, Ramiro Barberena, Mark G. Thomas, César Méndez and Katie Manning. Philosophical Transactions of the Royal Society B 2020. https://doi.org/10.1098/rstb.2019.0723
-Imports: DEoptimR, scales
 Depends: R (>= 3.1.0)
-Suggests: Bchron, OxcAAR
+Imports: scales, zoo, stats
+Suggests: Bchron, oxcAAR, DEoptimR, knitr
+Description: Provides tools to directly model underlying population dynamics using date datasets (radiocarbon and other) with a Continuous Piecewise Linear (CPL) model framework, and model comparison framework using BIC. Package also calibrates 14C samples, generates Summed Probability Distributions (SPD), and SPD simulation analysis to generate a Goodness-of-fit test for the best selected model.
 License: GPL-3
+URL: https://github.com/UCL/ADMUR
 Encoding: UTF-8
 VignetteBuilder: knitr
 LazyData: true

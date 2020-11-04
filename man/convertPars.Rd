@@ -1,6 +1,6 @@
 \name{convertPars} 
 \alias{convertPars} 
-\title{Converts parameters to x,y coordinates (date and prob) that describe a model} 
+\title{Converts parameters to x,y coordinates (date and pdf) that describe a model} 
 \description{Converts either a vector of a single parameter set, or a matrix set of parameters to model x,y coordinates (date and pdf)}
 \usage{convertPars(pars, years, type)}
 \arguments{
@@ -27,17 +27,20 @@ Structure of the output differs depending on if converting a single vector or a 
 	}
 \examples{
 	# convert a single random 6-CPL parameter set
-	convertPars( pars=runif(11), years=5500:7500, type='CPL')
+	x <- convertPars( pars=runif(11), years=5500:7500, type='CPL')
 
 	# convert a matrix of 5 random 6-CPL parameter sets
 	pars <- matrix( runif(11*5), 5, 11 )
-	convertPars( pars=pars, years=5500:7500, type='CPL')
+	x <- convertPars( pars=pars, years=5500:7500, type='CPL')
 
 	# convert a single random exponential parameter
-	convertPars( pars=runif(1, -0.01, 0.01), years=5500:7500, type='exp')
+	x <- convertPars( pars=runif(1, -0.01, 0.01), years=5500:7500, type='exp')
 	
 	# convert a matrix of 5 random exponential parameter sets
 	pars <- matrix( runif(5, -0.01, 0.01), 5, 1 )
-	convertPars( pars=pars, years=5500:7500, type='exp')
+	x <- convertPars( pars=pars, years=5500:7500, type='exp')
+	
+	# although a uniform distribution has no parameters, a pdf can still be generated:
+	x <- convertPars(pars=NULL, years=5500:7500, type='uniform')
 
 	}

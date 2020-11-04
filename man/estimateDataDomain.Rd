@@ -31,11 +31,11 @@ data <- data.frame(
 
 estimateDataDomain(data, calcurve=intcal20)
 
-# 100 dates within the 14C range 5000 to 10000
+# 50 dates within the 14C range 5000 to 10000
 data <- data.frame(
-		age = round(runif(100,5000,10000)), 
-		sd = rep(50,100),
-		datingType = rep('14C',100)
+		age = round(runif(50,5000,10000)), 
+		sd = rep(50,50),
+		datingType = rep('14C',50)
 		)
 
 estimateDataDomain(data, calcurve=intcal20)

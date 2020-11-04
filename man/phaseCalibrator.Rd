@@ -23,7 +23,7 @@
 
 \details{
 
-Generates an SPD for each phase using \code{\link[=summedCalibrator]{summedCalibrator}} with default the normalisation = 'standard'. Returns a data frame of probabilities, with phase names assigned to column names, and calendar years assigned to row names. 
+Generates an SPD for each phase using \code{\link[=summedCalibrator]{summedCalibrator}} with the default normalisation = 'standard'. Returns a data frame of probabilities, with phase names assigned to column names, and calendar years assigned to row names. 
 
 As a minimum requirement the data must include either 'phase' or 'site'. If 'phase' is unavailable the function will automatically use 'site' to bin the dates into site-phases. This binning is achieved with a crude algorithm that assigns a date to a bin if it is within 200 years of any other date in that bin, based on the uncalibrated C14 mean date (non-14C dates are also mapped to 14C time for the purpose of this binning). The need to bin dates into phases is an important step in modelling population dynamics to adjust for the data ascertainment bias of some archaeological finds having more dates by virtue of a larger research interest/budget. This binning algorithm provides a simple and useful solution to handling large datasets that have not been phased, but is not an alternative to an oxcal phase model if the objective is to directly estimate phase boundary dates at a specific site.
 

@@ -29,7 +29,7 @@ Wrapper function to generate an overall SPD for phased dates. Internally this fi
 Optionally 'datingType' can be provided in the data. Only '14C' will be calibrated in the usual way, anything else is assumed to be provided in calendar time. If 'datingType' is not provided, all dates are assumed to be 14C.
 	}
 \examples{
-	data <- subset(arid, site \%in\% c('Carrizal','Pacopampa'))
+	data <- subset(SAAD, site \%in\% c('Carrizal','Pacopampa'))
 	SPD <- summedPhaseCalibrator(data, shcal20, c(2000,6000))
 	plotPD(SPD)
 	}

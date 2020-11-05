@@ -52,6 +52,6 @@ data <- data.frame(age = age, sd = 50, phase = 1:N, datingType = '14C')
 	PD <- phaseCalibrator(data, CalArray, remove.external = TRUE)
 
 	# Run MCMC for a 3-CPL model (5 parameters)
-	chain <- mcmc(PDarray = PD, startPars = c(0.5,0.5,0.5,0.5,0.5), type='CPL', jumps = 0.02)	
+	chain <- mcmc(PDarray = PD, startPars = rep(0.5,5), type='CPL', jumps = 0.02)	
 	}
 }

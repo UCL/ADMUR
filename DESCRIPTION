@@ -3,11 +3,10 @@ Version: 1.0.0
 Date: 2020-11-05
 Title: Ancient Demographic Modelling Using Radiocarbon
 Authors@R: person("Adrian", "Timpson", email = "a.timpson@ucl.ac.uk", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-0292-8729"))
-Author: Adrian Timpson [aut, cre] (<https://orcid.org/0000-0003-0292-8729>)
 Maintainer: Adrian Timpson <a.timpson@ucl.ac.uk>
 Depends: R (>= 3.2.0)
 Imports: scales, stats, zoo
-Suggests: Bchron, DEoptimR, knitr, rmarkdown, oxcAAR
+Suggests: DEoptimR, knitr, rmarkdown
 Description: Provides tools to directly model underlying population dynamics using date datasets (radiocarbon and other) with a Continuous Piecewise Linear (CPL) model framework, and model comparison framework using BIC. Package also calibrates 14C samples, generates Summed Probability Distributions (SPD), and performs SPD simulation analysis to generate a Goodness-of-fit test for the best selected model.
 License: GPL-3
 URL: https://github.com/UCL/ADMUR

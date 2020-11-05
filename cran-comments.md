@@ -1,6 +1,6 @@
 ## Test environments
 * local Windows 10, R 4.0.2
-* local OSX 10.9.5, R 3.3.3
+* Travis CI
 * win-builder (release)
 
 ## R CMD check results

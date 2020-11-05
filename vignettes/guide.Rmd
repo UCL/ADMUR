@@ -271,7 +271,7 @@ best <- JDEoptim(lower = rep(0,5),
 ```
 
 ```{r, echo = FALSE}
-load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vignette.3CPL.JDEoptim.best.RData')
+load('vignette.3CPL.JDEoptim.best.RData')
 ```
 
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
@@ -292,7 +292,7 @@ chain <- mcmc(PDarray=PD, startPars=best$par, type='CPL', N=100000, burn=2000, t
 ```
 
 ```{r, echo = FALSE}
-load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vignette.3CPL.MCMC.RData')
+load('vignette.3CPL.MCMC.RData')
 ```
 
 The acceptance ratio (AR) and raw chain (before burn-in and thinning) can be sanity checked. Ideally we want the AR somewhere in the range 0.2 to 0.5 (this can be tuned with the 'jumps' argument), and the raw chain to resemble 'hairy caterpillars':
@@ -368,7 +368,7 @@ uniform <- objectiveFunction(NULL, PD, type='uniform')
 ```
 
 ```{r, echo = FALSE}
-load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vignette.model.comparison.RData')
+load('vignette.model.comparison.RData')
 ```
 
 The objective function returns the negative log-likelihood since the search algorithm seeks to minimise the objective function. It is therefore trivial to extract the log-likelihoods, and calculate the BIC scores using the formula $BIC=k\ln(n)-2L$ where $k$ is the number of parameters, $n$ is the effective sample size (i.e. the number of phases = 303), and $L$ is the maximum log-likelihood.
@@ -427,7 +427,7 @@ summary <- SPDsimulationTest(data, calcurve=shcal20, calrange=c(5500,7500), pars
 The test provides a p-value of 1.00 for the best model (3-CPL), since all of the 20,000 simulated SPDs were as or more extreme than the observed SPD, providing a sanity check that the data cannot be rejected under this model, and therefore is a plausible model:
 
 ```{r, echo = FALSE}
-load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vignette.3CPL.SPDsimulationTest.RData')
+load('vignette.3CPL.SPDsimulationTest.RData')
 ```
 
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
@@ -505,7 +505,7 @@ summary <- SPDsimulationTest(data, calcurve=shcal20, calrange=c(5500,7500), pars
 
 The function [plotSimulationSummary()](../html/plotSimulationSummary.html) then represents these summary results in a single plot:
 ```{r, echo = FALSE}
-load('C:/Users/adrian/Documents/FILES/analysis/spanning/ramiro/2019/github/vignette.exp.SPDsimulationTest.RData')
+load('vignette.exp.SPDsimulationTest.RData')
 ```
 
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE, message=FALSE}

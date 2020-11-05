@@ -8,12 +8,12 @@ Please contact a.timpson@ucl.ac.uk  in the first instance to make suggestions, r
 ## Installation
 
 ``` r
-# ADMUR can be installed directly from GitHub, after installing and loading 'devtools' package on the CRAN:
+# Installing and loading 'devtools' give you the ability to install direct from GitHub:
 install.packages('devtools')
 library(devtools)
-install_github('UCL/ADMUR')
 
-# The ADMUR package can then be locally loaded:
+# The ADMUR package can then be installed and loaded:
+install_github('UCL/ADMUR')
 library(ADMUR)
 ```
 

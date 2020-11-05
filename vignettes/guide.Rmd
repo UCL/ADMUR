@@ -453,7 +453,7 @@ The generational (25 yr) rate $r$ of this $i^{th}$ piece is: $$r_i=100\times exp
 For example, a population decline from n=200 to n=160 across 100 years is conventionally considered to have a generational decline rate of $100\times exp[\ln(\frac{160}{200})/\frac{100}{25}]-100$ = 5.426% loss per generation.
 If partitioned into just $N=2$ equal sections (n=200, n=180, n=160), we require two generational decline rates:
 $100\times exp[\ln(\frac{180}{200})/\frac{50}{25}]-100$ = 5.132% and  $100\times exp[\ln(\frac{160}{180})/\frac{50}{25}]-100$ = 5.719%, giving a mean of 5.425%. 
-As the number of sections $N$ approaches +$\infty$, the mean rate asymptoticly approaches 5.507%. 
+As the number of sections $N$ approaches +$\infty$, the mean rate asymptotically approaches 5.507%. 
 The similarity to the conventional rate of 5.426% is because the total percentage loss is small (20%), therefore an exponential curve between n=200 and n=160 is similar to a straight line.
 In contrast, a huge percentage loss of 99.5% illustrates the importance of calculating the expected growth rate, averaged across the whole line:
 An exponential curve between n=200 and n=1 across the same 100 years has a decline rate of $100\times exp[\ln(\frac{1}{200})/\frac{100}{25}]-100$ = 73.409% loss per 25 yr generation.

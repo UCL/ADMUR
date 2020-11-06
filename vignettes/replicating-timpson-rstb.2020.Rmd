@@ -24,6 +24,8 @@ Each section of this vignette provides stand alone R code that is not reliant on
 **********
 # Figure 1
 
+## Simulating datasets from a 3-CPL toy.
+
 Generate key objects:
 
 ```{r, eval = FALSE}
@@ -150,6 +152,8 @@ dev.off()
 **********
 
 # Figure 2
+
+## Model selection with small simulated data.
 
 Generate key objects:
 
@@ -397,6 +401,8 @@ dev.off()
 
 # Figure 4
 
+## SPD simulation analysis of SAAD data
+
 Generate key objects:
 
 ```{r, eval = FALSE}
@@ -431,6 +437,8 @@ dev.off()
 
 
 # Figure 5
+
+## Model selection of SAAD data.
 
 Generate key objects:
 
@@ -521,6 +529,8 @@ dev.off()
 **********
 
 # Figure 6, Figure 7, Table 2
+
+## Parameter estimates and CI of SAAD data.
 
 Generate key objects:
 

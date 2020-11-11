@@ -2,7 +2,7 @@
 \alias{summedCalibrator} 
 \title{Generates a summed probability distribution (SPD) of calibrated dates} 
 \description{Generates a Summed Probability Distribution (SPD). Handles both C14 and other date types e.g., thermoluminescence.}
-\usage{summedCalibrator(data, CalArray, normalise = 'standard')}
+\usage{summedCalibrator(data, CalArray, normalise = 'standard', checks = TRUE)}
 \arguments{
   \item{data}{
 	A dataframe of 14C dates. Requires 'age' and 'sd', and at least one of 'site' and 'phase'. Optional 'datingType' to include '14C' and anything else.
@@ -12,6 +12,9 @@
 	}
   \item{normalise}{
 	One of 'none', 'standard', or 'full'. 
+	}
+  \item{checks}{
+	Logical, performs various data checks if TRUE. Can be useful to set FALSE to avoid repetitive warnings if run in a loop. 
 	}
 }
 \value{

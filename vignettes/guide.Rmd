@@ -297,12 +297,14 @@ load('vignette.3CPL.MCMC.RData')
 
 The acceptance ratio (AR) and raw chain (before burn-in and thinning) can be sanity checked. Ideally we want the AR somewhere in the range 0.2 to 0.5 (this can be tuned with the 'jumps' argument), and the raw chain to resemble 'hairy caterpillars':
 ```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='jpeg', warning=FALSE}
+oldpar <- par(no.readonly = TRUE) 
 print(chain$acceptance.ratio)
 par(mfrow=c(2,3))
 col <- 'steelblue'
 for(n in 1:5){
 	plot(chain$all.pars[,n], type='l', ylim=c(0,1), col=col, xlab='', ylab='', main=paste('par',n))
 	}
+par(oldpar)
 ```
 
 These parameters can then be converted to the hinge coordinates using the [convertPars()](../html/convertPars.html) function, and their marginal distributions plotted. Note, the MLE parameters (red lines) may not exactly match the peaks of these distributions because they are only marginals. Note also the dates of hinge 1 and 2 are fixed at 5500 and 7500: 
@@ -321,6 +323,7 @@ hist(hinges$pdf1, border=c1,breaks=pdf.brk, main=names[3], xlab='');abline(v=CPL
 hist(hinges$pdf2, border=c1,breaks=pdf.brk, main=names[4], xlab='');abline(v=CPL$pdf[2],col=c2,lwd=lwd)
 hist(hinges$pdf3, border=c1,breaks=pdf.brk, main=names[5], xlab='');abline(v=CPL$pdf[3],col=c2,lwd=lwd)
 hist(hinges$pdf4, border=c1,breaks=pdf.brk, main=names[6], xlab='');abline(v=CPL$pdf[4],col=c2,lwd=lwd)
+par(oldpar)
 ```
 
 
@@ -333,6 +336,7 @@ plot(hinges$yr2, hinges$pdf2, pch=16, col=alpha(1,0.02), ylim=c(0,0.0005))
 points(CPL$year[2], CPL$pdf[2], col='red', pch=16, cex=1.2)
 plot(hinges$yr3, hinges$pdf3, pch=16, col=alpha(1,0.02), ylim=c(0,0.0015))
 points(CPL$year[3], CPL$pdf[3], col='red', pch=16, cex=1.2) 
+par(oldpar)
 ```
 
 Alternatively, the joint distributions can be visualised by plotting the CPL model for each iteration of the chain, with the MLE in red:

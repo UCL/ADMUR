@@ -19,7 +19,7 @@ This vignette provides the R code used to generate all results, plots and tables
 
 The only exception to this is the exclusion of R code for figure 3, which is an adaptation of [Fig 7 from Peel et al 2007](https://doi.org/10.5194/hess-11-1633-2007) and is therefore not novel.
 
-Each section of this vignette provides stand alone R code that is not reliant on objects created earlier in the vignette. As such, there is some repetition between sections. Setting random seeds is not necessary, but can be used to ensure random components are identical to those used in the publication. The generation and calibration of each random dataset takes seconds to complete. Simulation tests and searches performed by JDEoptim or the generation of MCMC chains then requires several hours to complete. Therefore the code for each section is separated into two or more blocks. The first block always includes all slow components which are saved by the last line of code. This provides a firewall to allow plots to be quickly generated on a later occasion using the remaining block(s), which runs in seconds. Sometimes there is an intermediate block which takes a few seconds to perform some pre-plot processing. 
+Each section of this vignette provides stand alone R code that is not reliant on objects created earlier in the vignette. As such, there is some repetition between sections. Setting random seeds is not necessary, but can be used to ensure random components are identical to those used in the publication. The generation and calibration of each random dataset takes seconds to complete. Simulation tests and searches performed by JDEoptimR or the generation of MCMC chains then requires several hours to complete. Therefore the code for each section is separated into two or more blocks. The first block always includes all slow components which are saved by the last line of code. This provides a firewall to allow plots to be quickly generated on a later occasion using the remaining block(s), which runs in seconds. Sometimes there is an intermediate block which takes a few seconds to perform some pre-plot processing. 
 
 **********
 # Figure 1
@@ -94,7 +94,7 @@ Generate plot:
 ```{r, eval = FALSE}
 library(ADMUR)
 load('results.RData')
-
+oldpar <- par(no.readonly = TRUE) 	
 svg('Fig1.svg',height=4,width=10)
 par(mar=c(2,4,0.1,2))
 plot(NULL, xlim=c(7500,5500), ylim=c(0,0.0011), xlab='', ylab='', xaxs='i',cex.axis=0.7, bty='n',las=1)
@@ -145,6 +145,7 @@ lines(mod.5$year,mod.5$pdf,col=6,lwd=lwd2)
 lines(toy$year, toy$pdf, lwd=lwd3)
 
 dev.off()
+par(oldpar)
 ```
 
 ![Low resolution png of Figure 1](Fig1.png)
@@ -331,6 +332,8 @@ print(BIC)
 Generate plot:
 
 ```{r, eval = FALSE}
+oldpar <- par(no.readonly = TRUE) 	
+
 # Fig 2 plot
 svg('Fig2.svg',height=6,width=13)
 layout(mat=matrix(1:14, 2, 7, byrow = F),widths=c(0.3,rep(1,6)), heights=c(1,1.5),respect=T)
@@ -393,6 +396,7 @@ for(n in 1:6){
 	lines(model$year, sqrt(model$pdf), lwd=lwd, col=red)
 	}
 dev.off()
+par(oldpar)
 ```
 
 ![Low resolution png of Figure 2](Fig2.png)
@@ -423,11 +427,13 @@ Generate plot:
 ```{r, eval = FALSE}
 library(ADMUR)
 load('results.RData')
+oldpar <- par(no.readonly = TRUE) 	
 svg('Fig4.svg',height=4,width=10)
 par(mar=c(2,4,0.1,0.1))
 plotSimulationSummary(summary, legend.x=11500,legend.y=0.0003)
 axis(side=1, at=2500,labels='calBP',tick=F)
 dev.off()
+par(oldpar)
 ```
 
 
@@ -498,6 +504,7 @@ best <- convertPars(pars=CPL3$par, years=c(2500,14000), type='CPL')
 Generate plot:
 
 ```{r, eval = FALSE}
+oldpar <- par(no.readonly = TRUE) 	
 svg('Fig5.svg',height=4,width=10)
 par(mfrow=c(1,2))
 
@@ -522,6 +529,7 @@ lines(best$year,best$pdf,col=red,lwd=3)
 
 legend(x=14000,y=0.0003,lwd=c(5,3),col=c(blue,red),bty='n',legend=c('SPD','3-CPL'))
 dev.off()
+par(oldpar)
 ```
 
 ![Low resolution png of Figure 5](Fig5.png)
@@ -570,7 +578,6 @@ hinges <- convertPars(chain$res, years=c(2500,14000), type='CPL')
 chain$acceptance.ratio
 
 # Eyeball the entire chain, before burn-in and thinning
-par(mfrow=c(3,2))
 for(n in 1:5)plot(chain$all.pars[,n], type='l', ylim=c(0,1))
 
 # Generate CI for Fig 7
@@ -590,6 +597,7 @@ for(y in 1:Y)CI[y,] <- quantile(pdf.matrix[,y],prob=c(0.025,0.125,0.25,0.75,0.87
 Generate Figure 6:
 
 ```{r, eval = FALSE}
+oldpar <- par(no.readonly = TRUE) 	
 svg('Fig6.svg',height=5,width=11)
 par(mfrow=c(2,3))
 lwd <- 3
@@ -613,6 +621,7 @@ abline(v = ML$pdf[2], col=red, lwd=lwd)
 hist(hinges$pdf1, breaks=breaks.pdf, col=grey, border=NA, main=names[6], xlab=xlab.pdf)
 abline(v = ML$pdf[1], col=red, lwd=lwd)
 dev.off()
+par(oldpar)
 ```
 
 ![Low resolution png of Figure 6](Fig6.png)
@@ -620,6 +629,7 @@ dev.off()
 Generate Figure 7:
 
 ```{r, eval = FALSE}
+oldpar <- par(no.readonly = TRUE) 	
 svg('Fig7.svg',height=5,width=12)
 grey1 <- 'grey90'
 grey2 <- 'grey70'
@@ -656,6 +666,7 @@ legend(legend=c('Joint posterior parameters','50% CI of model PDF','75% CI of mo
 		fill = c(NA,grey3,grey2,grey1),
 		x.intersp = c(1.5,1,1,1))
 dev.off()
+par(oldpar)
 ```
 
 ![Low resolution png of Figure 7](Fig7.png)

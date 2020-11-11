@@ -46,7 +46,7 @@ cal <- simulateCalendarDates(toy, N)
 age <- uncalibrateCalendarDates(cal, shcal20)
 data <- data.frame(age = age, sd = 50, phase = 1:N, datingType = '14C')
 
-	\dontrun{
+	\donttest{
 	# Calibrate each phase, taking care to restrict to the modelled date range
 	CalArray <- makeCalArray(shcal20, calrange = range(toy$year), inc = 5)
 	PD <- phaseCalibrator(data, CalArray, remove.external = TRUE)

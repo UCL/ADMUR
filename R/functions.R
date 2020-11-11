@@ -14,7 +14,7 @@ checkData <- function(data){
 	x <- 'good'
 	if(class(data)!='data.frame'){warning('data must be a data.frame');return('bad')}
 	if(sum(names(data)%in%c('age','sd'))!=2){warning("data must include 'age' and 'sd'");return('bad')}
-	if(!is.numeric(data$age)){ warning('age must be numeric');return('bad')}	
+	if(!is.numeric(data$age)){warning('age must be numeric');return('bad')}	
 	if(!is.numeric(data$sd)){warning('sd must be numeric');return('bad')}		
 	if(min(data$age)<0){warning('some ages are negative');return('bad')}			
 	if(min(data$sd)<1){warning('some sd are impossibly small');return('bad')}	
@@ -111,14 +111,12 @@ plotCalArray <- function(CalArray){
 	P <- CalArray$probs
 	c14 <- as.numeric(row.names(P))
 	cal <- as.numeric(colnames(P))
-	par(mar=c(5,4,1.5,1.5))
 	colfunc <- colorRampPalette(c('white','steelblue'))
 	image(cal,c14,t(P)^0.1,xlab='Cal BP',ylab='14C',xlim=rev(range(cal)),col = colfunc(20),las=1, cex.axis=0.7, cex.lab=0.7)
 	}
 #--------------------------------------------------------------------------------------------	
 plotPD <- function(x){
 	years <- as.numeric(row.names(x))
-	par(mar=c(5,4,1.5,1.5))
 	plot(NULL, type = "n", bty = "n", xlim = rev(range(years)), ylim=c(0,max(x)*1.2),las = 1, cex.axis = 0.7, cex.lab = 0.7, ylab='PD',xlab='calBP')
 	for(n in 1:ncol(x)){
 		prob <- x[,n]
@@ -250,17 +248,12 @@ internalCalibrator <- function(data, CalArray){
 
 return(result)}
 #--------------------------------------------------------------------------------------------
-summedCalibrator <- function(data, CalArray, normalise = 'standard'){
+summedCalibrator <- function(data, CalArray, normalise = 'standard', checks = TRUE){
 
 	# performs a few checks
 	# separates data into C14 for calibration using internalCalibrator(), and nonC14 dates
 	# combines PDs to produce an SPD
 	# reduces the SPD to the orginal required range and applies normalisation if required
-
-	# check arguments
-	if(checkData(data)=='bad')stop()
-	if(attr(CalArray, 'creator')!= 'makeCalArray') stop('CalArray was not made by makeCalArray()' )
-	if(!normalise %in% c('none','standard','full')) stop('normalise must be none, standard or full')
 
 	if(nrow(data)==0){
 		result <- data.frame(rep(0,length(CalArray$cal)))
@@ -269,7 +262,13 @@ summedCalibrator <- function(data, CalArray, normalise = 'standard'){
 		return(result)
 		}
 
-	data <- checkDatingType(data)
+	# check arguments
+	if(checks){
+		if(checkData(data)=='bad')stop()
+		if(attr(CalArray, 'creator')!= 'makeCalArray') stop('CalArray was not made by makeCalArray()' )
+		if(!normalise %in% c('none','standard','full')) stop('normalise must be none, standard or full')
+		data <- checkDatingType(data)
+		}
 
 	# C14
 	C14.data <- subset(data, datingType=='14C')
@@ -334,10 +333,8 @@ phaseCalibrator <- function(data, CalArray, width = 200, remove.external = FALSE
 
 	for(p in 1:length(phases)){
 		phase.data <- subset(data,phase==phases[p])
-		if(p==2)options(warn=(-1)) # only need to report for first iteration
-		phase.SPDs[,p] <- summedCalibrator(phase.data, CalArray, normalise = 'standard')[,1]
+		phase.SPDs[,p] <- summedCalibrator(phase.data, CalArray, normalise = 'standard', checks = FALSE)[,1]
 		}
-	options(warn=0) # back to default
 
 	phase.SPDs <- as.data.frame(phase.SPDs); names(phase.SPDs) <- phases; row.names(phase.SPDs) <- CalArray$cal
 

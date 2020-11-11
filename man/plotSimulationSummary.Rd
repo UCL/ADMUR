@@ -21,7 +21,7 @@
 	Default NULL for legend.x and legend.y will automatically add a legend, which may not be ideally placed to avoid overlapping other components of the plot. To remove the legend, simply place well outside the boundary.
 	}
 \examples{
-	\dontrun{
+	\donttest{
 	summary <- SPDsimulationTest(data=SAAD, 
 		calcurve=shcal20, 
 		calrange=c(2500,14000), 

@@ -1,6 +1,8 @@
 # 2020-11-11
 
-## This is a resubmission. In this version I have:
+## This is a resubmission. 
+
+In this version I have:
 
 * changed all instances of \dontrun{} to \donttest{}, as these take > 5 secs. 
 
@@ -12,6 +14,16 @@
 
 Many thanks to Gregor Seyer for hugely helpful comments.
 
+### R CMD check results
+There were no ERRORs or WARNINGs. 
+
+There was 1 NOTE:
+
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: 'Adrian Timpson <a.timpson@ucl.ac.uk>'
+
+
+# 2020-11-05
 ## This is a new submission
 
 ### Test environments

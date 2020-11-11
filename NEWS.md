@@ -2,7 +2,8 @@
 
 ## 20-11-11 
 
-Fixes following the fix and resubmit request from the CRAN (Gregor Seyer):
+Repairs following the fix and resubmit request from the CRAN. Many thanks to Gregor Seyer for hugely helpful comments.
+
 
 * All instances of \dontrun{} in the manual examples changed to \donttest{}, as these take > 5 secs. 
 
@@ -12,7 +13,6 @@ Fixes following the fix and resubmit request from the CRAN (Gregor Seyer):
 
 * All instances of par() changes in vignettes are reset to user's par().
 
-Many thanks to Gregor Seyer for hugely helpful comments.
 
 ## 20-11-06 
 Initial submission to CRAN

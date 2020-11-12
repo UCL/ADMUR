@@ -498,7 +498,7 @@ convertPars <- function(pars, years, type){
 	# Important: the model must be returned as a PDF. I.e, the total area must sum to 1.
 
 	# sanity checks
-	if(!type%in%c('CPL','exp','uniform'))stop('unknown model type. Only CPL exp or uniform currently handled')
+	if(!type%in%c('CPL','exp','uniform','norm','lognorm'))stop('unknown model type. Only CPL, exp, uniform, norm, lognorm currently handled')
 	if('data.frame'%in%class(pars))pars <- as.matrix(pars)
 	if('integer'%in%class(years))years <- as.numeric(years)
 	if(!'numeric'%in%class(years))stop('years must be a numeric vector')
@@ -530,25 +530,44 @@ convertPars <- function(pars, years, type){
 		}
 
 	if(type=='exp'){
-
 		inc <- years[2]-years[1]
-		
-		# if a single parameter, generates a two-column data frame
+		# if a single parameter set, generates a two-column data frame
 		if('numeric'%in%class(pars)){
 			if(length(pars)!=1)stop('An exponential model must have exactly one parameter')
 			approx.pdf <- pars*exp(pars*years - pars*max(years)) # an intermediate fiddle to avoid computing nutty numbers beyond floating point limits
 			res <- data.frame(year = years, pdf = approx.pdf/(sum(approx.pdf)*inc))
 			}
-
 		# if matrix of parameters, each row is a converted parameter set
 		if(!'numeric'%in%class(pars)){
-			if(ncol(pars)!=1)stop('A CPL model must have an odd number of parameters')
+			if(ncol(pars)!=1)stop('An exponential model must have exactly one parameter')
 			N <- nrow(pars)
 			C <- length(years)
 			res <- as.data.frame(matrix(,N,C))
 			names(res) <- years
 			for(n in 1:N){
 				approx.pdf <- pars[n,]*exp(pars[n,]*years - pars[n,]*max(years))
+				res[n,] <- approx.pdf/(sum(approx.pdf)*inc)
+				}
+			}
+		}
+
+	if(type=='norm'){
+		inc <- years[2]-years[1]
+		# if a single parameter set, generates a two-column data frame
+		if('numeric'%in%class(pars)){
+			if(length(pars)!=2)stop('An norm model must have exactly two parameters')
+			approx.pdf <- dunif(years, pars[1], pars[2])
+			res < data.frame(year = years, pdf = approx.pdf/(sum(approx.pdf)*inc))		
+			}
+		# if matrix of parameters, each row is a converted parameter set
+		if(!'numeric'%in%class(pars)){
+			if(ncol(pars)!=2)stop('An norm model must have exactly two parameters')
+			N <- nrow(pars)
+			C <- length(years)
+			res <- as.data.frame(matrix(,N,C))
+			names(res) <- years
+			for(n in 1:N){
+				approx.pdf <- dunif(years, pars[n,1], pars[n,2])
 				res[n,] <- approx.pdf/(sum(approx.pdf)*inc)
 				}
 			}
@@ -582,29 +601,34 @@ return(d)}
 objectiveFunction <- function(pars, PDarray, type){
 
 	# sanity check a few arguments
-	if(!type%in%c('CPL','exp','uniform'))stop('unknown model type. Only CPL, exp or uniform currently handled')
+	if(!type%in%c('CPL','exp','uniform','norm','lognorm'))stop('unknown model type. Only CPL, exp, uniform, norm, lognorm currently handled')
 	if(type=='exponential' & length(pars)!=1)stop('exponential model requires just one rate parameter')
 	if(type=='uniform' & !is.null(pars))stop('A uniform model must have NULL parameters')
+	if(type=='norm' & !is.null(pars))stop('A norm model must have two parameters, mean and sd')
 	if(!is.data.frame(PDarray))stop('PDarray must be a data frame')
 
 	years <- as.numeric(row.names(PDarray))
 	inc <- years[2]-years[1]
 
 	if(type=='CPL'){
-		pdf <- convertPars(pars,years,type='CPL')
-		model.pdf <- approx(x=pdf$year,y=pdf$pdf,xout=years,ties='ordered',rule=2)$y 
+		pdf <- convertPars(pars,years,type=type)
+		model.pdf <- approx(x=pdf$year,y=pdf$pdf,xout=years,ties='ordered',rule=2)$y # why is this required?
 		}
 
 	if(type=='exp'){
-		model.pdf <- convertPars(pars,years,type='exp')$pdf
+		model.pdf <- convertPars(pars,years,type=type)$pdf
 		}
 
 	if(type=='uniform'){
-		model.pdf <- dunif(years, min(years), max(years))
+		model.pdf <- convertPars(pars,years,type=type)$pdf
+		}
+
+	if(type=='norm'){
+		model.pdf <- convertPars(pars,years,type=type)$pdf
 		}
  
 	# sometimes a tiny adjustment is required, due to the discretisation
-	model.pdf <- model.pdf/(sum(model.pdf)*inc)
+	model.pdf <- model.pdf/(sum(model.pdf)*inc) # not sure this is required if everything is now run through convertPars
 
 	# calculate loglik
 	model <- data.frame(pdf=model.pdf, year=years)
@@ -615,13 +639,23 @@ return(-loglik)}
 proposalFunction <- function(pars, jumps, type){
 	moves <- rnorm(length(pars),0,jumps)
 	new.pars <- pars + moves
-	new.pars[new.pars>0.999999] <- 0.999999
-	if(type=='CPL')new.pars[new.pars<0] <- 0
+
+	# bunch of constraints for impossible parameters (usually floating point bullshit)
+	if(type=='CPL'){
+		new.pars[new.pars<0] <- 0
+		new.pars[new.pars>0.999999] <- 0.999999
+		}
+	if(type=='exp'){
+		if(new.pars==0)new.pars <- runif(1,-1e-20,1e-20)
+		}
+	if(type=='norm'){
+		new.pars[new.pars<=0] <- 1e-20
+		}
 return(new.pars)}
 #--------------------------------------------------------------------------------------------
 mcmc <- function(PDarray, startPars, type, N = 30000, burn = 2000, thin = 5, jumps = 0.02){ 
 
-	if(!type%in%c('CPL','exp'))stop('unknown model type. Only CPL or exp')
+	if(!type%in%c('CPL','exp','norm'))stop('unknown model type. Only CPL, exp, norm')
 
 	# starting parameters
 	pars <- startPars

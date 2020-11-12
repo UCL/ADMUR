@@ -1,5 +1,11 @@
 # ADMUR build history
 
+## 20-11-12
+
+### Version: 1.0.0.9002
+
+Added a Gaussian model to existing options of n-CPL, exponential, uniform.
+
 ## 20-11-11 
 
 ### Version: 1.0.0.9001

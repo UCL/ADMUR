@@ -1,9 +1,10 @@
-# ADMUR 1.0.0
+# ADMUR build history
 
 ## 20-11-11 
 
-Repairs following the fix and resubmit request from the CRAN. Many thanks to Gregor Seyer for hugely helpful comments.
+### Version: 1.0.0.9001
 
+Resubmission to CRAN as version 1.0.0 following the fix and resubmit request. Many thanks to Gregor Seyer for hugely helpful comments.
 
 * All instances of \dontrun{} in the manual examples changed to \donttest{}, as these take > 5 secs. 
 
@@ -15,6 +16,9 @@ Repairs following the fix and resubmit request from the CRAN. Many thanks to Gre
 
 
 ## 20-11-06 
-Initial submission to CRAN
+
+### Version: 1.0.0.9000
+
+Initial submission to CRAN as version 1.0.0
 
 

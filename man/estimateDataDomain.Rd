@@ -32,6 +32,7 @@ data <- data.frame(
 estimateDataDomain(data, calcurve=intcal20)
 
 # 50 dates within the 14C range 5000 to 10000
+\donttest{
 data <- data.frame(
 		age = round(runif(50,5000,10000)), 
 		sd = rep(50,50),
@@ -39,4 +40,5 @@ data <- data.frame(
 		)
 
 estimateDataDomain(data, calcurve=intcal20)
-	}
+}
+}

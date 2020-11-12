@@ -46,12 +46,12 @@ cal <- simulateCalendarDates(toy, N)
 age <- uncalibrateCalendarDates(cal, shcal20)
 data <- data.frame(age = age, sd = 50, phase = 1:N, datingType = '14C')
 
-	\donttest{
-	# Calibrate each phase, taking care to restrict to the modelled date range
-	CalArray <- makeCalArray(shcal20, calrange = range(toy$year), inc = 5)
-	PD <- phaseCalibrator(data, CalArray, remove.external = TRUE)
+\donttest{
+# Calibrate each phase, taking care to restrict to the modelled date range
+CalArray <- makeCalArray(shcal20, calrange = range(toy$year), inc = 5)
+PD <- phaseCalibrator(data, CalArray, remove.external = TRUE)
 
-	# Run MCMC for a 3-CPL model (5 parameters)
-	chain <- mcmc(PDarray = PD, startPars = rep(0.5,5), type='CPL', jumps = 0.02)	
-	}
+# Run MCMC for a 3-CPL model (5 parameters)
+chain <- mcmc(PDarray = PD, startPars = rep(0.5,5), type='CPL', jumps = 0.02)	
+}
 }

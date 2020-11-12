@@ -702,7 +702,7 @@ return(dates)}
 estimateDataDomain <- function(data, calcurve){
 
 	thresholds <- c(60000,20000,4000)
-	incs <- c(200,50,10)
+	incs <- c(100,20,1)
 	min.year <- 0
 	max.year <- 60000
 	for(n in 1:length(incs)){

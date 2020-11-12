@@ -39,8 +39,14 @@ Structure of the output differs depending on if converting a single vector or a 
 	# convert a matrix of 5 random exponential parameter sets
 	pars <- matrix( runif(5, -0.01, 0.01), 5, 1 )
 	x <- convertPars( pars=pars, years=5500:7500, type='exp')
+
+	# convert a single random Gaussian parameter pair (mean, sd)
+	x <- convertPars( pars=runif(2)*10000, years=5500:7500, type='norm')
+
+	# convert a matrix of 5 random Gaussian parameter pairs (mean, sd)
+	pars <- matrix( runif(10)*10000, 5, 2 )
+	x <- convertPars( pars=pars, years=5500:7500, type='norm')
 	
 	# although a uniform distribution has no parameters, a pdf can still be generated:
 	x <- convertPars(pars=NULL, years=5500:7500, type='uniform')
-
 	}

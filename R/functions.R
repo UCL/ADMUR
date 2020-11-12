@@ -410,8 +410,7 @@ loglik <- function(PD, model){
 		x <- as.numeric(model$year)
 		y <- model$pdf
 		y.out <- approx(x=x, y=y, xout=years)$y
-		model <- data.frame(pdf = y.out, year = years)
-		model$pdf <- model$pdf/(sum(model$pdf)*inc)
+		model <- data.frame(pdf=y.out, year=years)
 		}
 
 	# ensure model PD is provided as a discretised PDF
@@ -556,18 +555,18 @@ convertPars <- function(pars, years, type){
 		# if a single parameter set, generates a two-column data frame
 		if('numeric'%in%class(pars)){
 			if(length(pars)!=2)stop('An norm model must have exactly two parameters')
-			approx.pdf <- dunif(years, pars[1], pars[2])
-			res < data.frame(year = years, pdf = approx.pdf/(sum(approx.pdf)*inc))		
+			approx.pdf <- dnorm(years, pars[1], pars[2])
+			res <- data.frame(year = years, pdf = approx.pdf/(sum(approx.pdf)*inc))		
 			}
 		# if matrix of parameters, each row is a converted parameter set
 		if(!'numeric'%in%class(pars)){
-			if(ncol(pars)!=2)stop('An norm model must have exactly two parameters')
+			if(ncol(pars)!=2)stop('A Gaussian model must have exactly two parameters, mean and sd')
 			N <- nrow(pars)
 			C <- length(years)
 			res <- as.data.frame(matrix(,N,C))
 			names(res) <- years
 			for(n in 1:N){
-				approx.pdf <- dunif(years, pars[n,1], pars[n,2])
+				approx.pdf <- dnorm(years, pars[n,1], pars[n,2])
 				res[n,] <- approx.pdf/(sum(approx.pdf)*inc)
 				}
 			}
@@ -604,34 +603,11 @@ objectiveFunction <- function(pars, PDarray, type){
 	if(!type%in%c('CPL','exp','uniform','norm','lognorm'))stop('unknown model type. Only CPL, exp, uniform, norm, lognorm currently handled')
 	if(type=='exponential' & length(pars)!=1)stop('exponential model requires just one rate parameter')
 	if(type=='uniform' & !is.null(pars))stop('A uniform model must have NULL parameters')
-	if(type=='norm' & !is.null(pars))stop('A norm model must have two parameters, mean and sd')
+	if(type=='norm' & length(pars)!=2)stop('A Gaussian model must have two parameters, mean and sd')
 	if(!is.data.frame(PDarray))stop('PDarray must be a data frame')
 
 	years <- as.numeric(row.names(PDarray))
-	inc <- years[2]-years[1]
-
-	if(type=='CPL'){
-		pdf <- convertPars(pars,years,type=type)
-		model.pdf <- approx(x=pdf$year,y=pdf$pdf,xout=years,ties='ordered',rule=2)$y # why is this required?
-		}
-
-	if(type=='exp'){
-		model.pdf <- convertPars(pars,years,type=type)$pdf
-		}
-
-	if(type=='uniform'){
-		model.pdf <- convertPars(pars,years,type=type)$pdf
-		}
-
-	if(type=='norm'){
-		model.pdf <- convertPars(pars,years,type=type)$pdf
-		}
- 
-	# sometimes a tiny adjustment is required, due to the discretisation
-	model.pdf <- model.pdf/(sum(model.pdf)*inc) # not sure this is required if everything is now run through convertPars
-
-	# calculate loglik
-	model <- data.frame(pdf=model.pdf, year=years)
+	model <- convertPars(pars,years,type=type)
 	loglik <- loglik(PDarray, model)
 
 return(-loglik)}

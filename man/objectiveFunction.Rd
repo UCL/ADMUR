@@ -18,7 +18,10 @@
 	Returns a single value, the negative log likelihood.
 	}
 \details{
-	If type is 'CPL', pars must be an odd length each between 0 and 1 since parameters correspond to: (y,x,...y). If type is 'exp', pars must be a single positive or negative numeric (the exponential rate can be growth or decay). Typically this parameter should be close to zero (-0.1 to 0.1) to avoid numbers beyond floating point limits) 
+	If type is 'CPL', pars must be an odd length each between 0 and 1 since parameters correspond to: (y,x,...y). 
+	If type is 'exp', pars must be a single positive or negative numeric (the exponential rate can be growth or decay). Typically this parameter should be close to zero (-0.1 to 0.1) to avoid numbers beyond floating point limits) 
+	If type is 'norm', pars must have length 2 (mean and sd)
+	If type is 'uniform', then no parameters are required, and pars must be NULL or c(). 
 	}
 \examples{
 	# generate a PD array from a handful of dates
@@ -33,6 +36,10 @@
 	# the negative log likelihood given a random exponential model
 	pars <- runif(1, -0.01, 0.01)
 	objectiveFunction(pars, PD, type='exp')	
+
+	# the negative log likelihood given a random Gaussian model
+	pars <- c(runif(1, 2000, 6000), runif(1, 100, 1000))
+	objectiveFunction(pars, PD, type='norm')	
 
 	# the negative log likelihood given a uniform model
 	objectiveFunction(pars=NULL, PD, type='uniform')	

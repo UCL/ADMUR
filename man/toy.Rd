@@ -17,4 +17,4 @@
 \references{
 	Timpson, A., Barberena, R., Thomas, M.G., Méndez, C., Manning, K. 2020 Directly modelling population dynamics in the South American Arid Diagonal using 14C dates. Philosophical Transactions of the Royal Society B.
 }
-	
+

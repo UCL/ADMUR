@@ -2,6 +2,3 @@
 
 language: R
 cache: packages
-env:
-  global:
-    - _R_CHECK_DONTTEST_EXAMPLES_=TRUE

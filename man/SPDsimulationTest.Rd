@@ -65,7 +65,7 @@
 	The default N = 20000 can be increased if greater precision is required, however this can be very time costly.
 	}
 \examples{
-\donttest{
+\dontrun{
 # trivial example showing a single date can never be rejected under a uniform model:
 data <- data.frame(age=6500, sd=50, phase=1, datingType='14C')
 x <- SPDsimulationTest(data, 

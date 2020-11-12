@@ -622,10 +622,10 @@ proposalFunction <- function(pars, jumps, type){
 		new.pars[new.pars>0.999999] <- 0.999999
 		}
 	if(type=='exp'){
-		if(new.pars==0)new.pars <- runif(1,-1e-20,1e-20)
+		if(new.pars==0)new.pars <- 1e-100
 		}
 	if(type=='norm'){
-		new.pars[new.pars<=0] <- 1e-20
+		new.pars[new.pars<=0] <- 1
 		}
 return(new.pars)}
 #--------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 ^.*\.pdf$
-^testing.R$
+^prepForCRAN.R$
 ^cran-comments.md$
 ^\.travis\.yml$
 ^CRAN-RELEASE$

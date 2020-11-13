@@ -7,7 +7,10 @@
 if(getRversion() >= "2.15.1")  utils::globalVariables(c('datingType','site','calBP','phase','intcal20'))
 #--------------------------------------------------------------------------------------------
 
-checkData <- function(data){
+
+
+#--------------------------------------------------------------------------------------------
+checkDataStructure <- function(data){
 	# data: data.frame of 14C dates. Requires 'age' and 'sd'.
 	# helper function to check format of data, and throw warnings
 
@@ -20,6 +23,25 @@ checkData <- function(data){
 	if(min(data$sd)<1){warning('some sd are impossibly small');return('bad')}	
 
 return(x)}
+#--------------------------------------------------------------------------------------------
+checkData <- function(data){
+	# structural problems
+	x <- checkDataStructure(data)
+
+	# a few checks for absolute clangers
+	# check suspicious sds and ages
+	bad1 <- subset(data, sd<20)
+	bad2 <- data[(data$age/data$sd)>1000,]
+	bad3 <- data[(data$sd/data$age)>0.5,]
+	bad4 <- subset(data, age<100 | age>57000)
+	bad <- unique(rbind(bad1,bad2,bad3,bad4))
+
+	if(x=='good' & nrow(bad)==0)print('No obvious clangers found')
+	if(nrow(bad)>0){
+		print('Please check the following samples...')
+		print(bad)
+		}
+return(NULL)}
 #--------------------------------------------------------------------------------------------
 checkDatingType <- function(data){
 	# used by a couple of functions, so worth avoiding repetition
@@ -264,7 +286,7 @@ summedCalibrator <- function(data, CalArray, normalise = 'standard', checks = TR
 
 	# check arguments
 	if(checks){
-		if(checkData(data)=='bad')stop()
+		if(checkDataStructure(data)=='bad')stop()
 		if(attr(CalArray, 'creator')!= 'makeCalArray') stop('CalArray was not made by makeCalArray()' )
 		if(!normalise %in% c('none','standard','full')) stop('normalise must be none, standard or full')
 		data <- checkDatingType(data)
@@ -317,7 +339,7 @@ phaseCalibrator <- function(data, CalArray, width = 200, remove.external = FALSE
 	if(width<1)stop('width must be > 1')
 	if(attr(CalArray, 'creator')!= 'makeCalArray') stop('CalArray was not made by makeCalArray()' )
 	if(nrow(data)==0)return(NULL)
- 	if(checkData(data)=='bad')stop()
+ 	if(checkDataStructure(data)=='bad')stop()
 	data <- checkDatingType(data)
 
 	# ensure dates are phased
@@ -355,7 +377,7 @@ summedCalibratorWrapper <- function(data, calcurve=intcal20, plot=TRUE){
 	# takes care of choosing a sensible date and interpolation increments range automatically
 
 	if(nrow(data)==0)return(NULL)
- 	if(checkData(data)=='bad')stop()
+ 	if(checkDataStructure(data)=='bad')stop()
 	data <- checkDatingType(data)
 
 	calrange <- chooseCalrange(data,calcurve)

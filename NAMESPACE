@@ -16,6 +16,7 @@ export(estimateDataDomain)
 export(SPDsimulationTest)
 export(relativeRate)
 export(plotSimulationSummary)
+export(checkData)
 
 importFrom(grDevices, colorRampPalette)
 importFrom(graphics, axis, image, legend, lines, par, polygon, text)

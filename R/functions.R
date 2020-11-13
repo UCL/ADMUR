@@ -30,7 +30,7 @@ checkData <- function(data){
 
 	# a few checks for absolute clangers
 	# check suspicious sds and ages
-	bad1 <- subset(data, sd<20)
+	bad1 <- subset(data, sd<15)
 	bad2 <- data[(data$age/data$sd)>1000,]
 	bad3 <- data[(data$sd/data$age)>0.5,]
 	bad4 <- subset(data, age<100 | age>57000)

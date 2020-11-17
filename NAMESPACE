@@ -17,6 +17,7 @@ export(SPDsimulationTest)
 export(relativeRate)
 export(plotSimulationSummary)
 export(checkData)
+export(sinewavePDF)
 
 importFrom(grDevices, colorRampPalette)
 importFrom(graphics, axis, image, legend, lines, par, polygon, text)

@@ -427,12 +427,12 @@ loglik <- function(PD, model){
 	inc <- (years[2]-years[1])
 
 	# ensure the date ranges exactly match. If not, interpolate model pdf to match PD.
-	check <- identical(row.names(PD),model$year)
+	check <- identical(as.numeric(row.names(PD)),model$year)
 	if(!check){
 		x <- as.numeric(model$year)
 		y <- model$pdf
 		y.out <- approx(x=x, y=y, xout=years)$y
-		model <- data.frame(pdf=y.out, year=years)
+		model <- data.frame(year=years, pdf=y.out)
 		}
 
 	# ensure model PD is provided as a discretised PDF
@@ -911,4 +911,18 @@ plotSimulationSummary <- function(summary, title=NULL, legend.x=NULL, legend.y=N
 	xjust = 1,
 	x.intersp = c(1,1,1,-0.5,-0.5,-0.5,-0.5))
 	}
+#----------------------------------------------------------------------------------------------
+sinewavePDF <- function(x,xmin,xmax,f,p,r){
+
+	if(r==0)return(dunif(x,xmin,xmax))
+	if(r<0 | r>1)stop('r must be between 0 and 1')
+	if(p<0 | p>(2*pi))stop('p must be between 0 and 2pi')
+	num <- (sin(2*pi*f*x + p) + 1 - log(r))
+	denum <- (xmax - xmin)*(1 - log(r)) + (1/(2*pi*f))*( cos(2*pi*f*xmin+p) - cos(2*pi*f*xmax+p) )
+
+	# pdf
+	pdf <- num/denum
+	pdf[x<xmin | x>xmax] <- 0
+
+return(pdf)}
 #----------------------------------------------------------------------------------------------

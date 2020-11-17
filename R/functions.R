@@ -912,17 +912,17 @@ plotSimulationSummary <- function(summary, title=NULL, legend.x=NULL, legend.y=N
 	x.intersp = c(1,1,1,-0.5,-0.5,-0.5,-0.5))
 	}
 #----------------------------------------------------------------------------------------------
-sinewavePDF <- function(x,xmin,xmax,f,p,r){
+sinewavePDF <- function(x,min,max,f,p,r){
 
-	if(r==0)return(dunif(x,xmin,xmax))
+	if(r==0)return(dunif(x,min,max))
 	if(r<0 | r>1)stop('r must be between 0 and 1')
 	if(p<0 | p>(2*pi))stop('p must be between 0 and 2pi')
 	num <- (sin(2*pi*f*x + p) + 1 - log(r))
-	denum <- (xmax - xmin)*(1 - log(r)) + (1/(2*pi*f))*( cos(2*pi*f*xmin+p) - cos(2*pi*f*xmax+p) )
+	denum <- (max - min)*(1 - log(r)) + (1/(2*pi*f))*( cos(2*pi*f*min+p) - cos(2*pi*f*max+p) )
 
 	# pdf
 	pdf <- num/denum
-	pdf[x<xmin | x>xmax] <- 0
+	pdf[x<min | x>max] <- 0
 
 return(pdf)}
 #----------------------------------------------------------------------------------------------

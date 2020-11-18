@@ -1,4 +1,4 @@
-<img src="logo.jpg" alt="UCL" width="1000">
+<img src="logo.jpg" alt="UCL">
 
 [![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
 

@@ -516,83 +516,63 @@ return(res)}
 #--------------------------------------------------------------------------------------------
 convertPars <- function(pars, years, type){
 
-	# Important: the model must be returned as a PDF. I.e, the total area must sum to 1.
+	# The model must be returned as a PDF. I.e, the total area must sum to 1.
 
 	# sanity checks
-	if(!type%in%c('CPL','exp','uniform','norm','lognorm'))stop('unknown model type. Only CPL, exp, uniform, norm, lognorm currently handled')
+	if(!type%in%c('CPL','exp','uniform','norm','sine','cauchy'))stop('unknown model type. Only CPL, exp, uniform, norm, sine cauchy currently handled')
 	if('data.frame'%in%class(pars))pars <- as.matrix(pars)
 	if('integer'%in%class(years))years <- as.numeric(years)
 	if(!'numeric'%in%class(years))stop('years must be a numeric vector')
 
+	if('numeric'%in%class(pars)){
+		res <- convertParsInner(pars, years, type)
+		}
+
+	if(!'numeric'%in%class(pars)){
+		N <- nrow(pars)
+		r1 <- convertParsInner(pars[1,], years, type)
+		C <- nrow(r1)
+		res <- as.data.frame(matrix(,N,C))
+		names(res) <- r1$year
+		for(n in 1:N)res[n,] <- convertParsInner(pars[n,], years, type)$pdf
+		}
+
+return(res)}
+#--------------------------------------------------------------------------------------------
+convertParsInner <- function(pars, years, type){
+
+	inc <- years[2]-years[1]
+
+	# pdfs with straight sections can be described using just the hinges (uniform, CPL)
+	# pdfs with continuous change (cauchy, gaussian, sinewave, exponential) are described with a vector of values crresponding to 'years'
+	if(type=='CPL'){
+		res <- convertParsCPL(pars,years)
+		}
 	if(type=='uniform'){
 		if(!is.null(pars))stop('A uniform model must have NULL parameters')
 		res <- data.frame( year=range(years), pdf=dunif(range(years),min(years),max(years)) )
 		}
-
-	if(type=='CPL'){
-
-		# if a single parameter set, generates a few extras
-		if('numeric'%in%class(pars))res <- convertParsCPL(pars,years)
-
-		# if a matrix of parameters, only generates the x,y coords
-		if(!'numeric'%in%class(pars)){
-			N <- nrow(pars)
-			C <- (ncol(pars)+1)/2 +1
-			yr <- pdf <- as.data.frame(matrix(,N,C))
-			names(yr) <- paste('yr',1:C,sep='')
-			names(pdf) <- paste('pdf',1:C,sep='')
-			for(n in 1:N){
-				x <- convertParsCPL(pars[n,],years)
-				yr[n,] <- x$year
-				pdf[n,] <- x$pdf
-				}
-			res <- cbind(yr,pdf)
-			}
-		}
-
 	if(type=='exp'){
-		inc <- years[2]-years[1]
-		# if a single parameter set, generates a two-column data frame
-		if('numeric'%in%class(pars)){
-			if(length(pars)!=1)stop('An exponential model must have exactly one parameter')
-			approx.pdf <- pars*exp(pars*years - pars*max(years)) # an intermediate fiddle to avoid computing nutty numbers beyond floating point limits
-			res <- data.frame(year = years, pdf = approx.pdf/(sum(approx.pdf)*inc))
-			}
-		# if matrix of parameters, each row is a converted parameter set
-		if(!'numeric'%in%class(pars)){
-			if(ncol(pars)!=1)stop('An exponential model must have exactly one parameter')
-			N <- nrow(pars)
-			C <- length(years)
-			res <- as.data.frame(matrix(,N,C))
-			names(res) <- years
-			for(n in 1:N){
-				approx.pdf <- pars[n,]*exp(pars[n,]*years - pars[n,]*max(years))
-				res[n,] <- approx.pdf/(sum(approx.pdf)*inc)
-				}
-			}
+		if(length(pars)!=1)stop('exponential model requires just one rate parameter')
+		tmp <- pars*exp(pars*years - pars*max(years))
+		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
+		}
+	if(type=='norm'){
+		if(length(pars)!=2)stop('A Gaussian model must have two parameters, mean and sd')
+		tmp <- dnorm(years, pars[1], pars[2])
+		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
+		}
+	if(type=='sine'){
+		if(length(pars)!=3)stop('A sinusoidal model must have three parameters, f, p and r')
+		tmp <- sinewavePDF(years, min(years), max(years), pars[1], pars[2], pars[3])
+		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
+		}
+	if(type=='cauchy'){
+		if(length(pars)!=2)stop('A cauchy model must have two parameters, location and scale')
+		tmp <- dcauchy(years, pars[1], pars[2])
+		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
 		}
 
-	if(type=='norm'){
-		inc <- years[2]-years[1]
-		# if a single parameter set, generates a two-column data frame
-		if('numeric'%in%class(pars)){
-			if(length(pars)!=2)stop('An norm model must have exactly two parameters')
-			approx.pdf <- dnorm(years, pars[1], pars[2])
-			res <- data.frame(year = years, pdf = approx.pdf/(sum(approx.pdf)*inc))		
-			}
-		# if matrix of parameters, each row is a converted parameter set
-		if(!'numeric'%in%class(pars)){
-			if(ncol(pars)!=2)stop('A Gaussian model must have exactly two parameters, mean and sd')
-			N <- nrow(pars)
-			C <- length(years)
-			res <- as.data.frame(matrix(,N,C))
-			names(res) <- years
-			for(n in 1:N){
-				approx.pdf <- dnorm(years, pars[n,1], pars[n,2])
-				res[n,] <- approx.pdf/(sum(approx.pdf)*inc)
-				}
-			}
-		}
 return(res)}
 #--------------------------------------------------------------------------------------------
 convertParsCPL <- function(pars, years){
@@ -622,6 +602,7 @@ return(d)}
 objectiveFunction <- function(pars, PDarray, type){
 
 	# sanity check a few arguments
+# much of this not needed, as handed to convertPars
 	if(!type%in%c('CPL','exp','uniform','norm','lognorm'))stop('unknown model type. Only CPL, exp, uniform, norm, lognorm currently handled')
 	if(type=='exponential' & length(pars)!=1)stop('exponential model requires just one rate parameter')
 	if(type=='uniform' & !is.null(pars))stop('A uniform model must have NULL parameters')

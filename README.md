@@ -1,3 +1,4 @@
+![](vignette/logo.jpg)
 [![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
 
 # ADMUR
@@ -9,19 +10,14 @@ Please contact a.timpson@ucl.ac.uk  in the first instance to make suggestions, r
 
 ## Installation
 
+Install from CRAN
 ``` r
-# Installing and loading 'devtools' give you the ability to install direct from GitHub:
-install.packages('devtools')
-library(devtools)
-
-# The ADMUR package can then be installed and loaded:
-install_github('UCL/ADMUR')
-library(ADMUR)
+install.packages('ADMUR')
 ```
 
 ## Guide
 
-Please refer to the vignette 'guide' for detailed support and examples.
+Refer to the vignette 'guide' for detailed support and examples.
 
 ``` r
 help(AMDUR)

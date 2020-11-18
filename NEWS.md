@@ -1,6 +1,16 @@
 # ADMUR build history
 
-## 20-11-13
+## 2020-11-18
+
+### Version: 1.0.0.9003
+
+* Resubmission of v.1.0.0.9001 accepted by CRAN
+
+* Added a Cauchy model, as a Gaussian model is the devil's work. Real data from single events have long tails.
+
+* Added a sigmoidal model. Earth-related systems (e.g. climate) should be expected to oscillate.
+
+## 2020-11-13
 
 ### Version: 1.0.0.9002
 

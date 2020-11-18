@@ -524,27 +524,45 @@ convertPars <- function(pars, years, type){
 	if('integer'%in%class(years))years <- as.numeric(years)
 	if(!'numeric'%in%class(years))stop('years must be a numeric vector')
 
-	if('numeric'%in%class(pars)){
+	if('NULL'%in%class(pars) | 'numeric'%in%class(pars)){
 		res <- convertParsInner(pars, years, type)
+		return(res)
 		}
 
 	if(!'numeric'%in%class(pars)){
 		N <- nrow(pars)
-		r1 <- convertParsInner(pars[1,], years, type)
-		C <- nrow(r1)
-		res <- as.data.frame(matrix(,N,C))
-		names(res) <- r1$year
-		for(n in 1:N)res[n,] <- convertParsInner(pars[n,], years, type)$pdf
+		# handled differently for CPL
+		if(type=='CPL'){
+			C <- (ncol(pars)+1)/2 +1
+			yr <- pdf <- as.data.frame(matrix(,N,C))
+				names(yr) <- paste('yr',1:C,sep='')
+				names(pdf) <- paste('pdf',1:C,sep='')
+				for(n in 1:N){
+					x <- convertParsCPL(pars[n,],years)
+					yr[n,] <- x$year
+					pdf[n,] <- x$pdf
+					}
+			res <- cbind(yr,pdf)
+			}
+		if(type!='CPL'){
+			C <- length(years)
+			res <- as.data.frame(matrix(,N,C))
+			names(res) <- years
+			for(n in 1:N)res[n,] <- convertParsInner(pars[n,], years, type)$pdf
+			}
+		return(res)
 		}
 
-return(res)}
+}
 #--------------------------------------------------------------------------------------------
 convertParsInner <- function(pars, years, type){
 
 	inc <- years[2]-years[1]
 
-	# pdfs with straight sections can be described using just the hinges (uniform, CPL)
-	# pdfs with continuous change (cauchy, gaussian, sinewave, exponential) are described with a vector of values crresponding to 'years'
+	# structure of different models differs:
+	# CPL parameters are both pdfs and years
+	# uniform only requires pdfs at start and end
+	# pdfs with continuous change (cauchy, gaussian, sinewave, exponential) are described with a vector of values corresponding to 'years'
 	if(type=='CPL'){
 		res <- convertParsCPL(pars,years)
 		}
@@ -601,16 +619,10 @@ return(d)}
 #--------------------------------------------------------------------------------------------
 objectiveFunction <- function(pars, PDarray, type){
 
-	# sanity check a few arguments
-# much of this not needed, as handed to convertPars
-	if(!type%in%c('CPL','exp','uniform','norm','lognorm'))stop('unknown model type. Only CPL, exp, uniform, norm, lognorm currently handled')
-	if(type=='exponential' & length(pars)!=1)stop('exponential model requires just one rate parameter')
-	if(type=='uniform' & !is.null(pars))stop('A uniform model must have NULL parameters')
-	if(type=='norm' & length(pars)!=2)stop('A Gaussian model must have two parameters, mean and sd')
 	if(!is.data.frame(PDarray))stop('PDarray must be a data frame')
 
 	years <- as.numeric(row.names(PDarray))
-	model <- convertPars(pars,years,type=type)
+	model <- convertPars(pars,years,type)
 	loglik <- loglik(PDarray, model)
 
 return(-loglik)}

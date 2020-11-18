@@ -48,6 +48,25 @@ Structure of the output differs depending on if converting a single vector or a 
 	# convert a matrix of 5 random Gaussian parameter pairs (mean, sd)
 	pars <- matrix( runif(10)*10000, 5, 2 )
 	x <- convertPars( pars=pars, years=5500:7500, type='norm')
+
+	# convert a single random Cauchy parameter pair (location, scale)
+	x <- convertPars( pars=runif(2)*10000, years=5500:7500, type='cauchy')
+
+	# convert a matrix of 5 random Cauchy parameter pairs (location, scale)
+	pars <- matrix( runif(10)*10000, 5, 2 )
+	x <- convertPars( pars=pars, years=5500:7500, type='cauchy')
+
+	# convert a single random sinewave parameter set (f,p,r)
+	f <- 1/runif(1,200,1000)
+	p <- runif(1,0,2*pi)
+	r <- runif(1,0,1)
+	x <- convertPars( pars=c(f,p,r), years=5500:7500, type='sine')
+
+	# convert a matrix of 5 random sinewave parameter sets (f,p,r)
+	f <- 1/runif(5,200,1000)
+	p <- runif(5,0,2*pi)
+	r <- runif(5,0,1)
+	x <- convertPars( pars=cbind(f,p,r), years=5500:7500, type='sine')
 	
 	# although a uniform distribution has no parameters, a pdf can still be generated:
 	x <- convertPars(pars=NULL, years=5500:7500, type='uniform')

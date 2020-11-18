@@ -1,3 +1,5 @@
+<img src="logo.png" alt="UCL">
+
 # ADMUR build history
 
 ## 2020-11-18

@@ -1,4 +1,3 @@
-^.*\.pdf$
 ^prepForCRAN.R$
 ^cran-comments.md$
 ^\.travis\.yml$

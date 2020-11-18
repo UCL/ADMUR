@@ -1,8 +1,8 @@
-![](logo.jpg)
 [![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
+![](logo.jpg)
 
 # ADMUR
-**Ancient Demographic Modelling Using Radiocarbon**
+## Ancient Demographic Modelling Using Radiocarbon
 
 Tools to directly model underlying population dynamics using chronological datasets (radiocarbon and other) with a Continuous Piecewise Linear (CPL) model framework, and model comparison framework using BIC. Package also calibrates 14C samples, and generates Summed Probability Distributions (SPD).  CPL modelling directly estimates the most likely population trajectory given a dataset, using SPD simulation analysis to generate a Goodness-of-fit test for the best selected model.
 

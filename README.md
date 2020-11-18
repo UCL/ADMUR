@@ -1,4 +1,8 @@
-![](logo.jpg | width=250)
+<img src="logo.jpg" alt="UCL" width="250">
+
+![](logo.jpg)
+
+# gap
 
 [![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
 

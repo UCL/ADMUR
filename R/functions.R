@@ -4,7 +4,7 @@
 
 #--------------------------------------------------------------------------------------------	
 # global variables
-if(getRversion() >= "2.15.1")  utils::globalVariables(c('datingType','site','calBP','phase','intcal20'))
+if(getRversion() >= "2.15.1")  utils::globalVariables(c('age','datingType','site','calBP','phase','intcal20'))
 #--------------------------------------------------------------------------------------------
 
 

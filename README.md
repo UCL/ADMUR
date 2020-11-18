@@ -1,4 +1,4 @@
-![](vignette/logo.jpg)
+![](logo.jpg)
 [![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
 
 # ADMUR

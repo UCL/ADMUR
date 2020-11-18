@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
-![](logo.jpg)
+![](logo.jpg =250x)
 
 # ADMUR
 ## Ancient Demographic Modelling Using Radiocarbon

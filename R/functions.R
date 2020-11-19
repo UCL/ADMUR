@@ -563,6 +563,7 @@ convertParsInner <- function(pars, years, type){
 	# CPL parameters are both pdfs and years
 	# uniform only requires pdfs at start and end
 	# pdfs with continuous change (cauchy, gaussian, sinewave, exponential) are described with a vector of values corresponding to 'years'
+	# in most cases a final normalisation step is performed to ensure total area = 1 (i.e., resolves truncation of pdf within date range, and numeric approximation)
 	if(type=='CPL'){
 		res <- convertParsCPL(pars,years)
 		}

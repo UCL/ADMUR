@@ -1,7 +1,9 @@
 \name{convertPars} 
 \alias{convertPars} 
 \title{Converts parameters to x,y coordinates (date and pdf) that describe a model} 
-\description{Converts either a vector of a single parameter set, or a matrix set of parameters to model x,y coordinates (date and pdf)}
+\description{
+	Converts either a vector of a single parameter set, or a matrix set of parameters to model x,y coordinates (date and pdf)
+	\loadmathjax }
 \usage{convertPars(pars, years, type)}
 \arguments{
   \item{pars}{
@@ -11,21 +13,25 @@
 	A vector of years.
 	}
   \item{type}{
-	Choose 'CPL' for a Continuous Piecewise Linear model, 'exp' for an exponential model, 'uniform' for a uniform model, or 'norm' for a Gaussian (normal) model.
+	Choose 'CPL' for a Continuous Piecewise Linear model, 'exp' for an exponential model, 'norm' for a Gaussian (normal) model, 'cauchy' for a cauchy model, 'sine' for a sinusoidal model or 'uniform' for a uniform model.
 	}
 }
 \details{
 Parameter searches will yield either a single vector or parameters or a matrix of many parameters (such as the 'res' value from \code{\link[=mcmc]{mcmc}}) . Either can be handed directly to this function.
 
-If type is 'CPL' a vector comprising a parameter set with an odd length (each between 0 and 1) must be provided, or a matrix of parameters (one parameter set per row) with an odd number of columns. An Area Breaking Process (a modified Stick Breaking Dirichlet Process) is then used to map parameters to their corresponding PD coordinates.  This uses the Beta distribution CDF (with alpha = 1 and beta = the number of pieces still to be broken) to convert an x-parameter into its equivalent x-coordinate value, and the Gamma CDF (with alpha = 1 and beta = 1) to convert a y-parameter into its equivalent coordinate value between 0 and +infinity.
+Structure of the output differs depending on if converting pars that are a single vector or a matrix of many pars.
 
-If type is 'exp', a single parameter must be provided (-ve or +ve to allow for growth or decay), typically between -0.01 and 0.01 to keep the magnitude of computed values within floating point limits. Alternatively a single column matrix of parameters can be provided. This function uses the single parameter as the rate exponent r in the formula e^rt, where t = years. Note the parameter A in more familiar formula Ae^rt is not required since this is an exponential model PDF (zero outside the date range, total area equals 1).
+If type is 'CPL' a vector comprising a parameter set with an odd length (each between 0 and 1) must be provided, or a matrix of parameters (one parameter set per row) with an odd number of columns. An Area Breaking Process (a modified Stick Breaking Dirichlet Process) is then used to map parameters to their corresponding PD coordinates.  This uses the Beta distribution CDF (with \mjseqn{\alpha = 1} and \mjseqn{\beta =} the number of pieces still to be broken) to convert an x-parameter into its equivalent x-coordinate value, and the Gamma CDF (with \mjseqn{\alpha = 1} and \mjseqn{\beta = 1}) to convert a y-parameter into its equivalent coordinate value between 0 and \mjseqn{\infty}.
 
-If type is 'norm', then two parameters must be provided (mean and sd).
+If type is 'exp', a single parameter must be provided, or a single column matrix of parameters. Each single parameter is used as the rate exponent \mjseqn{r} where the PDF \mjsdeqn{f(x) = \frac{re^{r x}}{e^{rx_{max}} - e^{rx_{min}}}}  where \mjseqn{x =} years, and \mjseqn{x_{min}} and \mjseqn{x_{max}} determine the date range.
 
-If type is 'uniform', then no parameters are required, and pars must be NULL or c(). 
+If type is 'norm', then two parameters (\mjseqn{\mu} and \mjseqn{\sigma} respectively) are used in the formula for a truncated Normal distribution, such that the total area between \mjseqn{x_{min}} and \mjseqn{x_{max}} (the date range) equals 1.
 
-Structure of the output differs depending on if converting a single vector or a matrix.
+If type is 'uniform', then no parameters are required, pars must be NULL or c(), and trivially the PDF \mjseqn{f(x) = \frac{1}{x_{max} - x_{min}}} where \mjseqn{x =} years, and \mjseqn{x_{min}} and \mjseqn{x_{max}} determine the date range.
+
+If type is 'cauchy', then two parameters (location and scale respectively) are used in the formula for a truncated cauchy distribution, such that the total area between \mjseqn{x_{min}} and \mjseqn{x_{max}} (the date range) equals 1.
+
+IF type is 'sine', then three parameters are used as specified in \code{\link[=sinewavePDF]{sinewavePDF}}
 	}
 \examples{
 	# convert a single random 6-CPL parameter set

@@ -26,7 +26,7 @@
 	The usual function to describe a sine wave is \mjseqn{f(x) = A\sin(2\pi f x + p)}, where \mjseqn{A} is the amplitude, \mjseqn{f} is the frequency (cycles per year), and \mjseqn{p} is the cycle position (in radians) at \mjseqn{x = 0}.
 
 	However, we are describing a sine wave that is never negative, which can conceptually be considered as a sine wave stacked on top of a uniform distribution with a height \mjseqn{A + k}, where \mjseqn{k >= 0}.
-	Since the pdf is \mjseqn{f(x)} divided by the area below the curve, A and k can be simplified to a single parameter \mjseqn{r} that determines the relative proportions of the uniform and sinusoidal components, such that:
+	Since the PDF is \mjseqn{f(x)} divided by the area below the curve, A and k can be simplified to a single parameter \mjseqn{r} that determines the relative proportions of the uniform and sinusoidal components, such that:
 
 	when \mjseqn{r = 0} the amplitude of the sine wave component is zero, and the curve is uniform.
 
@@ -34,7 +34,7 @@
 
 	Therefore the formula for the pdf is:
 
-	\mjsdeqn{pdf(x) = \frac{1 + \sin(2\pi f x + p) - \log(r)}{(x_{max} - x_{min})(1 - \log(r)) + (\frac{1}{2\pi f})[\cos(2\pi f x_{min} - p) - \cos(2\pi f x_{max} - p)]}}
+	\mjsdeqn{f(x) = \frac{1 + \sin(2\pi f x + p) - \log(r)}{(x_{max} - x_{min})(1 - \log(r)) + (\frac{1}{2\pi f})[\cos(2\pi f x_{min} - p) - \cos(2\pi f x_{max} - p)]}}
 	}
 \examples{
 	# A sinewave with a period of 700 years

@@ -1,4 +1,8 @@
 [![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
+[![UCL Research Software Development](UCLlogo.png)](https://github.com/UCL)
+
+gap
+
 <img src="UCLlogo.png" alt="UCL Research Software Development" height="70">
 <img src="MACELABlogo.png" alt="Molecular And Cultural Evolution Laboratory" height="70">
 

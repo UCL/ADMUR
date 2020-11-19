@@ -1,8 +1,9 @@
-[![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
 <a href="https://github.com/UCL"><img src="logos/logo_UCL.png" alt="UCL Research Software Development" height="70"/></a>
 <a href="https://www.ucl.ac.uk/biosciences/departments/genetics-evolution-and-environment/research/molecular-and-cultural-evolution-lab"><img src="logos/logo_MACElab.png" alt="UCL Research Software Development" height="70"/></a>
 <a href="https://www.shh.mpg.de"><img src="logos/logo_MPI.svg" alt="Max Planck Institute for the Science of Human History" height="70"/></a>
 <a href="https://www.shh.mpg.de/1143811/pan-ev"><img src="logos/logo_PanEv.png" alt="Pan African Evolution ResearchGroup" height="70"/></a>
+
+[![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
 
 # ADMUR build history
 

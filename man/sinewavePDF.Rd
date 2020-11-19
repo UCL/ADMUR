@@ -34,7 +34,7 @@
 
 	Therefore the formula for the pdf is:
 
-	\mjsdeqn{f(x) = \frac{1 + \sin(2\pi f x + p) - \log(r)}{(x_{max} - x_{min})(1 - \log(r)) + (\frac{1}{2\pi f})[\cos(2\pi f x_{min} - p) - \cos(2\pi f x_{max} - p)]}}
+	\mjsdeqn{f(x) = \frac{1 + \sin(2\pi f x + p) - \log(r)}{(x_{max} - x_{min})(1 - \log(r)) + (\frac{1}{2\pi f})[\cos(2\pi f x_{min} - p) - \cos(2\pi f x_{max} - p)]}} where \mjseqn{x =} years, and \mjseqn{x_{min}} and \mjseqn{x_{max}} determine the date range.
 	}
 \examples{
 	# A sinewave with a period of 700 years

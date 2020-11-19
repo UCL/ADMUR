@@ -31,7 +31,7 @@ If type is 'uniform', then no parameters are required, pars must be NULL or c(),
 
 If type is 'cauchy', then two parameters (location and scale respectively) are used in the formula for a truncated cauchy distribution, such that the total area between \mjseqn{x_{min}} and \mjseqn{x_{max}} (the date range) equals 1.
 
-IF type is 'sine', then three parameters are used as specified in \code{\link[=sinewavePDF]{sinewavePDF}}
+If type is 'sine', then three parameters are used as specified in \code{\link[=sinewavePDF]{sinewavePDF}}
 	}
 \examples{
 	# convert a single random 6-CPL parameter set

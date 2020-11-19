@@ -1,7 +1,5 @@
 <img src="logo.png" alt="UCL">
-
 [![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
-
 
 # ADMUR
 ## Ancient Demographic Modelling Using Radiocarbon
@@ -29,6 +27,6 @@ help(AMDUR)
 
 <div id="ref-timpson-rstb.2020">
 
-Timpson A., Barberena R., Thomas M. G., Mendez C., Manning K. 2020. "Directly modelling population dynamics in the South American "Arid Diagonal using 14C dates",Philosophical Transactions B. <https://doi.org/10.1098/rstb.2019.0723>.
+Timpson A., Barberena R., Thomas M. G., Mendez C., Manning K. 2020. "Directly modelling population dynamics in the South American Arid Diagonal using 14C dates",Philosophical Transactions B. <https://doi.org/10.1098/rstb.2019.0723>.
 
 </div>

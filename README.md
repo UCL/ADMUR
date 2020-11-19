@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
-<img src="UCLlogo.png" alt="UCL" height="50">
+<img src="UCLlogo.png" alt="UCL Research Software Development" height="70">
+<img src="MACELABlogo.png" alt="Molecular And Cultural Evolution Laboratory" height="70">
 
 # ADMUR
 ## Ancient Demographic Modelling Using Radiocarbon

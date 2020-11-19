@@ -1,10 +1,6 @@
 [![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
-[![UCL Research Software Development](UCLlogo.png s=70)](https://github.com/UCL)
-
-gap
-
-<img src="UCLlogo.png" alt="UCL Research Software Development" height="70">
-<img src="MACELABlogo.png" alt="Molecular And Cultural Evolution Laboratory" height="70">
+<a href="https://github.com/UCL"><img src="UCLlogo.png" alt="UCL Research Software Development" height="70"/></a>
+<a href="https://www.ucl.ac.uk/biosciences/departments/genetics-evolution-and-environment/research/molecular-and-cultural-evolution-lab"><img src="MACELABlogo.png" alt="UCL Research Software Development" height="70"/></a>
 
 # ADMUR build history
 

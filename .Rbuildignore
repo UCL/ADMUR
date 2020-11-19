@@ -2,5 +2,4 @@
 ^cran-comments.md$
 ^\.travis\.yml$
 ^CRAN-RELEASE$
-^UCLlogo.png$
-^MACELABlogo.png$
+^logos/.*$

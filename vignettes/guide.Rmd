@@ -363,15 +363,15 @@ for(n in 1:nrow(hinges)){
 lines(x=CPL$year, y=CPL$pdf, lwd=2, col=c2)
 ```
 
-## Relative growth/decline rates
+## Relative growth and decline rates
 
 Percentage growth rates per generation provide an intuitive statistic to quantify and compare population changes through time. However there are two key issues to overcome when estimating growth rates for a CPL model.
 
-1. CPL modelling allows for the possibility of hiatus periods, defined by pieces between hinges with a zero or near zero PD. Conventionally, the total percentage change from any value to zero is a 100% decrease, however the equivalent percentage increase from zero is undefined.
-2. Each section of the CPL is a straight line with a constant gradient. However, a straight line has a constantly changing growth/decline rate.
+1. CPL modelling allows for the possibility of hiatus periods, defined by pieces between hinges with a zero or near zero PD. Conventionally, the percentage decrease from any value to zero is 100%, however the equivalent percentage increase from zero is undefined.
+2. Each section of the CPL is a straight line with a constant gradient. However, a straight line has a constantly changing rate.
 
 The first problem is an extreme manifestation of the asymmetry from conventionally reporting change always with respect to the first value. For example, if we consider a population of 80 individuals at time $t_1$, changing to 100 at $t_2$ and to 80 at $t_3$, this would be conventionally described as a 25% increase followed by a 20% decrease.
-This asymmetry is unintuitive and unhelpful in the context of population change, and instead we use a *relative rate* which is always calculated with respect to the larger value (e.g., the example above is reported as '20% relative growth' followed by '20% relative decline').
+This asymmetry is unintuitive and unhelpful in the context of population change, and instead we use a *relative rate* which is always calculated with respect to the larger value (e.g., a '20% relative growth' followed by '20% relative decline').
 
 We overcome the second problem by calculating the expected (mean average) rate across the entire linear piece. This is achieved by notionally breaking the line into $N$ equal pieces, such that the coordinates of the ends of the $i^{th}$ piece are $(x_1,y_1)$ and $(x_2,y_2)$.
 The generational (25 yr) rate $r$ of this $i^{th}$ piece is: $$r_i=100\times exp[\ln(\frac{y_2}{y_1})/\frac{x_1-x_2}{25}]-100$$ and the expected rate across the entire line as $N$ approaches +$\infty$ is: $$\sum_{i=1}^{N}r_i/N$$
@@ -385,7 +385,7 @@ In contrast, a huge percentage loss of 99.5% illustrates the importance of calcu
 An exponential curve between n=200 and n=1 across the same 100 years has a decline rate of $100\times exp[\ln(\frac{1}{200})/\frac{100}{25}]-100$ = 73.409% loss per 25 yr generation.
 Meanwhile a linear model between n=200 and n=1 across the same 100 years has an expected decline rate of 47.835% loss per generation.
 
-The relationship between the conventional rate and relative rate is almost identical for realistic rates of change (c. -10% to +10% per generation) and can be viewed as follows:
+The relationship between the conventional rate and relative rate is almost identical for realistic rates of change (c. -10% to +10% per generation):
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
 N <- 1000
 x <- cbind(rep(5100,N),rep(5000,N))

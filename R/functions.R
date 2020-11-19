@@ -572,7 +572,7 @@ convertParsInner <- function(pars, years, type){
 		}
 	if(type=='exp'){
 		if(length(pars)!=1)stop('exponential model requires just one rate parameter')
-		tmp <- pars*exp(pars*years - pars*max(years))
+		tmp <- exponentialPDF(years, min(years), max(years),pars[1])
 		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
 		}
 	if(type=='norm'){
@@ -917,5 +917,15 @@ sinewavePDF <- function(x,min,max,f,p,r){
 	pdf <- num/denum
 	pdf[x<min | x>max] <- 0
 
+return(pdf)}
+#----------------------------------------------------------------------------------------------
+exponentialPDF <- function(x,min,max,r){
+
+	num <- r*exp(r*x)
+	denum <- exp(r*max)-exp(r*min)
+
+	# pdf
+	pdf <- num/denum
+	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------

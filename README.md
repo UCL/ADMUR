@@ -30,9 +30,14 @@ vignette('guide', package = 'ADMUR')
 
 ## References
 
-<div id="ref-timpson-rstb.2020">
-
 Timpson A., Barberena R., Thomas M. G., Mendez C., Manning K. 2020. "Directly modelling population dynamics in the South American Arid Diagonal using 14C dates",Philosophical Transactions B. <https://doi.org/10.1098/rstb.2019.0723>.
+
+Citations available as follows:
+``` r
+citation(package='ADMUR')
+```
+
+---
 
 ADMUR was written in collaboration with:
 - University College London
@@ -45,4 +50,4 @@ ADMUR was written in collaboration with:
 
 Special thanks to Yoan Diekmann for his influential inferential input.
 
-</div>
+---

@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
-[![UCL Research Software Development](UCLlogo.png | width=70)](https://github.com/UCL)
+[![UCL Research Software Development](UCLlogo.png =70x70)](https://github.com/UCL)
 
 gap
 

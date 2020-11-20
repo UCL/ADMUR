@@ -594,7 +594,7 @@ convertParsInner <- function(pars, years, type){
 
 return(res)}
 #--------------------------------------------------------------------------------------------
-convertParsCPL <- function(pars, years){
+convertParsCPL.OLD <- function(pars, years){
 
 	# must be odd, as (2n-1 parameters where n=number of pieces)
  	cond <- ((length(pars)+1) %% 2) == 0
@@ -616,6 +616,46 @@ convertParsCPL <- function(pars, years){
 	# generates the true pdf at the hinges
 	d$pdf <- d$y / diff(range(d$year))
 
+return(d)}
+#--------------------------------------------------------------------------------------------
+convertParsCPL <- function(pars, years){
+
+	# must be odd, as (2n-1 parameters where n=number of pieces)
+ 	cond <- ((length(pars)+1) %% 2) == 0
+	if(!cond)stop('A CPL model must have an odd number of parameters')
+
+	if(length(pars)==1){
+		x.par <- c()
+		y.par <- pars
+		}
+
+	if(length(pars)!=1){
+		x.par <- pars[1:((length(pars)-1)/2)]
+		y.par <- pars[(length(x.par)+1):length(pars)]
+		}
+
+	# conversion of pars to raw hinge coordinates x between 0 and 1,  and y between 0 and Inf
+	# much more efficient stick breaking algorithm for x
+	# mapping for y (0 to 1) -> (0 to Inf) using (1/(1-y)^2)-1
+	# y0 is arbitrarily fixed at 3 since (1/(1-0.5)^2)-1
+	xn <- length(x.par)
+	proportion <- qbeta(x.par, 1 , xn:1)
+	x.raw <- c(0,1-cumprod(1 - proportion),1)
+	y.raw <- c(3, (1/(1-y.par)^2)-1)
+
+	# convert x.raw from 0 to 1, to years
+	x <- x.raw * (max(years)-min(years)) + min(years)
+
+	# area under curve
+	widths <- diff(x)
+	mids <- 0.5*(y.raw[1:(xn+1)]+y.raw[2:(xn+2)])
+	area <- sum(widths*mids)
+
+	# convert y.raw to PD
+	y <- y.raw/area 
+
+	# store
+	d <- data.frame(year=x, pdf=y)
 return(d)}
 #--------------------------------------------------------------------------------------------
 objectiveFunction <- function(pars, PDarray, type){

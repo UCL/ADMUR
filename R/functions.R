@@ -675,8 +675,8 @@ proposalFunction <- function(pars, jumps, type){
 
 	# bunch of constraints for impossible parameters (usually floating point bullshit)
 	if(type=='CPL'){
-		new.pars[new.pars<0] <- 0
-		new.pars[new.pars>0.999999] <- 0.999999
+		new.pars[new.pars<0.00000000001] <- 0.00000000001
+		new.pars[new.pars>0.99999999999] <- 0.99999999999
 		}
 	if(type=='exp'){
 		if(new.pars==0)new.pars <- 1e-100

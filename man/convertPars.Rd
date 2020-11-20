@@ -13,7 +13,7 @@
 	A vector of years.
 	}
   \item{type}{
-	Choose 'CPL' for a Continuous Piecewise Linear model, 'exp' for an exponential model, 'norm' for a Gaussian (normal) model, 'cauchy' for a cauchy model, 'sine' for a sinusoidal model or 'uniform' for a uniform model.
+	Choose 'CPL' for a Continuous Piecewise Linear model, 'exp' for an exponential model, 'norm' for a Gaussian (normal) model, 'cauchy' for a Cauchy model, 'sine' for a sinusoidal model or 'uniform' for a uniform model.
 	}
 }
 \details{
@@ -23,13 +23,13 @@ Structure of the output differs depending on if converting pars that are a singl
 
 If type is 'CPL' a vector comprising a parameter set with an odd length (each between 0 and 1) must be provided, or a matrix of parameters (one parameter set per row) with an odd number of columns. An Area Breaking Process (a modified Stick Breaking Dirichlet Process) is then used to map parameters to their corresponding PD coordinates.  This uses the Beta distribution CDF (with \mjseqn{\alpha = 1} and \mjseqn{\beta =} the number of pieces still to be broken) to convert an x-parameter into its equivalent x-coordinate value, and the Gamma CDF (with \mjseqn{\alpha = 1} and \mjseqn{\beta = 1}) to convert a y-parameter into its equivalent coordinate value between 0 and \mjseqn{\infty}.
 
-If type is 'exp', a single parameter must be provided, or a single column matrix of parameters. Each single parameter is used as the rate exponent \mjseqn{r} where the PDF \mjsdeqn{f(x) = \frac{re^{r x}}{e^{rx_{max}} - e^{rx_{min}}}}  where \mjseqn{x =} years, and \mjseqn{x_{min}} and \mjseqn{x_{max}} determine the date range.
+If type is 'exp', a single parameter must be provided, or a single column matrix of parameters. Each single parameter is used as the rate exponent \mjseqn{r} where the PDF is: \mjsdeqn{\frac{re^{r x}}{e^{rx_{max}} - e^{rx_{min}}}}  where \mjseqn{x =} years, and \mjseqn{x_{min}} and \mjseqn{x_{max}} determine the truncation (date range).
 
 If type is 'norm', then two parameters (\mjseqn{\mu} and \mjseqn{\sigma} respectively) are used in the formula for a truncated Normal distribution, such that the total area between \mjseqn{x_{min}} and \mjseqn{x_{max}} (the date range) equals 1.
 
-If type is 'uniform', then no parameters are required, pars must be NULL or c(), and trivially the PDF \mjseqn{f(x) = \frac{1}{x_{max} - x_{min}}} where \mjseqn{x =} years, and \mjseqn{x_{min}} and \mjseqn{x_{max}} determine the date range.
+If type is 'uniform', then no parameters are required, pars must be NULL or c(), and trivially the PDF is: \mjseqn{\frac{1}{x_{max} - x_{min}}} where \mjseqn{x =} years, and \mjseqn{x_{min}} and \mjseqn{x_{max}} determine the date range.
 
-If type is 'cauchy', then two parameters (location and scale respectively) are used in the formula for a truncated cauchy distribution, such that the total area between \mjseqn{x_{min}} and \mjseqn{x_{max}} (the date range) equals 1.
+If type is 'cauchy', then two parameters (location and scale respectively) are used in the formula for a truncated Cauchy distribution, such that the total area between \mjseqn{x_{min}} and \mjseqn{x_{max}} (the date range) equals 1.
 
 If type is 'sine', then three parameters are used as specified in \code{\link[=sinewavePDF]{sinewavePDF}}
 	}

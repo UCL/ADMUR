@@ -639,7 +639,8 @@ convertParsCPL <- function(pars, years){
 	# mapping for y (0 to 1) -> (0 to Inf) using (1/(1-y)^2)-1
 	# y0 is arbitrarily fixed at 3 since (1/(1-0.5)^2)-1
 	xn <- length(x.par)
-	proportion <- qbeta(x.par, 1 , xn:1)
+	if(xn>=1)proportion <- qbeta(x.par, 1 , xn:1)
+	if(xn==0)proportion <- c()
 	x.raw <- c(0,1-cumprod(1 - proportion),1)
 	y.raw <- c(3, (1/(1-y.par)^2)-1)
 

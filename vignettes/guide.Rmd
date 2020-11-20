@@ -544,6 +544,6 @@ Care should be taken when considering a Gaussian model. The distribution of data
 However, contrary to appearances (and intuitions) a Gaussian does not 'flatten' towards the tails, but decreases at a greater and greater rate towards zero.
 As a consequence, small amounts of data that are several standard deviations away from the mean *appear* to fit a Gaussian quite well, but under a likelihood framework are in fact absurdly improbable.
 Instead, for single events consider a Cauchy model, given the phenomenon that real life data usually has fatter tails than a Gaussian.
-Alternatively, if the waxing and waning of data is suspected to be driven by an oscillating system (such as climate) a sigmoidal model is arguably more sensible.
+Alternatively, if the waxing and waning of data is suspected to be driven by an oscillating system (such as climate) a sinusoidal model is arguably more sensible.
 
 **********

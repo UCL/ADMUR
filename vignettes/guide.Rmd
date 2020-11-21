@@ -300,7 +300,7 @@ text(x=CPL$year, y=CPL$pdf, pos=3, labels=c('H1','H2','H3','H4'))
 The ADMUR function [mcmc()](../html/mcmc.html) uses the Metropolis-Hastings algorithm to search joint parameter values of an n-CPL model, given a the calibrated probability distributions of phases in a ^14^C dataset (PDarray). In principle the starting parameters do not matter if burn is of an appropriate length, but in practice it is more efficient to start in a sensible place such as the maximum likelihood parameters: 
 
 ```{r, eval = FALSE}
-chain <- mcmc(PDarray=PD, startPars=best$par, type='CPL', N=100000, burn=2000, thin=5, jumps =0.05)
+chain <- mcmc(PDarray=PD, startPars=best$par, type='CPL', N=100000, burn=2000, thin=5, jumps =0.025)
 ```
 
 ```{r, echo = FALSE}

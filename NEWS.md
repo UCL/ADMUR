@@ -7,6 +7,13 @@
 
 # ADMUR build history
 
+## 2020-11-21
+
+### Version: 1.0.1.9000
+
+* Substantial improvement in the area breaking algorithm, total rebuild of convertParsCPL().
+This means that the raw parameter values now differ from v1.0.0 for a given model.
+
 ## 2020-11-18
 
 ### Version: 1.0.0.9003

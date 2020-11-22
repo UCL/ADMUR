@@ -546,16 +546,12 @@ Generate key objects:
 library(ADMUR)
 library(DEoptimR)
 
-# Generate SPD 
-SPD <- summedPhaseCalibrator(data=SAAD, calcurve=shcal20, calrange = c(2500,14000))
-
 # Calibrate each phase
 CalArray <- makeCalArray(calcurve=shcal20, calrange = c(2500,14000))
 PD <- phaseCalibrator(data=SAAD, CalArray, remove.external = TRUE)
 
-# starting parameters are taken from ML search
-best.pars <- c(0.8498309, 0.5422777, 0.8995522, 0.5482174, 1.0000000)
-chain <- mcmc(PDarray=PD, startPars=best.pars, type='CPL', N=100000, burn=2000, thin=5, jumps=0.02)
+# arbitrary starting parameters
+chain <- mcmc(PDarray=PD, startPars=rep(0.5,5), type='CPL', N=100000, burn=2000, thin=5, jumps=0.025)
 
 # save results, for separate plotting
 save(chain, best.pars, file='results.RData',version=2)

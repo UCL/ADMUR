@@ -234,7 +234,7 @@ exp( loglik(PD=PD, model=toy) - loglik(PD=PD, model=uniform.model) )
 
 Having established how to calculate the relative likelihood of any proposed model given a dataset, we can use any out-of-the-box search algorithm to find the maximum likelihood model. This first requires us to describe the PD of any population model in terms of a small number of parameters, rather than a vector of probabilities for each year.
 
-We achieve this using the Continuous Piecewise Linear (CPL) model, which can be described using the (x,y) coordinates of its hinge points.
+We achieve this using the Continuous Piecewise Linear (CPL) model, which is defined by the (x,y) coordinates of its hinge points.
 
 ![Illustration of the toy 3-CPL model PD, described using just four coordinate pairs (hinges).](model_plot.svg)
 
@@ -244,19 +244,12 @@ When performing a search for the best 3-CPL model coordinates (given a dataset),
 
 We use the function [convertPars()](../html/convertPars.html) to map our search parameters to their corresponding PD coordinates. This allows us to propose independent parameter values from a uniform distribution between 0 and 1, and convert them into coordinates that describe a corresponding CPL model PD. This parameter-to-coordinate mapping is achieved using a modified stick breaking Dirichlet process. 
 
-The Dirichlet Process (not to be confused with the Dirichlet distribution) is an algorithm that can break a stick (the x-axis date range) into a desired number of pieces, ensuring all lengths are sampled evenly. The length (proportion) of remaining stick to break (at each iteration) is chosen by sampling from the Beta distribution, such that we use the Beta CDF (with $\alpha$ = 1 and $\beta$ = the number of pieces still to be broken) to convert an x-parameter into its equivalent x-coordinate value. We extend this algorithm into two-dimensions by also sampling from a Gamma distribution on the y-axis, such that we use the Gamma CDF (with $\alpha$ = 1 and $\beta$ = 1) to convert a y-parameter (between 0 and 1) into its equivalent coordinate value between 0 and +$\infty$.
+The Dirichlet Process (not to be confused with the Dirichlet distribution) is an algorithm that can break a stick (the x-axis date range) into a desired number of pieces, ensuring all lengths are sampled evenly. The length (proportion) of remaining stick to break (at each iteration) is chosen by sampling from the Beta distribution, such that we use the Beta CDF (with $\alpha$ = 1 and $\beta$ = the number of pieces still to be broken) to convert an x-parameter into its equivalent x-coordinate value. We extend this algorithm for use with the CPL model by also converting y-parameters to y-coordinates as follows:
 
-The algorithm proceeds as follows:
-
-1. At the first hinge (H1, x = 5500 BP) convert the first y-parameter into the H1 y-coordinate using the Gamma CDF.
-1. At the next hinge (H2) convert the second y-parameter into the H2 y-coordinate using the Gamma CDF.
-1. Use the above y-coordinates (y~H1~ and y~H2~) to calculate the maximum possible H2 x-coordinate. This is achieved by assuming the area so far (to the left of H2) equals 1. Or in other words by assuming the remaining hinges all have a y-coordinate equal to zero and the x-coordinate of H3 is infinitely close to H2. Convert the first x-parameter into x~H2~ by multiplying the Beta CDF by max(x~H2~). 
-1. Repeat steps 2 and 3 for subsequent hinges.
-
-The algorithm continues until the penultimate hinge, which differs slightly since the maximum possible x-coordinate is constrained not just by the area so far (to the left) but also a minimum triangle area to the right. Therefore at the penultimate hinge we convert the last x-parameter first, by multiplying the Beta CDF by max(x~Hpenultimate~) Notice in the case of a 1-CPL model the first hinge is also the penultimate hinge, so in this special case the first y-parameter is converted into the H1 y-coordinate using a uniform distribution between 0 and 2.
-
-Finally the coordinates of the last hinge are not free. This is because the x-coordinate is already defined as 7500 BP and the y-coordinate is calculated exactly using the other coordinates and the constraint that the total area equals 1.
-
+1. Fix the y-value of the first hinge (H1, x = 5500 BP) to any constant (y = 3 is arbitrarily chosen since the mapping function below gives 3 for an average y-parameter of 0.5).
+1. Use the mapping function $f(z) = (1/(1-z))^2)-1$ to convert all remaining y-parameters (between 0 and 1) to y-values (between 0 and +$\infty$).
+1. Calculate the total area, given the y-values and previously calculated x-coordinates. 
+1. Divide y values by the total area, to give the y-coordinates of the final PDF.
 
 The parameters must be provided as a single vector with an odd length, each between 0 and 1 (y,x,y,x,...y). For example, a randomly generated 6-CPL model will have 11 parameters and 7 hinges:
 

@@ -244,12 +244,12 @@ When performing a search for the best 3-CPL model coordinates (given a dataset),
 
 We use the function [convertPars()](../html/convertPars.html) to map our search parameters to their corresponding PD coordinates. This allows us to propose independent parameter values from a uniform distribution between 0 and 1, and convert them into coordinates that describe a corresponding CPL model PD. This parameter-to-coordinate mapping is achieved using a modified stick breaking Dirichlet process. 
 
-The Dirichlet Process (not to be confused with the Dirichlet distribution) is an algorithm that can break a stick (the x-axis date range) into a desired number of pieces, ensuring all lengths are sampled evenly. The length (proportion) of remaining stick to break (at each iteration) is chosen by sampling from the Beta distribution, such that we use the Beta CDF (with $\alpha$ = 1 and $\beta$ = the number of pieces still to be broken) to convert an x-parameter into its equivalent x-coordinate value. We extend this algorithm for use with the CPL model by also converting y-parameters to y-coordinates as follows:
+The Dirichlet Process (not to be confused with the Dirichlet distribution) is an algorithm that can break a stick (the x-axis date range) into a desired number of pieces, ensuring all lengths are sampled evenly. The length (proportion) of remaining stick to break is chosen by sampling from the Beta distribution, such that we use the Beta CDF (with $\alpha$ = 1 and $\beta$ = the number of pieces still to be broken) to convert an x-parameter into its equivalent x-coordinate value. We extend this algorithm for use with the CPL model by also converting y-parameters to y-coordinates as follows:
 
 1. Fix the y-value of the first hinge (H1, x = 5500 BP) to any constant (y = 3 is arbitrarily chosen since the mapping function below gives 3 for an average y-parameter of 0.5).
-1. Use the mapping function $f(z) = (1/(1-z))^2)-1$ to convert all remaining y-parameters (between 0 and 1) to y-values (between 0 and +$\infty$).
+1. Use the mapping function $f(y) = (1/(1-y))^2)-1$ to convert all remaining y-parameters (between 0 and 1) to y-values (between 0 and +$\infty$).
 1. Calculate the total area, given the y-values and previously calculated x-coordinates. 
-1. Divide y values by the total area, to give the y-coordinates of the final PDF.
+1. Divide y-values by the total area, to give the y-coordinates of the final PDF.
 
 The parameters must be provided as a single vector with an odd length, each between 0 and 1 (y,x,y,x,...y). For example, a randomly generated 6-CPL model will have 11 parameters and 7 hinges:
 

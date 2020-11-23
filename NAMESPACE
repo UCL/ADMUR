@@ -25,4 +25,3 @@ importFrom(stats, approx, dcauchy, dlnorm, dnorm, dunif, qbeta, qgamma, quantile
 importFrom(scales, alpha)
 importFrom(zoo, rollmean)
 importFrom(graphics, plot)
-import(mathjaxr) 

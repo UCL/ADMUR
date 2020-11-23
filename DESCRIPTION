@@ -1,6 +1,6 @@
 Package: ADMUR
-Version: 1.0.1.9000
-Date: 2020-11-12
+Version: 1.0.1
+Date: 2020-11-23
 Title: Ancient Demographic Modelling Using Radiocarbon
 Authors@R: person("Adrian", "Timpson", email = "a.timpson@ucl.ac.uk", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-0292-8729"))
 Maintainer: Adrian Timpson <a.timpson@ucl.ac.uk>

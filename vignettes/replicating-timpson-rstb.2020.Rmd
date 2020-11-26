@@ -1,6 +1,6 @@
 ---
 title: |
-  ![](../logos/four_logos.png){height=0.5in}  
+  ![](four_logos.png){height=0.5in}  
   Replicating published results
 author: "Adrian Timpson"
 date: "`r Sys.Date()`"

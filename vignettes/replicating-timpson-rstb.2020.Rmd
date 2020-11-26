@@ -1,5 +1,7 @@
 ---
-title: "Replicating published results"
+title: |
+  ![](../logos/four_logos.png){height=0.5in}  
+  Replicating published results
 author: "Adrian Timpson"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

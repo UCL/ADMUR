@@ -1,5 +1,5 @@
 \name{data2} 
-\docType{data2}
+\docType{data}
 \alias{data2} 
 \title{Toy radiocarbon dataset} 
 \description{

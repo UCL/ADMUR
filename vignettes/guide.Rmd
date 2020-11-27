@@ -513,17 +513,17 @@ a vector of summary statistics (number of points outside the 95% CI), one for ea
 the total number of date in the whole data set. Trivially, the number of rows in data.
 
 
-* **n.dates.effective**
+**n.dates.effective**
 
 the effective number of dates within the date range. Will be non-integer since a proportion of some dates will be outside the date range.
 
 
-* **n.phases.all**
+**n.phases.all**
 
 the total number of phases in the whole data set. 
 
 
-* **n.phases.effective**
+**n.phases.effective**
 
 the effective number of phases within the date range. Will be non-integer since a proportion of some phases will be outside the date range.
 

@@ -526,17 +526,73 @@ plotSimulationSummary(summary, legend.y=0.0012)
 
 The above modelling components (MCMC, GOF, model comparison, relative likelihoods, BIC etc) are not constrained to CPL models, but can be applied to any model structure. Currently ADMUR offers the following:
 
-1. **CPL** n parameters: hinge points.
+1. **CPL** 2n-1 parameters: where n is the number of pieces.
 1. **Uniform** 0 parameters: governed only by the date range.
 1. **Exponential** 1 parameter: rate.
 1. **Gaussian** 2 parameters: mean, sd.
 1. **Cauchy** 2 parameters: location, scale.
 1. **Sinusoidal** 3 parameters: f, p, r. See [sinewavePDF()](../html/sinewavePDF.html) for details.
+1. **Logistic** 2 parameters: k, x0. 
 
-Care should be taken when considering a Gaussian model. The distribution of data from a single event can often superficially appear to be normally distributed due to the human tendency to unconsciously apply regression methods (minimising the residuals).
+See [convertPars()](../html/convertPars.html) for details. Care should be taken when considering a Gaussian model. The distribution of data from a single event can often superficially appear to be normally distributed due to the human tendency to unconsciously apply regression methods (minimising the residuals).
 However, contrary to appearances (and intuitions) a Gaussian does not 'flatten' towards the tails, but decreases at a greater and greater rate towards zero.
 As a consequence, small amounts of data that are several standard deviations away from the mean *appear* to fit a Gaussian quite well, but under a likelihood framework are in fact absurdly improbable.
 Instead, for single events consider a Cauchy model, given the phenomenon that real life data usually has fatter tails than a Gaussian.
 Alternatively, if the waxing and waning of data is suspected to be driven by an oscillating system (such as climate) a sinusoidal model is arguably more sensible.
+
+```{r, eval = FALSE}
+# generate SPDs
+spd1 <- summedCalibrator(data1, CalArray, normalise='full')
+spd2 <- summedCalibrator(data2, CalArray, normalise='full')
+spd3 <- summedCalibrator(data3, CalArray, normalise='full')
+
+# calibrate phases
+CalArray <- makeCalArray(intcal20, calrange = c(5500,7500), inc = 5)
+PD1 <- phaseCalibrator(data1, CalArray, remove.external = TRUE)
+PD2 <- phaseCalibrator(data2, CalArray, remove.external = TRUE)
+PD3 <- phaseCalibrator(data3, CalArray, remove.external = TRUE)
+
+# maximum likelihood search, fitting various models to various datasets
+norm <- JDEoptim(lower=c(5500,1), upper=c(7500,5000), fn=objectiveFunction, PDarray=PD1, type='norm', NP=40, trace=T)
+cauchy <- JDEoptim(lower=c(5500,1), upper=c(7500,5000), fn=objectiveFunction, PDarray=PD1, type='cauchy', NP=40, trace=T)
+sine <- JDEoptim(lower=c(0,0,0), upper=c(1/1000,2*pi,1), fn=objectiveFunction, PDarray=PD2, type='sine', NP=60, trace=T)
+logistic <- JDEoptim(lower=c(0,5000), upper=c(1,8000), fn=objectiveFunction, PDarray=PD3, type='logistic', NP=40, trace=T)
+exp <- JDEoptim(lower=c(0), upper=c(1), fn=objectiveFunction, PDarray=PD3, type='exp', NP=20, trace=T)
+```
+
+Note the upper boundaries for the sinewave (see [sinewavePDF()](../html/sinewavePDF.html) for details). 
+The first parameter governs the frequency, so should be constrained by a wavelength no shorter than c. 1/10th of the date range.  
+
+```{r, echo = FALSE}
+load('vignette.further.models.RData')
+```
+
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+# convert parameters to model PDs
+mod.norm <- convertPars(pars=norm$par, years=5500:7500, type='norm')
+mod.cauchy <- convertPars(pars=cauchy$par, years=5500:7500, type='cauchy')
+mod.sine <- convertPars(pars=sine$par, years=5500:7500, type='sine')
+mod.uniform <- convertPars(pars=NULL, years=5500:7500, type='uniform')
+mod.logistic <- convertPars(pars=logistic$par, years=5500:7500, type='logistic')
+mod.exp <- convertPars(pars=exp$par, years=5500:7500, type='exp')
+
+# Plot SPDs and various fitted models:
+par(mfrow=c(3,1), mar=c(4,4,1,1))
+
+plotPD(spd1)
+lines(mod.norm, col=cols[1], lwd=2)
+lines(mod.cauchy, col=cols[2], lwd=2)
+legend(x=7500, y=max(spd), cex=0.7, lwd=2, col=cols[1:2], bty='n', legend=c('Gaussian','Cauchy'))
+
+plotPD(spd2)
+lines(mod.sine, col=cols[3], lwd=2)
+lines(mod.uniform, col=cols[4], lwd=2)
+legend(x=7500, y=max(spd), cex=0.7, lwd=2, col=cols[3:4], bty='n', legend=c('Sinewave','Uniform'))
+
+plotPD(spd3)
+lines(mod.logistic, col=cols[1], lwd=2)
+lines(mod.exp, col=cols[2], lwd=2)
+legend(x=7500, y=max(spd), cex=0.7, lwd=2, col=cols[1:2], bty='n', legend=c('Logistic','Exponential'))
+```
 
 **********

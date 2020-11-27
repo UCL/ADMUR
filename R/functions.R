@@ -458,7 +458,7 @@ convertPars <- function(pars, years, type){
 	# The model must be returned as a PDF. I.e, the total area must sum to 1.
 
 	# sanity checks
-	if(!type%in%c('CPL','exp','uniform','norm','sine','cauchy'))stop('unknown model type. Only CPL, exp, uniform, norm, sine cauchy currently handled')
+	if(!type%in%c('CPL','exp','uniform','norm','sine','cauchy','logistic'))stop('unknown model type. Only CPL, exp, uniform, norm, sine, cauchy, logistic currently handled')
 	if('data.frame'%in%class(pars))pars <- as.matrix(pars)
 	if('integer'%in%class(years))years <- as.numeric(years)
 	if(!'numeric'%in%class(years))stop('years must be a numeric vector')
@@ -513,6 +513,11 @@ convertParsInner <- function(pars, years, type){
 	if(type=='exp'){
 		if(length(pars)!=1)stop('exponential model requires just one rate parameter')
 		tmp <- exponentialPDF(years, min(years), max(years),pars[1])
+		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
+		}
+	if(type=='logistic'){
+		if(length(pars)!=2)stop('logistic model requires two parameters, rate and centre')
+		tmp <- logisticPDF(years, min(years), max(years),pars[1], pars[2])
 		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
 		}
 	if(type=='norm'){
@@ -863,26 +868,40 @@ plotSimulationSummary <- function(summary, title=NULL, legend.x=NULL, legend.y=N
 	}
 #----------------------------------------------------------------------------------------------
 sinewavePDF <- function(x,min,max,f,p,r){
-
 	if(r==0)return(dunif(x,min,max))
 	if(r<0 | r>1)stop('r must be between 0 and 1')
 	if(p<0 | p>(2*pi))stop('p must be between 0 and 2pi')
 	num <- (sin(2*pi*f*x + p) + 1 - log(r))
 	denum <- (max - min)*(1 - log(r)) + (1/(2*pi*f))*( cos(2*pi*f*min+p) - cos(2*pi*f*max+p) )
-
-	# pdf
 	pdf <- num/denum
 	pdf[x<min | x>max] <- 0
 
 return(pdf)}
 #----------------------------------------------------------------------------------------------
 exponentialPDF <- function(x,min,max,r){
-
 	num <- r*exp(r*x)
 	denum <- exp(r*max)-exp(r*min)
-
-	# pdf
 	pdf <- num/denum
 	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------
+logisticPDF <- function(x,min,max,k,x0){
+	num <- 1 / ( 1 + exp( -k * (x0-x) ) )
+	denum <- (1/k) * log( (1 + exp(k*(x0-min)) ) / (1 + exp(k*(x0-max)) ) )
+	pdf <- num/denum
+	pdf[x<min | x>max] <- 0
+return(pdf)}
+#----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+

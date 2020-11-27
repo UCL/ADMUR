@@ -13,6 +13,8 @@
 
 * Added a logistic model.
 
+* Added three toy datasets.
+
 ## 2020-11-21
 
 ### Version: 1.0.1.9000

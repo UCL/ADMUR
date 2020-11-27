@@ -9,7 +9,7 @@
 	toy
 	}
 \format{
-	A data frame comprising 4rows and 2 columns
+	A data frame comprising 4 rows and 2 columns
 	}
 \source{
 	Toy used in Timpson et al (2020).

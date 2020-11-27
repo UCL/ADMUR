@@ -1,6 +1,6 @@
 ---
 title: |
-  ![](four_logos.png){height=0.5in}  
+  ![](four_logos.png){height=0.55in}  
   ADMUR: Ancient Demographic Modelling Using Radiocarbon
 author: "Adrian Timpson"
 date: "`r Sys.Date()`"
@@ -475,7 +475,7 @@ The test provides a p-value of 1.00 for the best model (3-CPL), since all of the
 load('vignette.3CPL.SPDsimulationTest.RData')
 ```
 
-```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
 print(summary$pvalue)
 hist(summary$simulated.stat, main='Summary statistic', xlab='')
 abline(v=summary$observed.stat, col='red')
@@ -493,21 +493,85 @@ Part 2 provided a framework to directly select the best model given a dataset. T
 Nevertheless, the p-value from the SPD simulation framework is hugely useful in providing a Goodness of Fit test for the best selected model.
 Therefore the summary generated in the section *'Goodness of fit test'* by the [SPDsimulationTest()](../html/SPDsimulationTest.html) function provides a number of other useful outputs that can be plotted, including:
 
-* **timeseries**: a data frame containing various CIs and: 
-  * **calBP**: a vector of calendar years BP 
-  * **expected.sim**: a vector of the expected simulation (mean average of all N simulations) 
-  * **local.sd**: a vector of the local (each year) standard deviation of all N simulations
-  * **model**: a vector of the model PDF
-  * **SPD**: a vector of the observed SPD PDF, generated from data
-  * **index**: a vector of -1,0,+1 corresponding to the SPD points that are above, within or below the 95% CI of all N simulations.
-* **pvalue**: the proportion of N simulated SPDs that have more points outside the 95%CI than the observed SPD has.
-* **observed.stat**: the summary statistic for the observed data (number of points outside the 95% CI)
-* **simulated.stat**: a vector of summary statistics (number of points outside the 95% CI), one for each simulated SPD
-* **n.dates.all**: the total number of date in the whole data set. Trivially, the number of rows in data.
-* **n.dates.effective**: the effective number of dates within the date range. Will be non-integer since a proportion of some dates will be outside the date range
-* **n.phases.all**: the total number of phases in the whole data set. 
-* **n.phases.effective**: the effective number of phases within the date range. Will be non-integer since a proportion of some phases will be outside the date range
-* **n.phases.internal**: an integer subset of n.phases.all that have more than 50% of their total probability mass within the date range.
+**pvalue**
+
+the proportion of N simulated SPDs that have more points outside the 95%CI than the observed SPD has.
+
+
+**observed.stat**
+
+the summary statistic for the observed data (number of points outside the 95% CI).
+
+
+**simulated.stat**
+
+a vector of summary statistics (number of points outside the 95% CI), one for each simulated SPD.
+
+
+**n.dates.all**
+
+the total number of date in the whole data set. Trivially, the number of rows in data.
+
+
+* **n.dates.effective**
+
+the effective number of dates within the date range. Will be non-integer since a proportion of some dates will be outside the date range.
+
+
+* **n.phases.all**
+
+the total number of phases in the whole data set. 
+
+
+* **n.phases.effective**
+
+the effective number of phases within the date range. Will be non-integer since a proportion of some phases will be outside the date range.
+
+
+**n.phases.internal**
+
+an integer subset of n.phases.all that have more than 50% of their total probability mass within the date range.
+
+
+**timeseries**
+
+a data frame containing the following: 
+
+
+**CI**
+
+several vectors of various Confidence Intervals.
+
+**calBP**
+
+a vector of calendar years BP.
+
+
+**expected.sim**
+
+a vector of the expected simulation (mean average of all N simulations).
+
+
+**local.sd**
+
+a vector of the local (each year) standard deviation of all N simulations.
+
+
+**model**
+
+a vector of the model PDF.
+
+
+**SPD**
+
+a vector of the observed SPD PDF, generated from data.
+
+
+**index**
+
+a vector of -1,0,+1 corresponding to the SPD points that are above, within or below the 95% CI of all N simulations.
+
+
 
 ```{r, eval = FALSE}
 summary <- SPDsimulationTest(data, calcurve=shcal20, calrange=c(5500,7500), pars=exp$par, type='exp')
@@ -526,13 +590,7 @@ plotSimulationSummary(summary, legend.y=0.0012)
 
 The above modelling components (MCMC, GOF, model comparison, relative likelihoods, BIC etc) are not constrained to CPL models, but can be applied to any model structure. Currently ADMUR offers the following:
 
-1. **CPL** -> 2n-1 parameters: where n is the number of pieces.
-1. **Uniform** -> 0 parameters: governed only by the date range.
-1. **Exponential** -> 1 parameter: rate.
-1. **Gaussian** -> 2 parameters: mean, sd.
-1. **Cauchy** -> 2 parameters: location, scale.
-1. **Sinusoidal** 3->  parameters: f, p, r. 
-1. **Logistic** -> 2 parameters: k, x$_0$. 
+ **CPL, Uniform, Exponential, Gaussian, Cauchy, Sinusoidal, Logistic** 
 
 See [convertPars()](../html/convertPars.html) for details. Care should be taken when considering a Gaussian model. The distribution of data from a single event can often superficially appear to be normally distributed due to the tendency to unconsciously apply regression methods (minimising the residuals).
 However, contrary to appearances (and intuitions) a Gaussian does not 'flatten' towards the tails, but decreases at a greater and greater rate towards zero.
@@ -588,21 +646,28 @@ mod.exp <- convertPars(pars=exp$par, years=5500:7500, type='exp')
 
 # Plot SPDs and various fitted models:
 par(mfrow=c(3,1), mar=c(4,4,1,1))
+col <- cols[c(1,4)]
 
 plotPD(spd1)
 lines(mod.norm, col=cols[1], lwd=2)
 lines(mod.cauchy, col=cols[4], lwd=2)
-legend(x=7500, y=max(spd1), cex=0.7, lwd=2, col=cols[c(1,4)], bty='n', legend=c('Gaussian','Cauchy'))
+legend(x=7500, y=max(spd1), lwd=2, col=col, bty='n', legend=c('Gaussian','Cauchy'))
 
 plotPD(spd2)
 lines(mod.sine, col=cols[1], lwd=2)
 lines(mod.uniform, col=cols[4], lwd=2)
-legend(x=7500, y=max(spd2), cex=0.7, lwd=2, col=cols[c(1,4)], bty='n', legend=c('Sinewave','Uniform'))
+legend(x=7500, y=max(spd2),  lwd=2, col=col, bty='n', legend=c('Sinewave','Uniform'))
 
 plotPD(spd3)
 lines(mod.logistic, col=cols[1], lwd=2)
 lines(mod.exp, col=cols[4], lwd=2)
-legend(x=7500, y=max(spd3), cex=0.7, lwd=2, col=cols[c(1,4)], bty='n', legend=c('Logistic','Exponential'))
+legend(x=7500, y=max(spd3), lwd=2, col=col, bty='n', legend=c('Logistic','Exponential'))
+
+par(oldpar)
 ```
+
+**********
+
+![](four_logos.png){height=0.55in}  
 
 **********

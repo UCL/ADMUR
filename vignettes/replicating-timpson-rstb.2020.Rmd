@@ -829,3 +829,7 @@ print(tb1)
 ```
 
 **********
+
+![](four_logos.png){height=0.55in}  
+
+**********

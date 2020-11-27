@@ -879,13 +879,15 @@ sinewavePDF <- function(x,min,max,f,p,r){
 return(pdf)}
 #----------------------------------------------------------------------------------------------
 exponentialPDF <- function(x,min,max,r){
-	num <- r*exp(r*x)
-	denum <- exp(r*max)-exp(r*min)
+	if(r==0)return(dunif(x,min,max))
+	num <- -r*exp(-r*x)
+	denum <- exp(-r*max)-exp(-r*min)
 	pdf <- num/denum
 	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------
 logisticPDF <- function(x,min,max,k,x0){
+	if(k==0)return(dunif(x,min,max))
 	num <- 1 / ( 1 + exp( -k * (x0-x) ) )
 	denum <- (1/k) * log( (1 + exp(k*(x0-min)) ) / (1 + exp(k*(x0-max)) ) )
 	pdf <- num/denum

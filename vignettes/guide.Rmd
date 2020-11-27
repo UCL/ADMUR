@@ -32,8 +32,6 @@ The motivation for creating the ADMUR package is to provide a robust framework t
 Unfortunately, the spatiotemporal sparsity of radiocarbon data conspires with the wiggly nature of the calibration curve to encourage the overinterpretation of such datasets, often leading to colourful but statistically unjustified interpretations of population dynamics.
 No statistical method can (or ever will) be able to perfectly reconstruct the true population dynamics from such a dataset. ADMUR is no exception to this, but provides tools to infer a plausible yet conservative reconstruction of population dynamics. 
 
-**NOTE: The ADMUR package is still under construction and the paper is in press. Both are due for publication on 30th November 2020**
-
 ## Installation
 
 The ADMUR pacakge can be installed directly from the CRAN in the usual way:

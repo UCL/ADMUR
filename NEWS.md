@@ -7,6 +7,12 @@
 
 # ADMUR build history
 
+## 2020-11-27
+
+### Version: 1.0.1.9001
+
+* Added a logistic model.
+
 ## 2020-11-21
 
 ### Version: 1.0.1.9000

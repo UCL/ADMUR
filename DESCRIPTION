@@ -14,3 +14,4 @@ Encoding: UTF-8
 VignetteBuilder: knitr
 LazyData: true
 RdMacros: mathjaxr
+RoxygenNote: 7.1.1

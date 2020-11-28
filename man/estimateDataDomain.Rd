@@ -22,7 +22,7 @@ In practice however, the date range chosen to model should not be selected using
 Therefore this function should only be used to select a date range to model if simulating a tiny sample size, to ensure the modelled range does not exceed the date domain of the data.
 	}
 \examples{
-\dontrun{
+\donttest{
 # a single date within the 14C range 5000 to 10000
 data <- data.frame(
 		age = round(runif(1,5000,10000)), 

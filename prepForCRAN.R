@@ -26,29 +26,36 @@ for(n in 1:length(files)){
 #----------------------------------------------------------------------------------------------
 # to submit to the CRAN:
 #----------------------------------------------------------------------------------------------
-# first ensure manuals  are switched to 'donttest'
+# first ensure manuals are switched to 'donttest'
 # then:
 options(download.file.method = "libcurl")
 
-# final checks
-devtools::check_rhub()
+# spell checks
+devtools::spell_check()
+
+# multi-platform rhub checks
+devtools::check_rhub(platforms = NULL)
+
+# win builder checks
+https://win-builder.r-project.org/upload.aspx
 
 # for final submission:
 devtools::release()
 #----------------------------------------------------------------------------------------------
 # search for any specific words or phrases in: .R, .md, .Rmd
-
+#----------------------------------------------------------------------------------------------
+pattern <- '???'
 man <- list.files('man',full.names=T, pattern='.Rd')
 r <- list.files('R',full.names=T, pattern='.R')
 vig <- list.files('vignettes',full.names=T, pattern='.Rmd')
 files <- c(man,r,vig)
 for(n in 1:length(files)){
 	x <- readLines(files[n])
-	i <- grepl('par(',x, fixed = T)
+	i <- grepl(pattern,x, fixed = T)
 	bad <- x[i]
 	if(length(bad)>0)print(paste(files[n], bad))
 	}
-#-----------------------------------------------
+#----------------------------------------------------------------------------------------------
 
 
 

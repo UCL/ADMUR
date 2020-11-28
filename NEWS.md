@@ -10,52 +10,36 @@
 ## 2020-11-27
 
 ### Version: 1.0.1.9001
-
 * Added a logistic model.
-
 * Added three toy datasets.
-
 * New section in guide, exploring further models.
 
 ## 2020-11-21
 
 ### Version: 1.0.1.9000
-
 * Substantial improvement in the area breaking algorithm, total rebuild of convertParsCPL().
-This means that the raw parameter values now differ from v1.0.0 for a given model.
+Be aware that the raw parameter values now differ from v1.0.0 for a given model.
 
 ## 2020-11-18
 
 ### Version: 1.0.0.9003
-
 * Added a Cauchy model, as a Gaussian model is the devil's work. Real data from single events have long tails.
-
 * Added a sigmoidal model. Earth-related systems (e.g. climate) should be expected to oscillate.
-
-* Resubmission of v.1.0.0.9001 accepted by CRAN
 
 ## 2020-11-13
 
 ### Version: 1.0.0.9002
-
-* Added a Gaussian model to existing options of n-CPL, exponential, uniform.
-
+* Added a Gaussian model.
 * Added checkData()
 
 ## 20-11-11 
 
 ### Version: 1.0.0.9001
-
 Resubmission to CRAN as version 1.0.0 following the fix and resubmit request. Many thanks to Gregor Seyer for hugely helpful comments.
-
 * All instances of \dontrun{} in the manual examples changed to \donttest{}, as these take > 5 secs. 
-
 * Changes to warning settings removed from summedCalibrator(). Instead, to avoid repetitive warnings in a loop, warnings are now a logical argument.
-
 * All instances of par() changes within functions have been removed. 
-
 * All instances of par() changes in vignettes are reset to user's par().
-
 
 ## 20-11-06 
 

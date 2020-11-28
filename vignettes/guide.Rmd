@@ -34,7 +34,7 @@ No statistical method can (or ever will) be able to perfectly reconstruct the tr
 
 ## Installation
 
-The ADMUR pacakge can be installed directly from the CRAN in the usual way:
+The ADMUR package can be installed directly from the CRAN in the usual way:
 ```{r, eval = FALSE}
 install.packages('ADMUR')
 ```

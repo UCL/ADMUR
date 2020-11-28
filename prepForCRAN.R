@@ -14,7 +14,7 @@ options(download.file.method = "libcurl")
 devtools::spell_check()
 
 # multi-platform rhub checks
-devtools::check_rhub(platforms = NULL)
+devtools::check_rhub(platforms = NULL, env_vars = c('_R_CHECK_DONTTEST_EXAMPLES_' = "false"))
 
 # check downstream dependencies from code in directory 'dependency checks'
 

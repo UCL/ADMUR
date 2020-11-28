@@ -6,7 +6,9 @@ Please accept my apologies for the short period since last submission (22 days).
 ### Test environments
 * local Windows 10, R 4.0.2
 * Travis CI
-* devtools::check_rhub(platforms = NULL)
+* R-hub builder: Fedora Linux, R-devel, clang, gfortran
+* R-hub builder: Windows Server 2008 R2 SP1, R-devel, 32/64 bit
+* R-hub builder: Ubuntu Linux 16.04 LTS, R-release, GCC
 * win-builder (release)
 * win-builder (devel)
 

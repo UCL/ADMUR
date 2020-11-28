@@ -15,7 +15,6 @@ There were no ERRORs or WARNINGs.
 There was 1 NOTE:
 checking CRAN incoming feasibility ... NOTE
 Maintainer: 'Adrian Timpson <a.timpson@ucl.ac.uk>'
-
 Found possibly invalid DOI. This DOI will go live on 2020-11-30
 
 #### What changed

@@ -16,6 +16,8 @@ There was 1 NOTE:
 checking CRAN incoming feasibility ... NOTE
 Maintainer: 'Adrian Timpson <a.timpson@ucl.ac.uk>'
 
+Found possibly invalid DOI. This DOI will go live on 2020-11-30
+
 #### What changed
 * Added a logistic model.
 * Added three toy datasets.
@@ -25,6 +27,7 @@ Maintainer: 'Adrian Timpson <a.timpson@ucl.ac.uk>'
 * Added a sigmoidal model. Earth-related systems (e.g. climate) should be expected to oscillate.
 * Added a Gaussian model.
 * Added checkData()
+* Cleaner mathematical formulae in manuals, using mathjaxr
 
 # ADMUR version 1.0.0
 

@@ -44,7 +44,7 @@ devtools::release()
 #----------------------------------------------------------------------------------------------
 # search for any specific words or phrases in: .R, .md, .Rmd
 #----------------------------------------------------------------------------------------------
-pattern <- '???'
+pattern <- 'Sexpr'
 man <- list.files('man',full.names=T, pattern='.Rd')
 r <- list.files('R',full.names=T, pattern='.R')
 vig <- list.files('vignettes',full.names=T, pattern='.Rmd')

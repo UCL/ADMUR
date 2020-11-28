@@ -7,7 +7,7 @@
 \usage{sinewavePDF(x, min, max, f, p, r)}
 \arguments{
 	\item{x}{
-	Numeric vector
+	Numeric vector of years
 	}
 	\item{min, max}{
 	Lower and upper \mjseqn{x} limits of the distribution
@@ -34,7 +34,7 @@
 
 	Therefore the formula for the PDF is:
 
-	\mjsdeqn{\frac{1 + \sin(2\pi f x + p) - \log(r)}{(x_{max} - x_{min})(1 - \log(r)) + (\frac{1}{2\pi f})[\cos(2\pi f x_{min} - p) - \cos(2\pi f x_{max} - p)]}} 
+	\mjsdeqn{\frac{1 + \sin(2\pi f x + p) - \ln(r)}{(x_{max} - x_{min})(1 - \ln(r)) + (\frac{1}{2\pi f})[\cos(2\pi f x_{min} - p) - \cos(2\pi f x_{max} - p)]}} 
 	where \mjseqn{x =} years, and \mjseqn{x_{min}} and \mjseqn{x_{max}} determine the truncated date range.
 	}
 \examples{

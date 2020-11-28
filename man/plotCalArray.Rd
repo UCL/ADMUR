@@ -14,7 +14,10 @@
 	Time costly if CalArray comprises the entire 50,000 year range of the calibration curve.
 	}
 \examples{
+\donttest{
 	# generate a CalArray of the intcal20 curve covering 5500 calBP to 6000 calBP
 	x <- makeCalArray( calcurve = intcal20, calrange = c(5500,6000), inc = 1 )
 	plotCalArray(x)
 	}
+	}
+	

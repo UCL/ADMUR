@@ -3,9 +3,10 @@
 # Any bits of R code needed at the top level 
 #----------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------
-
+mathjaxr::preview_rd("convertPars", type = "pdf")
 #----------------------------------------------------------------------------------------------
 # to submit to the CRAN:
+# https://kalimu.github.io/post/checklist-for-r-package-submission-to-cran/
 #----------------------------------------------------------------------------------------------
 options(download.file.method = "libcurl")
 
@@ -15,8 +16,11 @@ devtools::spell_check()
 # multi-platform rhub checks
 devtools::check_rhub(platforms = NULL)
 
+# check downstream dependencies from code in directory 'dependency checks'
+
 # win builder checks
-https://win-builder.r-project.org/upload.aspx
+devtools::check_win_release()
+devtools::check_win_devel()
 
 # for final submission:
 devtools::release()

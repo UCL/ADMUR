@@ -4,7 +4,7 @@
 Please accept my apologies for the short period since last submission (22 days). I anticipate a much longer period before next submission.
 
 ### Test environments
-* local Windows 10, R 4.0.2
+* local Windows 10, R 4.0.3
 * Travis CI
 * R-hub builder: Fedora Linux, R-devel, clang, gfortran
 * R-hub builder: Windows Server 2008 R2 SP1, R-devel, 32/64 bit
@@ -14,7 +14,14 @@ Please accept my apologies for the short period since last submission (22 days).
 
 ### R CMD check results
 There were no ERRORs or WARNINGs. 
-There was 1 NOTE: Found possibly invalid DOI. This DOI will go live on 2020-11-30
+There was 1 NOTE: identifing the following correct URL: https://doi.org/10.1098/rstb.2019.0723  
+
+### Downstream dependencies
+I have also run R CMD check on downstream dependencies of ADMUR 
+All packages passed with no ERRORs or WARNINGs and Status: OK
+
+### Further comments
+The DOI is correct, paper is in press and will go live on 2020-11-30
 
 #### What changed
 * Added a logistic model.

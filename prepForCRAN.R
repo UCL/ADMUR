@@ -10,22 +10,21 @@ mathjaxr::preview_rd("convertPars", type = "pdf")
 #----------------------------------------------------------------------------------------------
 options(download.file.method = "libcurl")
 
+# check downstream dependencies from code in directory 'dependency checks'
+
 # spell checks
 devtools::spell_check()
-
-# multi-platform rhub checks. It appears the default for check-rhub is --no-manual
-# therefore change check_args to ""
-devtools::check_rhub(platforms = NULL, check_args = "", env_vars = c('_R_CHECK_DONTTEST_EXAMPLES_' = "false"))
-
-# check downstream dependencies from code in directory 'dependency checks'
 
 # win builder checks
 devtools::check_win_release()
 devtools::check_win_devel()
 
+# multi-platform rhub checks. It appears the default for check-rhub is --no-manual
+# therefore change check_args to ""
+devtools::check_rhub(platforms = NULL, check_args = "", env_vars = c('_R_CHECK_DONTTEST_EXAMPLES_' = "false"))
+
 # for final submission:
 devtools::release()
-
 #----------------------------------------------------------------------------------------------
 # search for any specific words or phrases in: .R, .md, .Rmd
 #----------------------------------------------------------------------------------------------

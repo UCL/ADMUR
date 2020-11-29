@@ -3,27 +3,27 @@
 # Any bits of R code needed at the top level 
 #----------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------
-mathjaxr::preview_rd("convertPars", type = "pdf")
-#----------------------------------------------------------------------------------------------
 # to submit to the CRAN:
 # https://kalimu.github.io/post/checklist-for-r-package-submission-to-cran/
 #----------------------------------------------------------------------------------------------
 options(download.file.method = "libcurl")
 
-# check downstream dependencies from code in directory 'dependency checks'
+# 1. check downstream dependencies from code in directory 'dependency checks'
+# 2. ensure tarball is < 5MB
 
-# spell checks
+# 3. spell checks
 devtools::spell_check()
 
-# win builder checks
+# 4. win builder checks
 devtools::check_win_release()
 devtools::check_win_devel()
 
-# multi-platform rhub checks. It appears the default for check-rhub is --no-manual, which throws a note.
-# therefore change check_args to ""
+# 5. multi-platform rhub checks.
+#  default for check-rhub is R CMD --no-manual, which throws a note. Therefore change check_args to ""
+#  default for check-rhub is to run the slow examples (donttest). Therefore change enrionmental variables to '_R_CHECK_DONTTEST_EXAMPLES_' = "false"
 devtools::check_rhub(platforms = NULL, check_args = "", env_vars = c('_R_CHECK_DONTTEST_EXAMPLES_' = "false"))
 
-# for final submission:
+# 6. final submission:
 devtools::release()
 #----------------------------------------------------------------------------------------------
 # search for any specific words or phrases in: .R, .md, .Rmd

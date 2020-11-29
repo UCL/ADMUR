@@ -1,6 +1,6 @@
 ---
 title: |
-  ![](four_logos.png){height=0.55in}  
+  ![](four_logos.png){width=680px}  
   ADMUR: Ancient Demographic Modelling Using Radiocarbon
 author: "Adrian Timpson"
 date: "`r Sys.Date()`"
@@ -296,26 +296,22 @@ The ADMUR function [mcmc()](../html/mcmc.html) uses the Metropolis-Hastings algo
 chain <- mcmc(PDarray=PD, startPars=best$par, type='CPL', N=100000, burn=2000, thin=5, jumps =0.025)
 ```
 
-```{r, echo = FALSE}
-load('vignette.3CPL.MCMC.RData')
-```
-
-The acceptance ratio (AR) and raw chain (before burn-in and thinning) can be sanity checked. Ideally we want the AR somewhere in the range 0.2 to 0.5 (this can be tuned with the 'jumps' argument), and the raw chain to resemble 'hairy caterpillars':
-```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='jpeg', warning=FALSE}
-oldpar <- par(no.readonly = TRUE) 
+The acceptance ratio (AR) and raw chain (before burn-in and thinning) can be sanity checked. Ideally we want the AR somewhere in the range 0.3 to 0.5 (this can be tuned with the 'jumps' argument), and the raw chain to resemble 'hairy caterpillars':
+```{r, eval = FALSE}
 print(chain$acceptance.ratio)
-par(mfrow=c(2,3))
+par(mfrow=c(3,2), mar=c(4,3,3,1))
 col <- 'steelblue'
 for(n in 1:5){
 	plot(chain$all.pars[,n], type='l', ylim=c(0,1), col=col, xlab='', ylab='', main=paste('par',n))
 	}
-par(oldpar)
 ```
+![Single chain of all 5 raw parameters](mcmc_chain.png){width=680px}  
+
 
 These parameters can then be converted to the hinge coordinates using the [convertPars()](../html/convertPars.html) function, and their marginal distributions plotted. Note, the MLE parameters (red lines) may not exactly match the peaks of these distributions because they are only marginals. Note also the dates of hinge 1 and 2 are fixed at 5500 and 7500: 
-```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+```{r, eval = FALSE}
 hinges <- convertPars(pars=chain$res, years=5500:7500, type='CPL')
-par(mfrow=c(2,3))
+par(mfrow=c(3,2), mar=c(4,3,3,1))
 c1 <- 'steelblue'
 c2 <- 'firebrick'
 lwd <- 3
@@ -328,25 +324,24 @@ hist(hinges$pdf1, border=c1,breaks=pdf.brk, main=names[3], xlab='');abline(v=CPL
 hist(hinges$pdf2, border=c1,breaks=pdf.brk, main=names[4], xlab='');abline(v=CPL$pdf[2],col=c2,lwd=lwd)
 hist(hinges$pdf3, border=c1,breaks=pdf.brk, main=names[5], xlab='');abline(v=CPL$pdf[3],col=c2,lwd=lwd)
 hist(hinges$pdf4, border=c1,breaks=pdf.brk, main=names[6], xlab='');abline(v=CPL$pdf[4],col=c2,lwd=lwd)
-par(oldpar)
 ```
-
+![Marginal distributions after conversion to hinge coordinates. Maximum Likelihoods (calculated separately) in red.](mcmc_posteriors.png){width=680px}  
 
 Some two-dimensional combinations of joint parameters may be preferred, but still these are 2D marginal representations of 5D parameters, again with MLE in red:
 
-```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='jpeg', warning=FALSE}
+```{r, eval = FALSE}
 require(scales)
 par( mfrow=c(1,2) , mar=c(4,4,1.5,2), cex=0.7 )
 plot(hinges$yr2, hinges$pdf2, pch=16, col=alpha(1,0.02), ylim=c(0,0.0005))
 points(CPL$year[2], CPL$pdf[2], col='red', pch=16, cex=1.2)
 plot(hinges$yr3, hinges$pdf3, pch=16, col=alpha(1,0.02), ylim=c(0,0.0015))
 points(CPL$year[3], CPL$pdf[3], col='red', pch=16, cex=1.2) 
-par(oldpar)
 ```
+![2D Marginal distributions. Maximum Likelihoods (calculated separately) in red.](mcmc_2D.png){width=680px}  
 
 Alternatively, the joint distributions can be visualised by plotting the CPL model for each iteration of the chain, with the MLE in red:
 
-```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='jpeg', warning=FALSE}
+```{r, eval = FALSE}
 plot(NULL, xlim=c(7500,5500),ylim=c(0,0.0011), xlab='calBP', ylab='PD', cex=0.7)
 for(n in 1:nrow(hinges)){
 	x <- c(hinges$yr1[n], hinges$yr2[n], hinges$yr3[n], hinges$yr4[n])
@@ -355,6 +350,7 @@ for(n in 1:nrow(hinges)){
 	}
 lines(x=CPL$year, y=CPL$pdf, lwd=2, col=c2)
 ```
+![Joint posterior distributions. Maximum Likelihood (calculated separately) in red.](mcmc_joint.png){width=680px}  
 
 ## Relative growth and decline rates
 
@@ -630,12 +626,7 @@ The first parameter governs the frequency, so should be constrained by a wavelen
 
 Now the maximum likelihood parameters need to be converted into a PDF and plotted:
 
-
-```{r, echo = FALSE}
-load('vignette.further.models.RData')
-```
-
-```{r, eval = TRUE, fig.height = 7, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+```{r, eval = FALSE}
 # convert parameters to model PDs
 mod.norm <- convertPars(pars=norm$par, years=5500:7500, type='norm')
 mod.cauchy <- convertPars(pars=cauchy$par, years=5500:7500, type='cauchy')
@@ -646,28 +637,27 @@ mod.exp <- convertPars(pars=exp$par, years=5500:7500, type='exp')
 
 # Plot SPDs and various fitted models:
 par(mfrow=c(3,1), mar=c(4,4,1,1))
-col <- cols[c(1,4)]
+cols <- c('steelblue','firebrick')
 
 plotPD(spd1)
 lines(mod.norm, col=cols[1], lwd=2)
-lines(mod.cauchy, col=cols[4], lwd=2)
-legend(x=7500, y=max(spd1), lwd=2, col=col, bty='n', legend=c('Gaussian','Cauchy'))
+lines(mod.cauchy, col=cols[2], lwd=2)
+legend(x=7500, y=max(spd1), lwd=2, col=cols, bty='n', legend=c('Gaussian','Cauchy'))
 
 plotPD(spd2)
 lines(mod.sine, col=cols[1], lwd=2)
-lines(mod.uniform, col=cols[4], lwd=2)
-legend(x=7500, y=max(spd2),  lwd=2, col=col, bty='n', legend=c('Sinewave','Uniform'))
+lines(mod.uniform, col=cols[2], lwd=2)
+legend(x=7500, y=max(spd2),  lwd=2, col=cols, bty='n', legend=c('Sinewave','Uniform'))
 
 plotPD(spd3)
 lines(mod.logistic, col=cols[1], lwd=2)
-lines(mod.exp, col=cols[4], lwd=2)
-legend(x=7500, y=max(spd3), lwd=2, col=col, bty='n', legend=c('Logistic','Exponential'))
-
-par(oldpar)
+lines(mod.exp, col=cols[2], lwd=2)
+legend(x=7500, y=max(spd3), lwd=2, col=cols, bty='n', legend=c('Logistic','Exponential'))
 ```
+![Examples of other models available in ADMUR](further_models.png){width=680px}  
 
 **********
 
-![](four_logos.png){height=0.55in}  
+![](four_logos.png){width=680px}  
 
 **********

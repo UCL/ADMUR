@@ -1,5 +1,10 @@
 # ADMUR version 1.0.1
 
+## Round 2: 2020-11-29 This is a resubmission. 
+In this version I have:
+* reduced tarball size from 7.8 MB to 4.1 MB
+Many thaks to Uwe Ligges for helpful advice.
+
 ## Round 1: 2020-11-28 This is a new submission.
 Please accept my apologies for the short period since last submission (23 days). Much development has been done in this time. I anticipate a much longer period before next submission.
 
@@ -36,6 +41,20 @@ All packages passed with no ERRORs or WARNINGs and Status: OK
 
 # ADMUR version 1.0.0
 
+## Round 2: 20-11-11 This is a resubmission. 
+In this version I have:
+* changed all instances of \dontrun{} to \donttest{}, as these take > 5 secs. 
+* removed all changes to options(warn). Was previously used to suppress repetitive warnings if summedCalibrator() was run in a loop. I have instead added 'checks' as an argument to this function, giving user choice to suppress.
+* removed all changes to par() within functions.
+* ensured par() changes in vignettes are reset to user's par().
+Many thanks to Gregor Seyer for hugely helpful comments.
+
+### R CMD check results
+There were no ERRORs or WARNINGs. 
+There was 1 NOTE:
+checking CRAN incoming feasibility ... NOTE
+Maintainer: 'Adrian Timpson <a.timpson@ucl.ac.uk>'
+
 ## Round 1: 2020-11-06 This is a new submission.
 
 ### Test environments
@@ -59,16 +78,3 @@ All packages passed with no ERRORs or WARNINGs and Status: OK
 * The build checks identify: Possibly mis-spelled words in DESCRIPTION: SPD (11:303, 11:322)
 This intended initialisation is previously fully specified (Summed Probability Distribution).
 
-## Round 2: 20-11-11 This is a resubmission. 
-In this version I have:
-* changed all instances of \dontrun{} to \donttest{}, as these take > 5 secs. 
-* removed all changes to options(warn). Was previously used to suppress repetitive warnings if summedCalibrator() was run in a loop. I have instead added 'checks' as an argument to this function, giving user choice to suppress.
-* removed all changes to par() within functions.
-* ensured par() changes in vignettes are reset to user's par().
-Many thanks to Gregor Seyer for hugely helpful comments.
-
-### R CMD check results
-There were no ERRORs or WARNINGs. 
-There was 1 NOTE:
-checking CRAN incoming feasibility ... NOTE
-Maintainer: 'Adrian Timpson <a.timpson@ucl.ac.uk>'

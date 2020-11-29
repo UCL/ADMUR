@@ -13,6 +13,7 @@
 * Added a logistic model.
 * Added three toy datasets.
 * New section in guide, exploring further models.
+* Package size reduced.
 
 ## 2020-11-21
 

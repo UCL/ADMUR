@@ -800,7 +800,7 @@ relativeDeclineRate <- function(x, y, generation, N){
 		}
 return(res)	}
 #----------------------------------------------------------------------------------------------
-relativeRate <- function(x, y, generation=25, N=5000){
+relativeRate <- function(x, y, generation=25, N=1000){
 
 	if('numeric'%in%class(x)){
 		grad <- diff(y)/diff(x)

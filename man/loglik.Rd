@@ -20,7 +20,7 @@ Row names of both PD and model arguments must exactly match, since the probabili
 \examples{
 	# calibrate a dataset comprising just two phases
 	data <- data.frame(age=c(5800, 5100),sd=c(40, 35),phase=c('p1', 'p2'), datingType='14C')
-	CalArray <- makeCalArray(shcal20, calrange = range(toy$year) ,inc=1)
+	CalArray <- makeCalArray(shcal20, calrange = range(toy$year))
 	PD <- phaseCalibrator(data, CalArray)	
 
 	# calculate toy model log likelihood

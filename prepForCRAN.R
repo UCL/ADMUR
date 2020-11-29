@@ -19,7 +19,7 @@ devtools::spell_check()
 devtools::check_win_release()
 devtools::check_win_devel()
 
-# multi-platform rhub checks. It appears the default for check-rhub is --no-manual
+# multi-platform rhub checks. It appears the default for check-rhub is --no-manual, which throws a note.
 # therefore change check_args to ""
 devtools::check_rhub(platforms = NULL, check_args = "", env_vars = c('_R_CHECK_DONTTEST_EXAMPLES_' = "false"))
 
@@ -42,6 +42,4 @@ for(n in 1:length(files)){
 	if(length(bad)>0)print(paste(files[n], bad))
 	}
 #----------------------------------------------------------------------------------------------
-
-
 

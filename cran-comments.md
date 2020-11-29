@@ -1,7 +1,7 @@
 # ADMUR version 1.0.1
 
 ## Round 1: 2020-11-28 This is a new submission.
-Please accept my apologies for the short period since last submission (22 days). I anticipate a much longer period before next submission.
+Please accept my apologies for the short period since last submission (23 days). Much development has been done in this time. I anticipate a much longer period before next submission.
 
 ### Test environments
 * local Windows 10, R 4.0.3
@@ -28,8 +28,8 @@ All packages passed with no ERRORs or WARNINGs and Status: OK
 * Added three toy datasets.
 * New section in guide, exploring further models.
 * Substantial improvement in the area breaking algorithm, total rebuild of convertParsCPL().
-* Added a Cauchy model, as a Gaussian model is the devil's work. Real data from single events have long tails.
-* Added a sigmoidal model. Earth-related systems (e.g. climate) should be expected to oscillate.
+* Added a Cauchy model.
+* Added a sigmoidal model.
 * Added a Gaussian model.
 * Added checkData()
 * Cleaner mathematical formulae in manuals, using mathjaxr

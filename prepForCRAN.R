@@ -13,8 +13,9 @@ options(download.file.method = "libcurl")
 # spell checks
 devtools::spell_check()
 
-# multi-platform rhub checks
-devtools::check_rhub(platforms = NULL, env_vars = c('_R_CHECK_DONTTEST_EXAMPLES_' = "false"))
+# multi-platform rhub checks. It appears the default for check-rhub is --no-manual
+# therefore change check_args to ""
+devtools::check_rhub(platforms = NULL, check_args = "", env_vars = c('_R_CHECK_DONTTEST_EXAMPLES_' = "false"))
 
 # check downstream dependencies from code in directory 'dependency checks'
 

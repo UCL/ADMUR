@@ -30,7 +30,7 @@ vignette('guide', package = 'ADMUR')
 
 ## References
 
-This package accompanies the following paper which is due to be published on 30th November 2020:
+This package accompanies the following paper:
 
 Timpson A., Barberena R., Thomas M. G., Mendez C., Manning K. 2020. "Directly modelling population dynamics in the South American Arid Diagonal using 14C dates",Philosophical Transactions B. <https://doi.org/10.1098/rstb.2019.0723>.
 

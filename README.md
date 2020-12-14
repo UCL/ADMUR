@@ -52,4 +52,8 @@ ADMUR was written in collaboration with:
 
 Special thanks to Yoan Diekmann for his influential inferential input.
 
+Also thanks to the following who have reported bugs, requested additional functionality, offered constructive criticism, or provided other advice:
+- Enrico Crema
+- Ricardo Fernandes 
+
 ---

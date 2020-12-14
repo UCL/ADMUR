@@ -7,6 +7,12 @@
 
 # ADMUR build history
 
+## 2020-12-14
+
+### Version: 1.0.1.9002
+* Typo corrected in Guide - thanks to Ricardo Fernandes.
+* Bug in relativeRate() corrected. Generation time was fixed on 25 yrs.
+
 ## 2020-11-27
 
 ### Version: 1.0.1.9001

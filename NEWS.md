@@ -12,6 +12,7 @@
 ### Version: 1.0.1.9002
 * Typo corrected in Guide - thanks to Ricardo Fernandes.
 * Bug in relativeRate() corrected. Generation time was fixed on 25 yrs.
+* Further detail in guide on likelihood calculations.
 
 ## 2020-11-27
 

@@ -211,13 +211,13 @@ The argument 'remove.external = TRUE' ensures any calibrated phases with less th
 print( ncol(PD) )
 ```
 
-Finally we calculate the overall log likelihood of the model given the data:
+Finally we calculate the overall relative log likelihood of the model using function [loglik()](../html/loglik.html) 
 
 ```{r, eval = TRUE}
 loglik(PD=PD, model=toy)
 ```
 
-For comparison, we can calculate the overall likelihood of a uniform model given exactly the same data. Intuitively this should have a lower likelihood, since our dataset was randomly generated from the non-uniform toy population history:
+For comparison, we can calculate the overall relative likelihood of a uniform model given exactly the same data. Intuitively this should have a lower relative likelihood, since our dataset was randomly generated from the non-uniform toy population history:
 
 ```{r, eval = TRUE}
 uniform.model <- convertPars(pars=NULL, years=5500:7500, type='uniform')
@@ -229,10 +229,11 @@ And indeed the toy model is thirty nine million trillion times more likely than 
 exp( loglik(PD=PD, model=toy) - loglik(PD=PD, model=uniform.model) )
 ```
 
+Crucially, [loglik()](../html/loglik.html) calculates the relative likelihoods for each effective sample separately (each phase containing a few dates). The overall model likelihood is the overall product of these individual likelihoods. This means that even in the case where there is no ascertainment bias, each date should still be assigned to its own phase, to ensure phaseCalibrator() calibrates each date separately. In contrast, attempting to calculate a likelihood for a single SPD constructed from the entire dataset would be incorrect, as this would be treating the entire dataset as a single 'average' sample.
 
 ## The anatomy of a CPL model
 
-Having established how to calculate the relative likelihood of any proposed model given a dataset, we can use any out-of-the-box search algorithm to find the maximum likelihood model. This first requires us to describe the PD of any population model in terms of a small number of parameters, rather than a vector of probabilities for each year.
+Having established how to calculate the relative likelihood of a proposed model given a dataset, we can use any out-of-the-box search algorithm to find the maximum likelihood model. This first requires us to describe the PD of any population model in terms of a small number of parameters, rather than a vector of probabilities for each year.
 
 We achieve this using the Continuous Piecewise Linear (CPL) model, which is defined by the (x,y) coordinates of its hinge points.
 

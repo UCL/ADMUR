@@ -357,7 +357,7 @@ lines(x=CPL$year, y=CPL$pdf, lwd=2, col=c2)
 Percentage growth rates per generation provide an intuitive statistic to quantify and compare population changes through time. However there are two key issues to overcome when estimating growth rates for a CPL model.
 
 1. CPL modelling allows for the possibility of hiatus periods, defined by pieces between hinges with a zero or near zero PD. Conventionally, the percentage decrease from any value to zero is 100%, however the equivalent percentage increase from zero is undefined.
-2. Each section of the CPL is a straight line with a constant gradient. However, a straight line has a constantly changing rate.
+2. Each section of the CPL is a straight line with a constant gradient. However, a straight line has a constantly changing growth/decline rate.
 
 The first problem is an extreme manifestation of the asymmetry from conventionally reporting change always with respect to the first value. For example, if we consider a population of 80 individuals at time $t_1$, changing to 100 at $t_2$ and to 80 at $t_3$, this would be conventionally described as a 25% increase followed by a 20% decrease.
 This asymmetry is unintuitive and unhelpful in the context of population change, and instead we use a *relative rate* which is always calculated with respect to the larger value (e.g., a '20% relative growth' followed by '20% relative decline').

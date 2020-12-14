@@ -781,7 +781,7 @@ relativeDeclineRate <- function(x, y, generation, N){
 		y <- sort(y, decreasing=T)
 		X <- seq(x[1],x[2], length.out=N)
 		Y <- seq(y[1],y[2], length.out=N)
-		k <- exp(log(Y[2:N]/Y[1:(N-1)])/((X[1:(N-1)]-X[2:N])/25))
+		k <- exp(log(Y[2:N]/Y[1:(N-1)])/((X[1:(N-1)]-X[2:N])/generation))
 		res <- 100*(mean(k)-1)
 		}
 
@@ -795,7 +795,7 @@ relativeDeclineRate <- function(x, y, generation, N){
 			Y[,c] <- seq(y[c,1],y[c,2],length.out=N)
 			}
 		km <- matrix(,N-1,C)
-		for(c in 1:C)km[,c] <- exp(log(Y[2:N,c]/Y[1:(N-1),c])/((X[1:(N-1),c]-X[2:N,c])/25))
+		for(c in 1:C)km[,c] <- exp(log(Y[2:N,c]/Y[1:(N-1),c])/((X[1:(N-1),c]-X[2:N,c])/generation))
 		res <- 100*(colMeans(km)-1)
 		}
 return(res)	}
@@ -894,7 +894,6 @@ logisticPDF <- function(x,min,max,k,x0){
 	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------
-
 
 
 

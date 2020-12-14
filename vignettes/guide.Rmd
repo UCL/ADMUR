@@ -272,7 +272,7 @@ best <- JDEoptim(lower = rep(0,5),
 	PDarray = PD, 
 	type = 'CPL', 
 	NP = 100,
-	Trace = TRUE)
+	trace = TRUE)
 ```
 
 ```{r, echo = FALSE}

@@ -31,7 +31,7 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 
 'norm' is a truncated Gaussian model. The two parameters are used as \mjseqn{\mu} and \mjseqn{\sigma} in the formula for a truncated Normal distribution, the PDF of which is calculated in two steps. Firstly, the PDF of an ordinary Normal distribution is calculated. Secondly, it is normalised by the area within the date range.
 
-'cauchy' is a truncated Cauchy model. The two parameters are used as location and scale in the formula for a truncated Cauchy distribution, the PDF of which is calculated in two steps. Firstly, the PDF of an ordinary Cauchy distribution is calculated. Secondly, it is normalised by the area within the date range.
+'cauchy' is a truncated Cauchy model. The two parameters are used as \mjseqn{x_0} (location) and \mjseqn{\gamma} (scale) in the formula for a truncated Cauchy distribution. The PDF is as follows where \mjseqn{x =} years: \mjsdeqn{\frac{x_0}{\gamma[1+(x\frac{x_0}{\gamma})^2][\arctan(max\frac{x_0}{\gamma})-\arctan(min\frac{x_0}{\gamma})]}}  
 
 'sine' is a truncated sinewave model. The three parameters are used as specified in \code{\link[=sinewavePDF]{sinewavePDF}}
 

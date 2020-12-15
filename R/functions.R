@@ -502,7 +502,7 @@ convertParsInner <- function(pars, years, type){
 	# CPL parameters are both pdfs and years
 	# uniform only requires pdfs at start and end
 	# pdfs with continuous change (cauchy, gaussian, sinewave, exponential) are described with a vector of values corresponding to 'years'
-	# in most cases a final normalisation step is performed to ensure total area = 1 (i.e., resolves truncation of pdf within date range, and numeric approximation)
+	# in most cases a final normalisation step is performed, just in case of any tiny adjustment is required for numeric approximation
 	if(type=='CPL'){
 		res <- convertParsCPL(pars,years)
 		}
@@ -532,7 +532,7 @@ convertParsInner <- function(pars, years, type){
 		}
 	if(type=='cauchy'){
 		if(length(pars)!=2)stop('A cauchy model must have two parameters, location and scale')
-		tmp <- dcauchy(years, pars[1], pars[2])
+		tmp <- cauchyPDF(years, min(years), max(years),pars[1], pars[2])
 		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
 		}
 
@@ -872,8 +872,8 @@ sinewavePDF <- function(x,min,max,f,p,r){
 	if(r<0 | r>1)stop('r must be between 0 and 1')
 	if(p<0 | p>(2*pi))stop('p must be between 0 and 2pi')
 	num <- (sin(2*pi*f*x + p) + 1 - log(r))
-	denum <- (max - min)*(1 - log(r)) + (1/(2*pi*f))*( cos(2*pi*f*min+p) - cos(2*pi*f*max+p) )
-	pdf <- num/denum
+	denom <- (max - min)*(1 - log(r)) + (1/(2*pi*f))*( cos(2*pi*f*min+p) - cos(2*pi*f*max+p) )
+	pdf <- num/denom
 	pdf[x<min | x>max] <- 0
 
 return(pdf)}
@@ -881,21 +881,28 @@ return(pdf)}
 exponentialPDF <- function(x,min,max,r){
 	if(r==0)return(dunif(x,min,max))
 	num <- -r*exp(-r*x)
-	denum <- exp(-r*max)-exp(-r*min)
-	pdf <- num/denum
+	denom <- exp(-r*max)-exp(-r*min)
+	pdf <- num/denom
 	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------
 logisticPDF <- function(x,min,max,k,x0){
 	if(k==0)return(dunif(x,min,max))
 	num <- 1 / ( 1 + exp( -k * (x0-x) ) )
-	denum <- (1/k) * log( (1 + exp(k*(x0-min)) ) / (1 + exp(k*(x0-max)) ) )
-	pdf <- num/denum
+	denom <- (1/k) * log( (1 + exp(k*(x0-min)) ) / (1 + exp(k*(x0-max)) ) )
+	pdf <- num/denom
 	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------
-
-
+cauchyPDF <- function(x,min,max,x0,g){
+	num <- x0
+	denom1 <- g
+	denom2 <- 1 + (x*x0/g)^2
+	denom3 <- atan(max*x0/g) - atan(min*x0/g)
+	pdf <- num/(denom1*denom2*denom3)
+	pdf[x<min | x>max] <- 0
+return(pdf)}
+#----------------------------------------------------------------------------------------------
 
 
 

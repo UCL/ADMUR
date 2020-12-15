@@ -7,6 +7,11 @@
 
 # ADMUR build history
 
+## 2020-12-15
+
+### Version: 1.0.1.9003
+* Full formula for truncated Cauchy model integrated in calculations and manual.
+
 ## 2020-12-14
 
 ### Version: 1.0.1.9002

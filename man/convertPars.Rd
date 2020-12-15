@@ -13,7 +13,7 @@
 	A vector of years.
 	}
   \item{type}{
-	Choose from 'CPL', 'exp', 'norm', 'cauchy', 'sine', 'uniform', 'logistic'.
+	Choose from 'CPL', 'exp', 'norm', 'cauchy', 'sine', 'uniform', 'logistic', 'power'.
 	}
 }
 \details{
@@ -25,13 +25,15 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 
 'CPL' is a Continuous Piecewise Linear model. Pars must be of odd length, each between 0 and 1. A n-CPL model has \mjseqn{2n-1} parameters (\mjseqn{n-1} x-parameters and \mjseqn{n} y-parameters) that are mapped to \mjseqn{n+1} PD coordinates (x,y pairs) using a modified Stick Breaking Dirichlet Process. The first and last x-coordinate are set as \mjseqn{x_{min}} and \mjseqn{x_{max}}, and the remaining internal x-coordinates are converted from their respective x-parameters using the Beta distribution CDF (where \mjseqn{\alpha = 1} and \mjseqn{\beta =} the number of pieces still to be broken). The y-parameters (between 0 and 1) are converted to y-coordinates in two steps. Firstly, they are mapped from the parameter range (0,1) to the coordinate range (0, \mjseqn{\infty}) using the formula \mjseqn{\frac{1}{(1 - y)^2} - 1}, and the single remaining y-coordinate is set as \mjseqn{\frac{1}{(1 - 0.5)^2} - 1}. Secondly, they are normalised by the total area under the curve, calculated as the sum of the areas under all \mjseqn{n} pieces: \mjsdeqn{Area = \sum_{i=1}^{n} (\frac{y_i + y_{i+1}}{2})(x_{i+1} - x_i) }
 
-'exp' is a truncated exponential model. The single parameter is used as the rate exponent \mjseqn{r} which gives growth through time if \mjseqn{r > 0}, decline if \mjseqn{r < 0}, and constant if \mjseqn{r=0}. The PDF is as follows where \mjseqn{x =} years: \mjsdeqn{\frac{-re^{-r x}}{e^{-rx_{max}} - e^{-rx_{min}}}}  
+'exp' is a truncated exponential model of the form \mjseqn{f(x)=ae^{rx}} where \mjseqn{x =} years. The single parameter is used as the rate exponent \mjseqn{r} which gives growth through time if \mjseqn{r > 0}, decline if \mjseqn{r < 0}, and constant if \mjseqn{r=0}. The PDF is as follows. Note the \mjseqn{a} parameter cancels out: \mjsdeqn{\frac{-re^{-r x}}{e^{-rx_{max}} - e^{-rx_{min}}}}  
 
-'logistic' is a truncated logistic model. The two parameters are used as the rate \mjseqn{k} and centre \mjseqn{x_0} where the PDF is: \mjsdeqn{\frac{k}{(e^{-k(x_0 - x)} + 1)\ln{\Bigl(\frac{e^{-k(x_0 - min)} + 1}{e^{-k(x_0 - max)} + 1}}\Bigr)}}
+'logistic' is a truncated logistic model. The two parameters are used as the rate \mjseqn{k} and centre \mjseqn{x_0} where the PDF is: \mjsdeqn{\frac{k}{(e^{-k(x_0 - x)} + 1)\ln{\Bigl(\frac{e^{-k(x_0 - x_{min})} + 1}{e^{-k(x_0 - x_{max})} + 1}}\Bigr)}}
 
 'norm' is a truncated Gaussian model. The two parameters are used as \mjseqn{\mu} and \mjseqn{\sigma} in the formula for a truncated Normal distribution, the PDF of which is calculated in two steps. Firstly, the PDF of an ordinary Normal distribution is calculated. Secondly, it is normalised by the area within the date range.
 
-'cauchy' is a truncated Cauchy model. The two parameters are used as \mjseqn{x_0} (location) and \mjseqn{\gamma} (scale) in the formula for a truncated Cauchy distribution. The PDF is as follows where \mjseqn{x =} years: \mjsdeqn{\frac{x_0}{\gamma[1+(x\frac{x_0}{\gamma})^2][\arctan(max\frac{x_0}{\gamma})-\arctan(min\frac{x_0}{\gamma})]}}  
+'cauchy' is a truncated Cauchy model. The two parameters are used as \mjseqn{x_0} (location) and \mjseqn{\gamma} (scale) in the formula for a truncated Cauchy distribution. The PDF is as follows where \mjseqn{x =} years: \mjsdeqn{\frac{x_0}{\gamma[1+(x\frac{x_0}{\gamma})^2][\arctan(x_{max}\frac{x_0}{\gamma})-\arctan(x_{min}\frac{x_0}{\gamma})]}}  
+
+'power' is a truncated Power law model of the form \mjseqn{f(x)=a(b+x)^c} where \mjseqn{x =} years. The PDF is as follows. Note the \mjseqn{a} parameter cancels out: \mjsdeqn{\frac{(c+1)(b+x)^c}{(b+x_{max})^(c+1) - (b+x_{min})^(c+1)}}
 
 'sine' is a truncated sinewave model. The three parameters are used as specified in \code{\link[=sinewavePDF]{sinewavePDF}}
 
@@ -67,13 +69,21 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 	pars <- matrix( runif(10)*10000, 5, 2 )
 	x <- convertPars( pars=pars, years=5500:7500, type='cauchy')
 
-	# convert a single random logistic parameter pairs (k, x0)
+	# convert a single random logistic parameter pair (k, x0)
 	pars <- c(runif(1,0,0.01),runif(1,6000,6500))
 	x <- convertPars( pars=pars, years=5500:7500, type='logistic')
 
 	# convert a matrix of 5 random logistic parameter pairs(k, x0)
 	pars <- matrix( c(runif(5,0,0.01),runif(5,6000,6500)), 5, 2 )
 	x <- convertPars( pars=pars, years=5500:7500, type='logistic')
+
+	# convert a single random power law parameter pair (b, c)
+	pars <- c(runif(1,2000,4000),runif(1,-1.2,-1.7))
+	x <- convertPars( pars=pars, years=5500:7500, type='power')
+
+	# convert a matrix of 5 random power law parameter pairs(b, c)
+	pars <- matrix( c(runif(5,2000,4000),runif(5,-1.2,-1.7)), 5, 2 )
+	x <- convertPars( pars=pars, years=5500:7500, type='power')
 
 	# convert a single random sinewave parameter set (f,p,r)
 	f <- 1/runif(1,200,1000)

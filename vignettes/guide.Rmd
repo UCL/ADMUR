@@ -587,7 +587,7 @@ plotSimulationSummary(summary, legend.y=0.0012)
 
 The above modelling components (MCMC, GOF, model comparison, relative likelihoods, BIC etc) are not constrained to CPL models, but can be applied to any model structure. Currently ADMUR offers the following:
 
- **CPL, Uniform, Exponential, Gaussian, Cauchy, Sinusoidal, Logistic** 
+ **CPL, Uniform, Exponential, Gaussian, Cauchy, Sinusoidal, Logistic, Power law** 
 
 See [convertPars()](../html/convertPars.html) for details. Care should be taken when considering a Gaussian model. The distribution of data from a single event can often superficially appear to be normally distributed due to the tendency to unconsciously apply regression methods (minimising the residuals).
 However, contrary to appearances (and intuitions) a Gaussian does not 'flatten' towards the tails, but decreases at a greater and greater rate towards zero.

@@ -458,7 +458,7 @@ convertPars <- function(pars, years, type){
 	# The model must be returned as a PDF. I.e, the total area must sum to 1.
 
 	# sanity checks
-	if(!type%in%c('CPL','exp','uniform','norm','sine','cauchy','logistic'))stop('unknown model type. Only CPL, exp, uniform, norm, sine, cauchy, logistic currently handled')
+	if(!type%in%c('CPL','exp','uniform','norm','sine','cauchy','logistic','power'))stop('unknown model type. Only CPL, exp, uniform, norm, sine, cauchy, logistic, power currently handled')
 	if('data.frame'%in%class(pars))pars <- as.matrix(pars)
 	if('integer'%in%class(years))years <- as.numeric(years)
 	if(!'numeric'%in%class(years))stop('years must be a numeric vector')
@@ -501,7 +501,7 @@ convertParsInner <- function(pars, years, type){
 	# structure of different models differs:
 	# CPL parameters are both pdfs and years
 	# uniform only requires pdfs at start and end
-	# pdfs with continuous change (cauchy, gaussian, sinewave, exponential) are described with a vector of values corresponding to 'years'
+	# pdfs with continuous change (cauchy, gaussian, sinewave, exponential, power) are described with a vector of values corresponding to 'years'
 	# in most cases a final normalisation step is performed, just in case of any tiny adjustment is required for numeric approximation
 	if(type=='CPL'){
 		res <- convertParsCPL(pars,years)
@@ -533,6 +533,11 @@ convertParsInner <- function(pars, years, type){
 	if(type=='cauchy'){
 		if(length(pars)!=2)stop('A cauchy model must have two parameters, location and scale')
 		tmp <- cauchyPDF(years, min(years), max(years),pars[1], pars[2])
+		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
+		}
+	if(type=='power'){
+		if(length(pars)!=2)stop('A power law model must have two parameters, b and c')
+		tmp <- powerPDF(years, min(years), max(years),pars[1], pars[2])
 		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
 		}
 
@@ -903,8 +908,13 @@ cauchyPDF <- function(x,min,max,x0,g){
 	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------
-
-
+powerPDF <- function(x,min,max,b,c){
+	num <- (c+1)*(b+x)^c
+	denom <- (b+max)^(c+1) - (b+min)^(c+1)
+	pdf <- num/denom
+	pdf[x<min | x>max] <- 0
+return(pdf)}
+#----------------------------------------------------------------------------------------------
 
 
 

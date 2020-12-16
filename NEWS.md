@@ -11,7 +11,8 @@
 
 ### Version: 1.0.1.9004
 * Toy data sets 1,2,3 changed to a more recent date range, to better demonstrate the power law model.
-* Power Law model added to guide, and all guide models rerun under 'Other models in ADMUR'
+* Power Law model added to guide, and all guide models rerun under 'Other models in ADMUR'.
+* MCMC extended to handle other models.
 
 ## 2020-12-15
 

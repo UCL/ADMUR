@@ -595,31 +595,39 @@ As a consequence, small amounts of data that are several standard deviations awa
 Instead, for single events consider a Cauchy model, given the phenomenon that real life data usually has fatter tails than a Gaussian.
 Alternatively, if the waxing and waning of data is suspected to be driven by an oscillating system (such as climate) a sinusoidal model may more sensible.
 
-The following code uses three toy datasets to demonstrate these models. After calibration through intcal20, they retain effective sample sizes of n = 100, n = 93 and n = 79 respectively.
+The following code uses three toy datasets to demonstrate these models. After calibration through intcal20, they retain effective sample sizes of a little under n = 100.
 
 ```{r, eval = FALSE}
 # generate SPDs
+CalArray <- makeCalArray(intcal20, calrange = c(1000,4000))
 spd1 <- summedCalibrator(data1, CalArray, normalise='full')
 spd2 <- summedCalibrator(data2, CalArray, normalise='full')
 spd3 <- summedCalibrator(data3, CalArray, normalise='full')
 
 # calibrate phases
-CalArray <- makeCalArray(intcal20, calrange = c(5500,7500), inc = 5)
 PD1 <- phaseCalibrator(data1, CalArray, remove.external = TRUE)
 PD2 <- phaseCalibrator(data2, CalArray, remove.external = TRUE)
 PD3 <- phaseCalibrator(data3, CalArray, remove.external = TRUE)
 
+# effective sample sizes
+ncol(PD1)
+ncol(PD2)
+ncol(PD3)
+
 # maximum likelihood search, fitting various models to various datasets
-norm <- JDEoptim(lower=c(5500,1), upper=c(7500,5000), fn=objectiveFunction, 
-		PDarray=PD1, type='norm', NP=40, trace=T)
-cauchy <- JDEoptim(lower=c(5500,1), upper=c(7500,5000), fn=objectiveFunction, 
-		PDarray=PD1, type='cauchy', NP=40, trace=T)
-sine <- JDEoptim(lower=c(0,0,0), upper=c(1/1000,2*pi,1), fn=objectiveFunction, 
-		PDarray=PD2, type='sine', NP=60, trace=T)
-logistic <- JDEoptim(lower=c(0,5000), upper=c(1,8000), fn=objectiveFunction, 
-		PDarray=PD3, type='logistic', NP=40, trace=T)
-exp <- JDEoptim(lower=c(0), upper=c(1), fn=objectiveFunction, 
-		PDarray=PD3, type='exp', NP=20, trace=T)
+norm <- JDEoptim(lower=c(1000,1), upper=c(4000,5000), 
+	fn=objectiveFunction, PDarray=PD1, type='norm', NP=40, trace=T)
+cauchy <- JDEoptim(lower=c(1000,1), upper=c(4000,5000),
+	fn=objectiveFunction, PDarray=PD1, type='cauchy', NP=40, trace=T)
+sine <- JDEoptim(lower=c(0,0,0), upper=c(1/1000,2*pi,1),
+	fn=objectiveFunction, PDarray=PD2, type='sine', NP=60, trace=T)
+logistic <- JDEoptim(lower=c(0,0000), upper=c(1,10000),
+	fn=objectiveFunction, PDarray=PD3, type='logistic', NP=40, trace=T)
+exp <- JDEoptim(lower=c(0), upper=c(1),
+	fn=objectiveFunction, PDarray=PD3, type='exp', NP=20, trace=T)
+power <- JDEoptim(lower=c(0,-10), upper=c(10000,0),
+	fn=objectiveFunction, PDarray=PD3, type='power', NP=40, trace=T)
+
 ```
 
 Note the upper boundaries for the sinewave (see [sinewavePDF()](../html/sinewavePDF.html) for details). 
@@ -629,31 +637,34 @@ Now the maximum likelihood parameters need to be converted into a PDF and plotte
 
 ```{r, eval = FALSE}
 # convert parameters to model PDs
-mod.norm <- convertPars(pars=norm$par, years=5500:7500, type='norm')
-mod.cauchy <- convertPars(pars=cauchy$par, years=5500:7500, type='cauchy')
-mod.sine <- convertPars(pars=sine$par, years=5500:7500, type='sine')
-mod.uniform <- convertPars(pars=NULL, years=5500:7500, type='uniform')
-mod.logistic <- convertPars(pars=logistic$par, years=5500:7500, type='logistic')
-mod.exp <- convertPars(pars=exp$par, years=5500:7500, type='exp')
+years <- 1000:4000
+mod.norm <- convertPars(pars=norm$par, years, type='norm')
+mod.cauchy <- convertPars(pars=cauchy$par, years, type='cauchy')
+mod.sine <- convertPars(pars=sine$par, years, type='sine')
+mod.uniform <- convertPars(pars=NULL, years, type='uniform')
+mod.logistic <- convertPars(pars=logistic$par, years, type='logistic')
+mod.exp <- convertPars(pars=exp$par, years, type='exp')
+mod.power <- convertPars(pars=power$par, years, type='power')
 
 # Plot SPDs and various fitted models:
 par(mfrow=c(3,1), mar=c(4,4,1,1))
-cols <- c('steelblue','firebrick')
+cols <- c('steelblue','firebrick','orange')
 
 plotPD(spd1)
-lines(mod.norm, col=cols[1], lwd=2)
-lines(mod.cauchy, col=cols[2], lwd=2)
-legend(x=7500, y=max(spd1), lwd=2, col=cols, bty='n', legend=c('Gaussian','Cauchy'))
+lines(mod.norm, col=cols[1], lwd=5)
+lines(mod.cauchy, col=cols[2], lwd=5)
+legend(x=4000, y=max(spd1)*1.2, lwd=5, col=cols, bty='n', legend=c('Gaussian','Cauchy'))
 
 plotPD(spd2)
-lines(mod.sine, col=cols[1], lwd=2)
-lines(mod.uniform, col=cols[2], lwd=2)
-legend(x=7500, y=max(spd2),  lwd=2, col=cols, bty='n', legend=c('Sinewave','Uniform'))
+lines(mod.sine, col=cols[1], lwd=5)
+lines(mod.uniform, col=cols[2], lwd=5)
+legend(x=4000, y=max(spd2)*1.2,  lwd=5, col=cols, bty='n', legend=c('Sinewave','Uniform'))
 
 plotPD(spd3)
-lines(mod.logistic, col=cols[1], lwd=2)
-lines(mod.exp, col=cols[2], lwd=2)
-legend(x=7500, y=max(spd3), lwd=2, col=cols, bty='n', legend=c('Logistic','Exponential'))
+lines(mod.logistic, col=cols[1], lwd=5)
+lines(mod.exp, col=cols[2], lwd=5)
+lines(mod.power, col=cols[3], lwd=5)
+legend(x=4000, y=max(spd3)*1.2, lwd=5, col=cols, bty='n', legend=c('Logistic','Exponential','Power Law'))
 ```
 ![Examples of other models available in ADMUR](further_models.png){width=680px}  
 

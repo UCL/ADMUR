@@ -613,7 +613,7 @@ return(new.pars)}
 #--------------------------------------------------------------------------------------------
 mcmc <- function(PDarray, startPars, type, N = 30000, burn = 2000, thin = 5, jumps = 0.02){ 
 
-	if(!type%in%c('CPL','exp','norm'))stop('unknown model type. Only CPL, exp, norm')
+	if(!type%in%c('CPL','exp','norm','sine','cauchy','logistic','power'))stop('unknown model type. Only CPL, exp,  norm, sine, cauchy, logistic, power currently handled')
 
 	# starting parameters
 	pars <- startPars

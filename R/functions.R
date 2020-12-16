@@ -900,26 +900,20 @@ logisticPDF <- function(x,min,max,k,x0){
 return(pdf)}
 #----------------------------------------------------------------------------------------------
 cauchyPDF <- function(x,min,max,x0,g){
-	num <- x0
+	num <- 1
 	denom1 <- g
-	denom2 <- 1 + (x*x0/g)^2
-	denom3 <- atan(max*x0/g) - atan(min*x0/g)
+	denom2 <- 1+((x-x0)/g)^2
+	denom3 <- atan((x0-min)/g) - atan((x0-max)/g)
 	pdf <- num/(denom1*denom2*denom3)
 	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------
 powerPDF <- function(x,min,max,b,c){
 	num <- (c+1)*(b+x)^c
-	denom <- (b+max)^(c+1) - (b+min)^(c+1)
+	denom <- (b+max)*(c+1) - (b+min)*(c+1)
 	pdf <- num/denom
 	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------
-
-
-
-
-
-
 
 

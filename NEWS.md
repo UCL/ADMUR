@@ -7,11 +7,18 @@
 
 # ADMUR build history
 
+## 2020-12-16
+
+### Version: 1.0.1.9004
+* Toy data sets 1,2,3 changed to a more recent date range, to better demonstrate the power law model.
+* Power Law model added to guide, and all guide models rerun under 'Other models in ADMUR'
+
 ## 2020-12-15
 
 ### Version: 1.0.1.9003
 * Integrated full formula for truncated Cauchy model into calculations and manual.
 * Aded Power law model
+
 ## 2020-12-14
 
 ### Version: 1.0.1.9002

@@ -23,7 +23,7 @@
 	Specifies the proportion of proposals to be disregarded (after burn-in), such that the default 5 will only keep every 5th proposal.
 	}
   \item{jumps}{
-	Specifies the size of the random jump between the last parameters and the proposed parameters. A smaller value gives a smaller jump.
+	Vector that determines the size of the random jump between the last parameters and the proposed parameters. A smaller value gives a smaller jump. Different jump values can be provided for each parameter. This can be tuned by observing how well mixed each parameter is in the chain.
 	}
 
 }

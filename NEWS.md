@@ -11,7 +11,7 @@
 
 ### Version: 1.0.2.9000
 * Taphonomy option now included: major update.
-* Taphonomy parmaeter incorprated into convertPars(), objectiveFunction(), proposalFunction(), mcmc()
+* Taphonomy parameter incorporated into convertPars(), objectiveFunction(), proposalFunction(), mcmc()
 * New CPLparsToHinges() helper function purely to handle converting CPL parameters into hinges
 
 ## 2020-12-16
@@ -25,7 +25,7 @@
 
 ### Version: 1.0.1.9003
 * Integrated full formula for truncated Cauchy model into calculations and manual.
-* Aded Power law model
+* Added Power law model
 
 ## 2020-12-14
 

@@ -18,6 +18,7 @@ export(relativeRate)
 export(plotSimulationSummary)
 export(checkData)
 export(sinewavePDF)
+export(CPLparsToHinges)
 
 import(mathjaxr)
 importFrom(grDevices, colorRampPalette)

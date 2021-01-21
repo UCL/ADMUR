@@ -256,7 +256,7 @@ The parameters must be provided as a single vector with an odd length, each betw
 
 ```{r, eval = TRUE}
 set.seed(12345)
-convertPars( pars=runif(11), years=5500:7500, type='CPL' )
+CPLparsToHinges(pars=runif(11), years=5500:7500)
 ```
 
 Note: The Area Breaking Algorithm is a heuristic that ensures all parameter space is explored and therefore the maximum likelihood parameters are always found. However, unlike the one-dimensional stick-breaking process, its mapping of random parameters to PD coordinates is not perfectly even, and we welcome ideas for a more elegant algorithm.
@@ -281,7 +281,7 @@ load('vignette.3CPL.JDEoptim.best.RData')
 ```
 
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
-CPL <- convertPars(pars=best$par, years=5500:7500, type='CPL')
+CPL <- CPLparsToHinges(pars=best$par, years=5500:7500)
 SPD <- summedPhaseCalibrator( data=data, calcurve=shcal20, calrange=c(5500,7500) )
 plotPD(SPD)
 lines(CPL$year, CPL$pdf, lwd=2, col='firebrick')
@@ -667,6 +667,27 @@ lines(mod.power, col=cols[3], lwd=5)
 legend(x=4000, y=max(spd3)*1.2, lwd=5, col=cols, bty='n', legend=c('Logistic','Exponential','Power Law'))
 ```
 ![Examples of other models available in ADMUR](further_models.png){width=680px}  
+
+**********
+
+# 5. Taphonomy
+
+Taphonomic loss has an important influence on the amount of datable material that can be recovered, with the obvious bias that older material is less likely to survive. This means that if a constant population deposited a perfectly uniform amount of material through time, we should expect the archaeological record to show an increase in dates towards the present, rather than a uniform distribution.
+
+This taphonomic loss rate has been estimated by [Surovell et al.](https://doi.org/10.1016/j.jas.2009.03.029) and  [Bluhm and Surovell](https://doi.org/10.1017/qua.2018.78) who make a compelling argument that a power function $a(x+b)^c$  provides a useful model of taphonomic loss through time ($x$), providing not only a good statistical fit to empirical data, but is also consistent with the mechanism that datable material is subject to greater initial environmental degradation when first deposited on the ground surface compared to the increasing protection through time as it becomes cocooned from these forces. 
+
+However, there are two important issues to consider when modelling taphonomy:
+
+1. There is substantial uncertainty regarding the values of the parameters that determine the shape of taphonomic curve. These studies have estimated different parameter values for the two datasets used. Furthermore we should expect different taphonomic rates in different locations, due to variation in environmental and geological conditions.
+1. There is a common misunderstanding that the taphonomic curve can be used to 'adjust' or 'correct' the data or an SPD to generate a more faithful representation of the true population dynamics.
+
+## Taphonomic curve parameters
+
+Current taphonomic estimates use regression methods to find power law curves, which is problematic for several reasons. These methods don't incorporate the full information of the calibrated 14C dates (instead a point estimate is used for each date), and therefore are not based on likelihoods. Nor do they provide confidence intervals for the curve parameters. Finally, the parameter $a$ is an unnecessary for the purposes of population modelling, since we are not interested in estimating the *absolute* loss in material, merely the *relative* loss through time. Therefore we can consider the taphonomic curve as a PDF such that the total area across the study period equals 1. This results in the following formula, where $x$ is time, and $x_{min}$ and $x_{max}$ are the time boundaries of the study period: $$\frac{(c+1)(b+x)^c}{(b+x_{max})^{(c+1)} - (b+x_{min})^{(c+1)}}$$ 
+
+Instead, we apply this PDF (ADMUR's power model) within the MCMC framework to estimate the joint parameter distributions of $b$ and $c$ from the same two datasets used in the above studies, constraining the study period (as they did) to between 1kyr and 40kyr BP as follows:
+
+
 
 **********
 

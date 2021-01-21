@@ -416,6 +416,15 @@ uncalibrateCalendarDates <- function(dates, calcurve){
 	simC14Samples[i] <- round(rnorm(n=sum(i),mean=simC14.means[i],sd=simC14.errors[i]))
 	simC14Samples[!i] <- round(dates[!i])
 return(simC14Samples)}
+#--------------------------------------------------------------------------------------------
+interpolate.model.to.PD <- function(PD, model){
+
+	years <- as.numeric(row.names(PD))
+	x <- as.numeric(model$year)
+	y <- model$pdf
+	y.out <- approx(x=x, y=y, xout=years)$y
+	model <- data.frame(year=years, pdf=y.out)
+}
 #--------------------------------------------------------------------------------------------	
 loglik <- function(PD, model){
 
@@ -424,18 +433,13 @@ loglik <- function(PD, model){
 	# Numerically this is the scalar product: sum of (model PDF x date PDF).
 
 	years <- as.numeric(row.names(PD))
-	inc <- (years[2]-years[1])
 
 	# ensure the date ranges exactly match. If not, interpolate model pdf to match PD.
-	check <- identical(as.numeric(row.names(PD)),model$year)
-	if(!check){
-		x <- as.numeric(model$year)
-		y <- model$pdf
-		y.out <- approx(x=x, y=y, xout=years)$y
-		model <- data.frame(year=years, pdf=y.out)
-		}
+	check <- identical(years,model$year)
+	if(!check) model <- interpolate.model.to.PD(PD, model)
 
 	# ensure model PD is provided as a discretised PDF
+	inc <- (years[2]-years[1])
 	model$pdf <- model$pdf/(sum(model$pdf)*inc)
 
 	# convert the date PD pdfs to discrete PMFs to perform a weighted average
@@ -453,101 +457,112 @@ loglik <- function(PD, model){
 	if(is.nan(loglik))loglik <- -Inf
 return(loglik)}
 #--------------------------------------------------------------------------------------------	
-convertPars <- function(pars, years, type){
+convertPars <- function(pars, years, type, taphonomy=FALSE){
 
 	# The model must be returned as a PDF. I.e, the total area must sum to 1.
 
 	# sanity checks
-	if(!type%in%c('CPL','exp','uniform','norm','sine','cauchy','logistic','power'))stop('unknown model type. Only CPL, exp, uniform, norm, sine, cauchy, logistic, power currently handled')
+	model.choices <- c('CPL','exp','uniform','norm','sine','cauchy','logistic','power')
+	if(!type%in%model.choices)stop(paste('Unknown model type. Choose from:',paste(model.choices,collapse=', ')))
 	if('data.frame'%in%class(pars))pars <- as.matrix(pars)
 	if('integer'%in%class(years))years <- as.numeric(years)
 	if(!'numeric'%in%class(years))stop('years must be a numeric vector')
 
 	if('NULL'%in%class(pars) | 'numeric'%in%class(pars)){
-		res <- convertParsInner(pars, years, type)
+		res <- convertParsInner(pars, years, type, taphonomy)
 		return(res)
 		}
 
 	if(!'numeric'%in%class(pars)){
 		N <- nrow(pars)
-		# handled differently for CPL
-		if(type=='CPL'){
-			C <- (ncol(pars)+1)/2 +1
-			yr <- pdf <- as.data.frame(matrix(,N,C))
-				names(yr) <- paste('yr',1:C,sep='')
-				names(pdf) <- paste('pdf',1:C,sep='')
-				for(n in 1:N){
-					x <- convertParsCPL(pars[n,],years)
-					yr[n,] <- x$year
-					pdf[n,] <- x$pdf
-					}
-			res <- cbind(yr,pdf)
-			}
-		if(type!='CPL'){
-			C <- length(years)
-			res <- as.data.frame(matrix(,N,C))
-			names(res) <- years
-			for(n in 1:N)res[n,] <- convertParsInner(pars[n,], years, type)$pdf
-			}
-		return(res)
+		C <- length(years)
+		res <- as.data.frame(matrix(,N,C))
+		names(res) <- years
+		for(n in 1:N)res[n,] <- convertParsInner(pars[n,], years, type, taphonomy)$pdf
 		}
-
+		return(res)
 }
 #--------------------------------------------------------------------------------------------
-convertParsInner <- function(pars, years, type){
+convertParsInner <- function(pars, years, type, taphonomy){
 
-	inc <- years[2]-years[1]
+	if(taphonomy){
+		p <- length(pars)
+		model.pars <- pars[0:(p-2)]
+		taph.pars <- pars[(p-1):p]
+		}
+	if(!taphonomy){
+		model.pars <- pars
+		taph.pars <- c(0,0)
+		}
 
-	# structure of different models differs:
-	# CPL parameters are both pdfs and years
-	# uniform only requires pdfs at start and end
-	# pdfs with continuous change (cauchy, gaussian, sinewave, exponential, power) are described with a vector of values corresponding to 'years'
-	# in most cases a final normalisation step is performed, just in case of any tiny adjustment is required for numeric approximation
 	if(type=='CPL'){
-		res <- convertParsCPL(pars,years)
+		tmp <- CPLPDF(years,model.pars)
 		}
 	if(type=='uniform'){
-		if(!is.null(pars))stop('A uniform model must have NULL parameters')
-		res <- data.frame( year=range(years), pdf=dunif(range(years),min(years),max(years)) )
+		if(length(model.pars)!=0)stop('A uniform model must have zero parameters')
+		tmp <- dunif(years, min(years), max(years))
 		}
 	if(type=='exp'){
-		if(length(pars)!=1)stop('exponential model requires just one rate parameter')
-		tmp <- exponentialPDF(years, min(years), max(years),pars[1])
-		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
+		if(length(model.pars)!=1)stop('exponential model requires just one rate parameter')
+		tmp <- exponentialPDF(years, min(years), max(years),model.pars[1])
 		}
 	if(type=='logistic'){
-		if(length(pars)!=2)stop('logistic model requires two parameters, rate and centre')
-		tmp <- logisticPDF(years, min(years), max(years),pars[1], pars[2])
-		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
+		if(length(model.pars)!=2)stop('logistic model requires two parameters, rate and centre')
+		tmp <- logisticPDF(years, min(years), max(years),model.pars[1], model.pars[2])
 		}
 	if(type=='norm'){
-		if(length(pars)!=2)stop('A Gaussian model must have two parameters, mean and sd')
-		tmp <- dnorm(years, pars[1], pars[2])
-		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
+		if(length(model.pars)!=2)stop('A Gaussian model must have two parameters, mean and sd')
+		tmp <- dnorm(years, model.pars[1], model.pars[2])
 		}
 	if(type=='sine'){
-		if(length(pars)!=3)stop('A sinusoidal model must have three parameters, f, p and r')
-		tmp <- sinewavePDF(years, min(years), max(years), pars[1], pars[2], pars[3])
-		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
+		if(length(model.pars)!=3)stop('A sinusoidal model must have three parameters, f, p and r')
+		tmp <- sinewavePDF(years, min(years), max(years), model.pars[1], model.pars[2], model.pars[3])
 		}
 	if(type=='cauchy'){
-		if(length(pars)!=2)stop('A cauchy model must have two parameters, location and scale')
-		tmp <- cauchyPDF(years, min(years), max(years),pars[1], pars[2])
-		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
+		if(length(model.pars)!=2)stop('A cauchy model must have two parameters, location and scale')
+		tmp <- cauchyPDF(years, min(years), max(years),model.pars[1], model.pars[2])
 		}
 	if(type=='power'){
-		if(length(pars)!=2)stop('A power law model must have two parameters, b and c')
-		tmp <- powerPDF(years, min(years), max(years),pars[1], pars[2])
-		res <- data.frame(year = years, pdf = tmp/(sum(tmp)*inc))
+		if(length(model.pars)!=2)stop('A power law model must have two parameters, b and c')
+		tmp <- powerPDF(years, min(years), max(years),model.pars[1], model.pars[2])
 		}
 
+	# incorporate taphonomy
+	taph <- (years + taph.pars[1])^taph.pars[2]
+	tmp <- tmp * taph
+	inc <- years[2]-years[1]
+	pdf <- tmp/(sum(tmp)*inc)
+
+	res <- data.frame(year = years, pdf = pdf)
 return(res)}
 #--------------------------------------------------------------------------------------------
-convertParsCPL <- function(pars, years){
+CPLparsToHinges <- function(pars, years){
+
+	if('numeric'%in%class(pars)){
+		res <- CPLparsToHingesInner(pars, years)
+		return(res)}
+
+	N <- nrow(pars)
+	C <- (ncol(pars)+1)/2 +1
+	yr <- pdf <- as.data.frame(matrix(,N,C))
+	names(yr) <- paste('yr',1:C,sep='')
+	names(pdf) <- paste('pdf',1:C,sep='')
+	for(n in 1:N){
+		x <- CPLparsToHingesInner(pars[n,],years)
+		yr[n,] <- x$year
+		pdf[n,] <- x$pdf
+		}
+	res <- cbind(yr,pdf)
+return(res)}
+#--------------------------------------------------------------------------------------------
+CPLparsToHingesInner <- function(pars, years){
 
 	# must be odd, as (2n-1 parameters where n=number of pieces)
- 	cond <- ((length(pars)+1) %% 2) == 0
+	cond <- ((length(pars)+1) %% 2) == 0
 	if(!cond)stop('A CPL model must have an odd number of parameters')
+
+	# parameters must be between 0 and 1
+	if(sum(pars>1 | pars<0)!=0)stop('CPL parameters must be between 0 and 1')
 
 	if(length(pars)==1){
 		x.par <- c()
@@ -584,21 +599,35 @@ convertParsCPL <- function(pars, years){
 	d <- data.frame(year=x, pdf=y)
 return(d)}
 #--------------------------------------------------------------------------------------------
-objectiveFunction <- function(pars, PDarray, type){
+objectiveFunction <- function(pars, PDarray, type, taphonomy=FALSE){
 
 	if(!is.data.frame(PDarray))stop('PDarray must be a data frame')
-
 	years <- as.numeric(row.names(PDarray))
-	model <- convertPars(pars,years,type)
+	model <- convertPars(pars,years,type,taphonomy)
 	loglik <- loglik(PDarray, model)
 
 return(-loglik)}
 #--------------------------------------------------------------------------------------------
-proposalFunction <- function(pars, jumps, type){
+proposalFunction <- function(pars, jumps, type, taphonomy, taph.min, taph.max){
+
+	if(taphonomy){
+		p <- length(pars)
+		taph.pars <- pars[(p-1):p]
+		taph.jumps <- abs(taph.max-taph.min)/30
+		taph.moves <- rnorm(2,0,taph.jumps)
+		new.taph.pars <- taph.pars + taph.moves
+
+		# taphonomy constraints to a reasonable prior range
+		if(new.taph.pars[1]<taph.min[1] | new.taph.pars[1]>taph.max[1]) new.taph.pars[1] <- taph.pars[1]
+		if(new.taph.pars[2]<taph.min[2] | new.taph.pars[2]>taph.max[2]) new.taph.pars[2] <- taph.pars[2]
+		pars <- pars[1:(p-2)]
+		}
+
+	# remaining parameters (non-taph)
 	moves <- rnorm(length(pars),0,jumps)
 	new.pars <- pars + moves
 
-	# bunch of constraints for impossible parameters (usually floating point bullshit)
+	# technical constraints. Usually floating point bullshit.
 	if(type=='CPL'){
 		new.pars[new.pars<0.00000000001] <- 0.00000000001
 		new.pars[new.pars>0.99999999999] <- 0.99999999999
@@ -607,11 +636,15 @@ proposalFunction <- function(pars, jumps, type){
 		if(new.pars==0)new.pars <- 1e-100
 		}
 	if(type=='norm'){
-		new.pars[new.pars<=0] <- 1
+		new.pars[new.pars<=1] <- 1
 		}
+
+	# recombine pars with taph.pars if necessary
+	if(taphonomy)new.pars <- c(new.pars,new.taph.pars)
+
 return(new.pars)}
 #--------------------------------------------------------------------------------------------
-mcmc <- function(PDarray, startPars, type, N = 30000, burn = 2000, thin = 5, jumps = 0.02){ 
+mcmc <- function(PDarray, startPars, type, taphonomy=FALSE, taph.min=c(0,-3), taph.max=c(20000,0), N = 30000, burn = 2000, thin = 5, jumps = 0.02){ 
 
 	if(!type%in%c('CPL','exp','norm','sine','cauchy','logistic','power'))stop('unknown model type. Only CPL, exp,  norm, sine, cauchy, logistic, power currently handled')
 
@@ -624,9 +657,9 @@ mcmc <- function(PDarray, startPars, type, N = 30000, burn = 2000, thin = 5, jum
 	accepted <- rep(0,N)
 	for(n in 1:N){
 		all.pars[n,] <- pars
-		llik <- -objectiveFunction(pars,PDarray,type)
-		prop.pars <- proposalFunction(pars, jumps, type)
-		prop.llik <- -objectiveFunction(prop.pars,PDarray,type)
+		llik <- -objectiveFunction(pars, PDarray, type, taphonomy)
+		prop.pars <- proposalFunction(pars, jumps, type, taphonomy, taph.min, taph.max)
+		prop.llik <- -objectiveFunction(prop.pars, PDarray, type, taphonomy)
 		ratio <- min(exp(prop.llik-llik),1)
 		move <- sample(c(T,F),size=1,prob=c(ratio,1-ratio))
 		if(move){
@@ -872,6 +905,11 @@ plotSimulationSummary <- function(summary, title=NULL, legend.x=NULL, legend.y=N
 	x.intersp = c(1,1,1,-0.5,-0.5,-0.5,-0.5))
 	}
 #----------------------------------------------------------------------------------------------
+CPLPDF <- function(x,pars){
+	hinges <- CPLparsToHinges(pars, x)
+	pdf <- approx(x=hinges$year, y=hinges$pdf, xout=x)$y
+return(pdf)}
+#----------------------------------------------------------------------------------------------
 sinewavePDF <- function(x,min,max,f,p,r){
 	if(r==0)return(dunif(x,min,max))
 	if(r<0 | r>1)stop('r must be between 0 and 1')
@@ -879,8 +917,6 @@ sinewavePDF <- function(x,min,max,f,p,r){
 	num <- (sin(2*pi*f*x + p) + 1 - log(r))
 	denom <- (max - min)*(1 - log(r)) + (1/(2*pi*f))*( cos(2*pi*f*min+p) - cos(2*pi*f*max+p) )
 	pdf <- num/denom
-	pdf[x<min | x>max] <- 0
-
 return(pdf)}
 #----------------------------------------------------------------------------------------------
 exponentialPDF <- function(x,min,max,r){
@@ -888,7 +924,6 @@ exponentialPDF <- function(x,min,max,r){
 	num <- -r*exp(-r*x)
 	denom <- exp(-r*max)-exp(-r*min)
 	pdf <- num/denom
-	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------
 logisticPDF <- function(x,min,max,k,x0){
@@ -896,7 +931,6 @@ logisticPDF <- function(x,min,max,k,x0){
 	num <- 1 / ( 1 + exp( -k * (x0-x) ) )
 	denom <- (1/k) * log( (1 + exp(k*(x0-min)) ) / (1 + exp(k*(x0-max)) ) )
 	pdf <- num/denom
-	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------
 cauchyPDF <- function(x,min,max,x0,g){
@@ -905,14 +939,12 @@ cauchyPDF <- function(x,min,max,x0,g){
 	denom2 <- 1+((x-x0)/g)^2
 	denom3 <- atan((x0-min)/g) - atan((x0-max)/g)
 	pdf <- num/(denom1*denom2*denom3)
-	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------
 powerPDF <- function(x,min,max,b,c){
 	num <- (c+1)*(b+x)^c
 	denom <- (b+max)*(c+1) - (b+min)*(c+1)
 	pdf <- num/denom
-	pdf[x<min | x>max] <- 0
 return(pdf)}
 #----------------------------------------------------------------------------------------------
 

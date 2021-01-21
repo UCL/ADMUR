@@ -7,6 +7,13 @@
 
 # ADMUR build history
 
+## 2021-01-21
+
+### Version: 1.0.2.9000
+* Taphonomy option now included: major update.
+* Taphonomy parmaeter incorprated into convertPars(), objectiveFunction(), proposalFunction(), mcmc()
+* New CPLparsToHinges() helper function purely to handle converting CPL parameters into hinges
+
 ## 2020-12-16
 
 ### Version: 1.0.1.9004

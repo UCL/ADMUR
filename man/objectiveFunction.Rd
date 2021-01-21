@@ -2,7 +2,7 @@
 \alias{objectiveFunction} 
 \title{Objective function to be minimised in a search. Returns the negative log likelihood.} 
 \description{Calculates the negative log likelihood of a model given a calibrated date matrix.}
-\usage{objectiveFunction(pars, PDarray, type)}
+\usage{objectiveFunction(pars, PDarray, type, taphonomy=FALSE)}
 \arguments{
   \item{pars}{
 	A numeric vector of parameters. 
@@ -13,6 +13,9 @@
   \item{type}{
 	Choose from 'CPL', 'exponential', or 'uniform'. 
 	}
+  \item{taphonomy}{
+	If TRUE, the last two parameters determine the taphonomic loss rate.
+	}	
 }
 \value{
 	Returns a single value, the negative log likelihood.
@@ -43,4 +46,8 @@
 
 	# the negative log likelihood given a uniform model
 	objectiveFunction(pars=NULL, PD, type='uniform')	
+
+	# the negative log likelihood given a uniform model with taphonomy
+	pars <- c(runif(1, 0, 20000), runif(1, -3, 0))
+	objectiveFunction(pars=pars, PD, type='uniform', taphonomy=TRUE)	
 }

@@ -4,7 +4,7 @@
 \description{
 	Converts either a vector of parameters, or a matrix of many parameter sets to model x,y coordinates (date and pdf)
 	\loadmathjax }
-\usage{convertPars(pars, years, type)}
+\usage{convertPars(pars, years, type, taphonomy=FALSE)}
 \arguments{
   \item{pars}{
 	Either a vector of one parameter set, or a matrix of several parameter sets (one set per row). 
@@ -14,6 +14,9 @@
 	}
   \item{type}{
 	Choose from 'CPL', 'exp', 'norm', 'cauchy', 'sine', 'uniform', 'logistic', 'power'.
+	}
+  \item{taphonomy}{
+	If TRUE, the last two parameters determine the taphonomic loss rate.
 	}
 }
 \details{
@@ -39,51 +42,105 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 
 'uniform' is a uniform model requiring no parameters. I.e. the argument pars must be NULL or c(), and trivially the PDF is: \mjsdeqn{\frac{1}{x_{max} - x_{min}}}
 
+If taphonomy is TRUE, the model PDF additionally includes taphonomic loss. The last two parameters are used to generate a taphonomic curve using the formula \mjseqn{(b+x)^c} and the remaining parameters are used in the appropriate model type above. Then the model PDF is multiplied by the taphonomic curve and normalised across the date range, to give the final model PDF that includes taphonomy.
 	}
+	
 \examples{
 	# convert a single random 6-CPL parameter set
-	x <- convertPars( pars=runif(11), years=5500:7500, type='CPL')
+	pars <- runif(11)
+	x <- convertPars( pars=pars, years=5500:7500, type='CPL')
+
+	# single random 6-CPL parameter set with taphonomy parameters (b,c)
+	pars <- runif(13, c(rep(0,11),0,-3), c(rep(1,11),20000,0))
+	x <- convertPars( pars=pars, years=5500:7500, type='CPL', taphonomy=TRUE)
 
 	# convert a matrix of 5 random 6-CPL parameter sets
 	pars <- matrix( runif(11*5), 5, 11 )
 	x <- convertPars( pars=pars, years=5500:7500, type='CPL')
 
+	# 5 random 6-CPL parameter sets with taphonomy parameters (b,c)
+	pars <- t(matrix(runif(13*5, c(rep(0,11),0,-3), c(rep(1,11),20000,0)),13,5))
+	x <- convertPars( pars=pars, years=5500:7500, type='CPL', taphonomy=TRUE)
+
 	# convert a single random exponential parameter
-	x <- convertPars( pars=runif(1, -0.01, 0.01), years=5500:7500, type='exp')
+	pars <- runif(1, -0.01, 0.01)
+	x <- convertPars( pars=pars, years=5500:7500, type='exp')
+
+	# single random exponential parameter with taphonomy parameters (b,c)
+	pars <- runif(3, c(-0.01,0,-3), c(0.01,20000,0))
+	x <- convertPars( pars=pars, years=5500:7500, type='exp', taphonomy=TRUE)
 	
 	# convert a matrix of 5 random exponential parameter sets
 	pars <- matrix( runif(5, -0.01, 0.01), 5, 1 )
 	x <- convertPars( pars=pars, years=5500:7500, type='exp')
 
-	# convert a single random Gaussian parameter pair (mean, sd)
-	x <- convertPars( pars=runif(2)*10000, years=5500:7500, type='norm')
+	# 5 random exponential parameter sets with taphonomy parameters (b,c)
+	pars <- t(matrix(runif(3*5, c(-0.01,0,-3), c(0.01,20000,0)),3,5))
+	x <- convertPars( pars=pars, years=5500:7500, type='exp', taphonomy=TRUE)
 
-	# convert a matrix of 5 random Gaussian parameter pairs (mean, sd)
-	pars <- matrix( runif(10)*10000, 5, 2 )
+	# convert a single random Gaussian parameter pair (mean, sd)
+	pars <- runif(2, c(6000,200), c(7000,1000))
 	x <- convertPars( pars=pars, years=5500:7500, type='norm')
 
-	# convert a single random Cauchy parameter pair (location, scale)
-	x <- convertPars( pars=runif(2)*10000, years=5500:7500, type='cauchy')
+	# single random Gaussian parameter pair (mean, sd) with taphonomy parameters (b,c)
+	pars <- runif(4, c(6000,200,0,-3), c(7000,1000,20000,0))
+	x <- convertPars( pars=pars, years=5500:7500, type='norm', taphonomy=TRUE)
 
-	# convert a matrix of 5 random Cauchy parameter pairs (location, scale)
-	pars <- matrix( runif(10)*10000, 5, 2 )
+	# convert a matrix of 5 random Gaussian parameter pairs (mean, sd)
+	pars <- t(matrix(runif(2*5, c(6000,200), c(7000,1000)),2,5))
+	x <- convertPars( pars=pars, years=5500:7500, type='norm')
+
+	# 5 random Gaussian parameter pairs (mean, sd) with taphonomy parameters (b,c)
+	pars <- t(matrix(runif(4*5, c(6000,200,0,-3), c(7000,1000,20000,0)),4,5))
+	x <- convertPars( pars=pars, years=5500:7500, type='norm', taphonomy=TRUE)
+
+	# convert a single random Cauchy parameter pair (location, scale)
+	pars <- runif(2, c(6000,200), c(7000,1000))
 	x <- convertPars( pars=pars, years=5500:7500, type='cauchy')
 
+	# single random Cauchy parameter pair (location, scale) with taphonomy parameters (b,c)
+	pars <- runif(4, c(6000,200,0,-3), c(7000,1000,20000,0))
+	x <- convertPars( pars=pars, years=5500:7500, type='cauchy', taphonomy=TRUE)
+
+	# convert a matrix of 5 random Cauchy parameter pairs (location, scale)
+	pars <- t(matrix(runif(2*5, c(6000,200), c(7000,1000)),2,5))
+	x <- convertPars( pars=pars, years=5500:7500, type='cauchy')
+
+	# 5 random Cauchy parameter pairs (location, scale) with taphonomy parameters (b,c)
+	pars <- t(matrix(runif(4*5, c(6000,200,0,-3), c(7000,1000,20000,0)),4,5))
+	x <- convertPars( pars=pars, years=5500:7500, type='cauchy', taphonomy=TRUE)
+
 	# convert a single random logistic parameter pair (k, x0)
-	pars <- c(runif(1,0,0.01),runif(1,6000,6500))
+	pars <- runif(2, c(0,6000), c(0.01,6500))
 	x <- convertPars( pars=pars, years=5500:7500, type='logistic')
+
+	# single random logistic parameter pair (k, x0) with taphonomy parameters (b,c)
+	pars <- runif(4, c(0,6000,0,-3), c(0.01,6500,20000,0))
+	x <- convertPars( pars=pars, years=5500:7500, type='logistic', taphonomy=TRUE)
 
 	# convert a matrix of 5 random logistic parameter pairs(k, x0)
-	pars <- matrix( c(runif(5,0,0.01),runif(5,6000,6500)), 5, 2 )
+	pars <- t(matrix(runif(2*5, c(0,6000), c(0.01,6500)),2,5))
 	x <- convertPars( pars=pars, years=5500:7500, type='logistic')
 
+	#  5 random logistic parameter pairs(k, x0) with taphonomy parameters (b,c)
+	pars <- t(matrix(runif(4*5, c(0,6000,0,-3), c(0.01,6500,20000,0)),4,5))
+	x <- convertPars( pars=pars, years=5500:7500, type='logistic', taphonomy=TRUE)
+
 	# convert a single random power law parameter pair (b, c)
-	pars <- c(runif(1,2000,4000),runif(1,-1.2,-1.7))
+	pars <- runif(2, c(2000,-1.7), c(4000,-1.2))
 	x <- convertPars( pars=pars, years=5500:7500, type='power')
 
+	# single random power law parameter pair (b, c) with taphonomy parameters 
+	pars <- runif(4, c(2000,-1.7,0,-3), c(4000,-1.2,20000,0))
+	x <- convertPars( pars=pars, years=5500:7500, type='power', taphonomy=TRUE)
+
 	# convert a matrix of 5 random power law parameter pairs(b, c)
-	pars <- matrix( c(runif(5,2000,4000),runif(5,-1.2,-1.7)), 5, 2 )
+	pars <- t(matrix(runif(2*5, c(2000,-1.7), c(4000,-1.2)),2,5))
 	x <- convertPars( pars=pars, years=5500:7500, type='power')
+
+	#  5 random power law parameter pairs(b, c) with taphonomy parameters 
+	pars <- t(matrix(runif(4*5, c(2000,-1.7,0,-3), c(4000,-1.2,20000,0)),4,5))
+	x <- convertPars( pars=pars, years=5500:7500, type='power', taphonomy=TRUE)
 
 	# convert a single random sinewave parameter set (f,p,r)
 	f <- 1/runif(1,200,1000)
@@ -91,12 +148,36 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 	r <- runif(1,0,1)
 	x <- convertPars( pars=c(f,p,r), years=5500:7500, type='sine')
 
+	# single random sinewave parameter set (f,p,r) with taphonomy parameters (b,c)
+	f <- 1/runif(1,200,1000)
+	p <- runif(1,0,2*pi)
+	r <- runif(1,0,1)
+	b <- runif(1,0,20000)
+	c <- runif(1,-3,0)
+	x <- convertPars( pars=c(f,p,r,b,c), years=5500:7500, type='sine', taphonomy=TRUE)
+
 	# convert a matrix of 5 random sinewave parameter sets (f,p,r)
 	f <- 1/runif(5,200,1000)
 	p <- runif(5,0,2*pi)
 	r <- runif(5,0,1)
 	x <- convertPars( pars=cbind(f,p,r), years=5500:7500, type='sine')
+
+	# 5 random sinewave parameter sets (f,p,r) with taphonomy parameters (b,c)
+	f <- 1/runif(5,200,1000)
+	p <- runif(5,0,2*pi)
+	r <- runif(5,0,1)
+	b <- runif(5,0,20000)
+	c <- runif(5,-3,0)
+	x <- convertPars( pars=cbind(f,p,r,b,c), years=5500:7500, type='sine', taphonomy=TRUE)
 	
 	# although a uniform distribution has no parameters, a pdf can still be generated:
 	x <- convertPars(pars=NULL, years=5500:7500, type='uniform')
+
+	# and if taphonomy is included, it does have the taphonomy parameters (b,c)
+	pars <- runif(2, c(0,-3), c(20000,0))
+	x <- convertPars(pars=pars, years=5500:7500, type='uniform', taphonomy=TRUE)
+
+	# likewise for a matrix of 5 random taphonomy parameters (b,c)
+	pars <- t(matrix(runif(2*5, c(0,-3), c(20000,0)),2,5))
+	x <- convertPars(pars=pars, years=5500:7500, type='uniform', taphonomy=TRUE)
 	}

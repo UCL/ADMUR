@@ -7,6 +7,9 @@
 
 # ADMUR build history
 
+### Version: 1.0.2.9001
+* svg now imported from grDevices in NAMESPACE, following request from Prof Brian Ripley
+
 ## 2021-01-21
 
 ### Version: 1.0.2.9000

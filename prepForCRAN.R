@@ -31,6 +31,7 @@ devtools::release()
 pattern <- '\\mjseqn'
 pattern <- '\\mjsdeqn'
 pattern <- 'Philo'
+pattern <- 'svg'
 man <- list.files('man',full.names=T, pattern='.Rd')
 r <- list.files('R',full.names=T, pattern='.R')
 vig <- list.files('vignettes',full.names=T, pattern='.Rmd')

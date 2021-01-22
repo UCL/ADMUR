@@ -21,7 +21,7 @@ export(sinewavePDF)
 export(CPLparsToHinges)
 
 import(mathjaxr)
-importFrom(grDevices, colorRampPalette)
+importFrom(grDevices, colorRampPalette, svg)
 importFrom(graphics, axis, image, legend, lines, par, polygon, text)
 importFrom(stats, approx, dcauchy, dlnorm, dnorm, dunif, qbeta, qgamma, quantile, rnorm, sd)
 importFrom(scales, alpha)

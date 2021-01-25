@@ -12,6 +12,7 @@
 ### Version: 1.0.2.9001
 * svg now imported from grDevices in NAMESPACE, following request from Prof Brian Ripley.
 * 14C datasets from taphonomic papers added (Surovell, Bluhm, Bryson etc).
+* Substantial update to guide, detailing taphonomy.
 
 ## 2021-01-21
 

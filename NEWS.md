@@ -7,8 +7,11 @@
 
 # ADMUR build history
 
+## 2021-01-22
+
 ### Version: 1.0.2.9001
-* svg now imported from grDevices in NAMESPACE, following request from Prof Brian Ripley
+* svg now imported from grDevices in NAMESPACE, following request from Prof Brian Ripley.
+* 14C datasets from taphonomic papers added (Surovell, Bluhm, Bryson etc).
 
 ## 2021-01-21
 

@@ -138,7 +138,14 @@ plotCalArray <- function(CalArray){
 	}
 #--------------------------------------------------------------------------------------------	
 plotPD <- function(x){
-	years <- as.numeric(row.names(x))
+	if(!'year'%in%names(x)){
+		years <- as.numeric(row.names(x))
+		}
+	if('year'%in%names(x)){
+		years <- x$year
+		x <- data.frame(x$pdf)
+		}
+
 	plot(NULL, type = "n", bty = "n", xlim = rev(range(years)), ylim=c(0,max(x)*1.2),las = 1, cex.axis = 0.7, cex.lab = 0.7, ylab='PD',xlab='calBP')
 	for(n in 1:ncol(x)){
 		prob <- x[,n]

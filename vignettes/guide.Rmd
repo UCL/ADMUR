@@ -678,16 +678,114 @@ This taphonomic loss rate has been estimated by [Surovell et al.](https://doi.or
 
 However, there are two important issues to consider when modelling taphonomy:
 
-1. There is substantial uncertainty regarding the values of the parameters that determine the shape of taphonomic curve. These studies have estimated different parameter values for the two datasets used. Furthermore we should expect different taphonomic rates in different locations, due to variation in environmental and geological conditions.
-1. There is a common misunderstanding that the taphonomic curve can be used to 'adjust' or 'correct' the data or an SPD to generate a more faithful representation of the true population dynamics.
+1. There is substantial uncertainty regarding the values of the parameters that determine the shape of taphonomic curve. We should expect different taphonomic rates in different locations, due to variation in environmental and geological conditions. Indeed these studies have estimated different parameter values for the two datasets used. 
+1. There is a common misunderstanding that the taphonomic curve can be used to 'adjust' or 'correct' the data or an SPD to generate a more faithful representation of the true population dynamics. In the fact inclusion of taphonomy is achieved with additional appropriate model parameters, resulting in a more complex model. Whether or not this greater complexity is justified is moot - the decision to include or exclude cannot be resolved with model comparison and should be justified with an independent argument. When comparing models using BIC, all should be consistent in either including or excluding taphonomic curve parameters.
 
 ## Taphonomic curve parameters
 
-Current taphonomic estimates use regression methods to find power law curves, which is problematic for several reasons. These methods don't incorporate the full information of the calibrated 14C dates (instead a point estimate is used for each date), and therefore are not based on likelihoods. Nor do they provide confidence intervals for the curve parameters. Finally, the parameter $a$ is an unnecessary for the purposes of population modelling, since we are not interested in estimating the *absolute* loss in material, merely the *relative* loss through time. Therefore we can consider the taphonomic curve as a PDF such that the total area across the study period equals 1. This results in the following formula, where $x$ is time, and $x_{min}$ and $x_{max}$ are the time boundaries of the study period: $$\frac{(c+1)(b+x)^c}{(b+x_{max})^{(c+1)} - (b+x_{min})^{(c+1)}}$$ 
+The above studies use regression methods to estimate the power law curve parameters. These methods don't incorporate the full information of the calibrated 14C dates (instead a point estimate is used for each date), and therefore are not based on likelihoods. Nor do they provide confidence intervals for the curve parameters. Finally, the parameter $a$ is unnecessary for the purposes of population modelling, since we are not interested in estimating the *absolute* loss in material, merely the *relative* loss through time. Therefore we can consider the taphonomic curve as a PDF such that the total area across the study period equals 1. This results in the following formula, where $x$ is time, and $x_{min}$ and $x_{max}$ are the time boundaries of the study period: $$\frac{(c+1)(b+x)^c}{(b+x_{max})^{(c+1)} - (b+x_{min})^{(c+1)}}$$ 
 
-Instead, we apply this PDF (ADMUR's power model) within the MCMC framework to estimate the joint parameter distributions of $b$ and $c$ from the same two datasets used in the above studies, constraining the study period (as they did) to between 1kyr and 40kyr BP as follows:
+This defines ADMUR's power model PDF which we apply within the MCMC framework to estimate the joint parameter distributions of $b$ and $c$ from the same two datasets used in the above studies, constraining the study period (as they did) to between 1kyr and 40kyr BP as follows:
 
+```{r, eval = FALSE}
+# generate an PD array for each dataset
+years <- seq(1000,40000,by=50)
+CalArray <- makeCalArray(intcal20, calrange = c(1000,40000),inc=50)
+PD1 <- phaseCalibrator(bryson1848, CalArray, remove.external = TRUE)
+PD2 <- phaseCalibrator(bluhm2421, CalArray, remove.external = TRUE)
 
+# MCMC search
+chain.bryson <- mcmc(PDarray=PD1, 
+		startPars=c(10000,-1.5), 
+		type='power', N=50000, 
+		burn=2000, 
+		thin=5, 
+		jumps =c(250,0.075)) 
+		
+chain.bluhm <- mcmc(PDarray=PD2, 
+	startPars=c(10000,-1.5), 
+	type='power', N=50000, 
+	burn=2000, 
+	thin=5, 
+	jumps =c(250,0.075))
+
+# convert parameters to taphonomy curves
+curve.bryson <- convertPars(chain.bryson$res, type='power', years=years)
+curve.bluhm <- convertPars(chain.bluhm$res, type='power', years=years)
+
+# plot
+plot(NULL, xlim=c(0,12000),ylim=c(-2.5,-1), xlab='parameter b', ylab='parameter c')
+points(chain.bryson$res, col=cols[1])
+points(chain.bluhm$res, col=cols[2])
+
+plot(NULL, xlim=c(0,40000),ylim=c(0,0.00025), xlab='yrs BP', ylab='PD')
+N <- nrow(chain.bryson$res)
+for(n in sample(1:N,size=1000)){
+	lines(years,curve.bryson[n,], col=cols[1])
+	lines(years,curve.bluhm[n,], col=cols[2])
+	}
+```
+![Joint taphonomic parameter estimates (and equivalent curves) from the MCMC chain generated in ADMUR using datasets used in Surovell et al. 2009 and Bluhm and Surovell 2018](taphonomy_bryson_bluhm.png){width=680px}  
+
+Clearly the taphonomic parameters $b$ and $c$ are highly correlated, and although the curves superficially appear very similar, the parameters differ significantly between the two datasets. 
+
+## Including taphonomy in a model
+
+Taphonomy can be included in any ADMUR model by including the argument *taphonomy = TRUE*, which will then use the last two model parameters as the taphonomic parameters $b$ and $c$. We suggest constraining these parameters to $0 < b < 20000$ and $-3 < c < 0$, but if there is more constrained prior knowledge of this range (perhaps an independent dataset based on volcanic eruptions for the same study area) then this can be adjusted accordingly.
+
+For example, we might perform a maximum likelihood search using the previously generated PD array, to find the best 3-CPL model with and without taphonomy as follows:
+```{r, eval = FALSE}
+best <- JDEoptim(lower=c(0,0,0,0,0),
+	upper=c(1,1,1,1,1), 
+	fn=objectiveFunction, 
+	PDarray=PD, 
+	type='CPL',
+	taphonomy=F, 
+	trace=T, 
+	NP=100) 
+	
+best.taph <- JDEoptim(lower=c(0,0,0,0,0,0,-3), 
+	upper=c(1,1,1,1,1,20000,0), 
+	fn=objectiveFunction, 
+	PDarray=PD, 
+	type='CPL',
+	taphonomy=T, 
+	trace=T, 
+	NP=140) 
+```
+
+These parameters can then be converted to model PDFs and plotted:
+
+```{r, echo = FALSE}
+load('vignette.3CPL.JDEoptim.best.RData')
+load('vignette.3CPL.JDEoptim.best.taph.RData')
+```
+
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+CPL <- convertPars(pars=best$par, years=5500:7500, type='CPL', taphonomy=F)
+CPL.taph <- convertPars(pars=best.taph$par, years=5500:7500, type='CPL', taphonomy=T)
+
+SPD <- summedPhaseCalibrator( data=data, calcurve=shcal20, calrange=c(5500,7500) )
+plotPD(SPD)
+lines(CPL$year, CPL$pdf, lwd=2, col=cols[1])
+lines(CPL.taph$year, CPL.taph$pdf, lwd=2, col=cols[2])
+legend(x=6000,y=0.001,legend=c('3-CPL','3-CPL with taphonomy'),bty='n',col=cols[1:2],lwd=2)
+```
+
+The above *3-CPL with taphonomy* model represents a conflation of two model components: the population dynamics and the taphonomic loss. Instead we are interested in separating these components:
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='svg', warning=FALSE}
+pop <- convertPars(pars=best.taph$par[1:5], years=5500:7500, type='CPL')
+taph <- convertPars(pars=best.taph$par[6:7], years=5500:7500, type='power')
+plotPD(pop)
+title('Population dynamics')
+plotPD(taph)
+title('Taphonomic loss')
+```
+
+Finally the hinge coordinates of the population dynamics can be extracted:
+```{r, eval = TRUE}
+CPLparsToHinges(pars=best.taph$par[1:5], years=5500:7500)
+```
 
 **********
 

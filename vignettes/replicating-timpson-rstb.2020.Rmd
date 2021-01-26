@@ -500,7 +500,7 @@ K <- c(1, 1, 3, 5, 7, 9, 11)
 BICs <- log(N)*K - 2*loglik
 
 # convert best 3-CPL parameters into model pdf
-best <- convertPars(pars=CPL3$par, years=c(2500,14000), type='CPL')
+best <- convertPars(pars=CPL3$par, years=c(2500:14000), type='CPL')
 ```
 
 Generate plot:
@@ -555,6 +555,9 @@ PD <- phaseCalibrator(data=SAAD, CalArray, remove.external = TRUE)
 # arbitrary starting parameters
 chain <- mcmc(PDarray=PD, startPars=rep(0.5,5), type='CPL', N=100000, burn=2000, thin=5, jumps=0.025)
 
+# find ML parameters
+best.pars <- JDEoptim(lower=rep(0,5),upper=rep(1,5),fn=objectiveFunction,PDarray=PD,type='CPL',trace=T,NP=100)$par
+
 # save results, for separate plotting
 save(chain, best.pars, file='results.RData',version=2)
 ```
@@ -567,10 +570,10 @@ library('scales')
 load('results.RData')
 
 # Convert Maximum Likelihood parameters to hinge coordinates
-ML <- convertPars(best.pars,years=c(2500,14000), type='CPL')
+ML <- CPLparsToHinges(best.pars,years=c(2500,14000))
 
 # Convert MCMC chain of parameters to hinge coordinates
-hinges <- convertPars(chain$res, years=c(2500,14000), type='CPL')
+hinges <- CPLparsToHinges(chain$res, years=c(2500,14000))
 
 # check the acceptance ratio is sensible (c. 0.2 to 0.5)
 chain$acceptance.ratio

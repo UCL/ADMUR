@@ -383,6 +383,7 @@ y <- cbind(seq(1,100,length.out=N),seq(100,1,length.out=N))
 conventional <- 100 * exp(log(y[,2]/y[,1])/((x[,1]-x[,2])/25))-100
 relative <- relativeRate(x,y)
 plot(conventional, relative, type='l')
+rect(-100,-100,c(10,0,-10),c(10,0,-10), lty=2,border='grey')
 ```
 
 **********
@@ -826,7 +827,7 @@ for(n in 1:nrow(chain.taph$res))points(chain.taph$res[n,6], chain.taph$res[n,7],
 
 ![Joint posterior distributions of population dynamics only.](mcmc_pop_without_taph.png){width=680px}
  
-![Joint posterior distributions of taphonomy only. Clearly there is not enough information content in such a small toy dataset to narrow the taphonomic parameters better than the inital prior constraints](mcmc_taph.png){width=680px} 
+![Joint posterior distributions of taphonomy only. Clearly there is not enough information content in such a small toy dataset to narrow the taphonomic parameters better than the initial prior constraints](mcmc_taph.png){width=680px} 
 
 **********
 

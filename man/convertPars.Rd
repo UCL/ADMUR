@@ -36,7 +36,7 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 
 'cauchy' is a truncated Cauchy model. The two parameters are used as \mjseqn{x_0} (location) and \mjseqn{\gamma} (scale) in the formula for a truncated Cauchy distribution. The PDF is as follows where \mjseqn{x =} years: \mjsdeqn{\frac{1}{\gamma[1+(\frac{x-x_0}{\gamma})^2][\arctan(\frac{x_0-x_{min}}{\gamma})-\arctan(\frac{x_0-x_{max}}{\gamma})]}}  
 
-'power' is a truncated Power law model of the form \mjseqn{f(x)=a(b+x)^c} where \mjseqn{x =} years.  The PDF is as follows. Note the \mjseqn{a} parameter cancels out: \mjsdeqn{\frac{(c+1)(b+x)^c}{(b+x_{max})^{(c+1)} - (b+x_{min})^{(c+1)}}}
+'power' is a truncated Power function model of the form \mjseqn{f(x)=a(b+x)^c} where \mjseqn{x =} years.  The PDF is as follows. Note the \mjseqn{a} parameter cancels out: \mjsdeqn{\frac{(c+1)(b+x)^c}{(b+x_{max})^{(c+1)} - (b+x_{min})^{(c+1)}}}
 
 'sine' is a truncated sinewave model. The three parameters are used as specified in \code{\link[=sinewavePDF]{sinewavePDF}}
 
@@ -126,19 +126,19 @@ If taphonomy is TRUE, the model PDF additionally includes taphonomic loss. The l
 	pars <- t(matrix(runif(4*5, c(0,6000,0,-3), c(0.01,6500,20000,0)),4,5))
 	x <- convertPars( pars=pars, years=5500:7500, type='logistic', taphonomy=TRUE)
 
-	# convert a single random power law parameter pair (b, c)
+	# convert a single random power function parameter pair (b, c)
 	pars <- runif(2, c(2000,-1.7), c(4000,-1.2))
 	x <- convertPars( pars=pars, years=5500:7500, type='power')
 
-	# single random power law parameter pair (b, c) with taphonomy parameters 
+	# single random power function parameter pair (b, c) with taphonomy parameters 
 	pars <- runif(4, c(2000,-1.7,0,-3), c(4000,-1.2,20000,0))
 	x <- convertPars( pars=pars, years=5500:7500, type='power', taphonomy=TRUE)
 
-	# convert a matrix of 5 random power law parameter pairs(b, c)
+	# convert a matrix of 5 random power function parameter pairs(b, c)
 	pars <- t(matrix(runif(2*5, c(2000,-1.7), c(4000,-1.2)),2,5))
 	x <- convertPars( pars=pars, years=5500:7500, type='power')
 
-	#  5 random power law parameter pairs(b, c) with taphonomy parameters 
+	#  5 random power function parameter pairs(b, c) with taphonomy parameters 
 	pars <- t(matrix(runif(4*5, c(2000,-1.7,0,-3), c(4000,-1.2,20000,0)),4,5))
 	x <- convertPars( pars=pars, years=5500:7500, type='power', taphonomy=TRUE)
 

@@ -530,7 +530,7 @@ convertParsInner <- function(pars, years, type, taphonomy){
 		tmp <- cauchyPDF(years, min(years), max(years),model.pars[1], model.pars[2])
 		}
 	if(type=='power'){
-		if(length(model.pars)!=2)stop('A power law model must have two parameters, b and c')
+		if(length(model.pars)!=2)stop('A power function model must have two parameters, b and c')
 		tmp <- powerPDF(years, min(years), max(years),model.pars[1], model.pars[2])
 		}
 

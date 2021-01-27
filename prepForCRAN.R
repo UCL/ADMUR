@@ -23,7 +23,10 @@ devtools::check_win_devel()
 #  default for check-rhub is to run the slow examples (donttest). Therefore change enrionmental variables to '_R_CHECK_DONTTEST_EXAMPLES_' = "false"
 devtools::check_rhub(platforms = NULL, check_args = "", env_vars = c('_R_CHECK_DONTTEST_EXAMPLES_' = "false"))
 
-# 6. final submission:
+# 6. check any problems here:
+https://cran.ma.imperial.ac.uk/web/checks/check_results_ADMUR.html
+
+# 7. final submission:
 devtools::release()
 #----------------------------------------------------------------------------------------------
 # search for any specific words or phrases in: .R, .md, .Rmd

@@ -30,7 +30,7 @@ All packages passed with no ERRORs or WARNINGs and Status: OK
 ## Round 2: 2020-11-29 This is a resubmission. 
 In this version I have:
 * reduced tarball size from 7.8 MB to 4.1 MB
-Many thaks to Uwe Ligges for helpful advice.
+Many thanks to Uwe Ligges for helpful advice.
 
 ## Round 1: 2020-11-28 This is a new submission.
 Please accept my apologies for the short period since last submission (23 days). Much development has been done in this time. I anticipate a much longer period before next submission.

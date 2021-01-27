@@ -15,17 +15,15 @@
 * There were no ERRORs, no WARNINGs, no NOTES
 
 ### Downstream dependencies
-I have also run R CMD check on downstream dependencies of ADMUR 
+I have run R CMD check on downstream dependencies of ADMUR 
 All packages passed with no ERRORs or WARNINGs and Status: OK
 
 #### What changed
-* svg now imported from grDevices in NAMESPACE and DESCRIPTION, following request from Prof Brian Ripley on 2021-01-16.
+* svg() now imported from grDevices in NAMESPACE and DESCRIPTION, following request from Prof Brian Ripley on 2021-01-16.
 * 14C datasets from taphonomic papers added (Surovell, Bluhm, Bryson etc).
 * Substantial update to guide, detailing taphonomy.
-* Taphonomy option now included: major update.
 * Taphonomy parameter incorporated into convertPars(), objectiveFunction(), proposalFunction(), mcmc().
 * New CPLparsToHinges() helper function purely to handle converting CPL parameters into hinges.
-* tarball size reduced.
 
 # ADMUR version 1.0.1
 
@@ -40,8 +38,8 @@ Please accept my apologies for the short period since last submission (23 days).
 ### Test environments
 * local Windows 10, R 4.0.3
 * Travis CI
-* R-hub builder: Fedora Linux, R-devel, clang, gfortran
 * R-hub builder: Windows Server 2008 R2 SP1, R-devel, 32/64 bit
+* R-hub builder: Fedora Linux, R-devel, clang, gfortran
 * R-hub builder: Ubuntu Linux 16.04 LTS, R-release, GCC
 * win-builder (release)
 * win-builder (devel)

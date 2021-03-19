@@ -12,14 +12,16 @@
 * win-builder (devel)
 
 ### R CMD check results
-* There were no ERRORs, no WARNINGs, no NOTES
+* There was 1 NOTE:
+* Package was archived on CRAN
+CRAN repository db overrides: X-CRAN-Comment: Archived on 2021-01-30 as check problems were not corrected in time.
 
 ### Downstream dependencies
 I have run R CMD check on downstream dependencies of ADMUR 
 All packages passed with no ERRORs or WARNINGs and Status: OK
 
 #### What changed
-* All calls to svg() replaced with png() following request from Prof Brian Ripley on 2021-01-16.
+* All calls to svg() replaced with png() following request from Prof Brian Ripley on 2021-01-16. Aplogies for the delay in fixing this.
 
 # ADMUR version 1.0.2
 

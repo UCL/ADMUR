@@ -84,14 +84,14 @@ Generating a single calibrated date distribution or SPD requires either a two-st
 
 1. Use the function [summedCalibratorWrapper()](../html/summedCalibratorWrapper.html) 
 
-```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='pdf', warning=FALSE}
+```{r, eval = TRUE, fig.height = 3, fig.width=7,  fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
 data <- data.frame( age=c(6562,7144), sd=c(44,51) )
 x <- summedCalibratorWrapper(data)
 ```
 
 Notice the function assumes the data provided were all ^14^C dates. However, if you have other kinds of date such as thermoluminescence you can specify this. Non-^14^C types are assumed to be in calendar time, BP. You can also specify a particular calibration curve:
 
-```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='pdf', warning=FALSE}
+```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
 data <- data.frame( age=c(6562,7144), sd=c(44,51), datingType=c('14C','TL') )
 x <- summedCalibratorWrapper(data=data, calcurve=shcal20)
 ```
@@ -105,7 +105,7 @@ Generating the SPD without the wrapper gives you more control, and requires a tw
 
 This is useful for improving computational times if generating many SPDs, for example in a simulation framework, since the CalArray needs generating only once. 
 
-```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='pdf', warning=FALSE}
+```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
 data <- data.frame( age = c(9144), sd=c(151) )
 CalArray <- makeCalArray( calcurve=intcal20, calrange=c(8000,13000) )
 cal <- summedCalibrator(data, CalArray)
@@ -155,7 +155,7 @@ data[,2:7]
 The data have not already been phased (do not include a column 'phase') therefore the default binning algorithm calibrates these dates into four phases. this is achieved by binning dates that have a mean ^14^C date within 200 ^14^C years of any other date in that respective bin. Therefore Pacopampa.1 comprises samples 1207 and 1206, Pacopampa.2 comprises sample 1205, Carrizal.1 comprises samples 1196 and 1195 and 1194 and 1193, and Carrizal.2 comprises sample 1192:
 
 
-```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='pdf', warning=FALSE}
+```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
 CalArray <- makeCalArray( calcurve=shcal20, calrange=c(2000,6000) )
 x <- phaseCalibrator(data=data, CalArray=CalArray)
 plotPD(x)
@@ -172,7 +172,7 @@ SPD <- SPD/( sum(SPD) * CalArray$inc )
 
 Alternatively, the wrapper function [summedPhaseCalibrator()](../html/summedPhaseCalibrator.html) will perform this entire workflow internally:
 
-```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='pdf', warning=FALSE}
+```{r, eval = TRUE, fig.height = 3, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
 SPD <- summedPhaseCalibrator( data=data, calcurve=shcal20, calrange=c(2000,6000) )
 plotPD(SPD)
 ```
@@ -280,7 +280,7 @@ best <- JDEoptim(lower = rep(0,5),
 load('vignette.3CPL.JDEoptim.best.RData')
 ```
 
-```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='pdf', warning=FALSE}
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
 CPL <- CPLparsToHinges(pars=best$par, years=5500:7500)
 SPD <- summedPhaseCalibrator( data=data, calcurve=shcal20, calrange=c(5500,7500) )
 plotPD(SPD)
@@ -376,7 +376,7 @@ An exponential curve between n=200 and n=1 across the same 100 years has a decli
 Meanwhile a linear model between n=200 and n=1 across the same 100 years has an expected decline rate of 47.835% loss per generation.
 
 The relationship between the conventional rate and relative rate is almost identical for realistic rates of change (c. -10% to +10% per generation):
-```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='pdf', warning=FALSE}
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
 N <- 1000
 x <- cbind(rep(5100,N),rep(5000,N))
 y <- cbind(seq(1,100,length.out=N),seq(100,1,length.out=N))
@@ -435,7 +435,7 @@ data.frame(BIC.1,BIC.2,BIC.3,BIC.4,BIC.exp,BIC.uniform)
 
 Clearly the 4-CPL has the highest likelihood, however the 3-CPL model has the lowest BIC and is selected as the best. This tells us that the 4-CPL is overfitted to the data and is unjustifiably complex, whilst the other models are underfitted and lack explanatory power. Nevertheless for comparison we can plot all the competing models, illustrating that the 4-CPL fits the closest, but cannot warn us that it is overfit:
 
-```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='pdf', warning=FALSE}
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
 # convert parameters to model PDs
 CPL1 <- convertPars(pars=CPL.1$par, years=5500:7500, type='CPL') 
 CPL2 <- convertPars(pars=CPL.2$par, years=5500:7500, type='CPL')  
@@ -473,7 +473,7 @@ The test provides a p-value of 1.00 for the best model (3-CPL), since all of the
 load('vignette.3CPL.SPDsimulationTest.RData')
 ```
 
-```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='pdf', warning=FALSE}
+```{r, eval = TRUE, fig.height = 5, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
 print(summary$pvalue)
 hist(summary$simulated.stat, main='Summary statistic', xlab='')
 abline(v=summary$observed.stat, col='red')
@@ -580,7 +580,7 @@ The function [plotSimulationSummary()](../html/plotSimulationSummary.html) then 
 load('vignette.exp.SPDsimulationTest.RData')
 ```
 
-```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='pdf', warning=FALSE, message=FALSE}
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE, message=FALSE}
 plotSimulationSummary(summary, legend.y=0.0012)
 ```
 
@@ -764,7 +764,7 @@ load('vignette.3CPL.JDEoptim.best.RData')
 load('vignette.3CPL.JDEoptim.best.taph.RData')
 ```
 
-```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='pdf', warning=FALSE}
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
 CPL <- convertPars(pars=best$par, years=5500:7500, type='CPL', taphonomy=F)
 CPL.taph <- convertPars(pars=best.taph$par, years=5500:7500, type='CPL', taphonomy=T)
 
@@ -776,7 +776,7 @@ legend(x=6300,y=0.001,legend=c('3-CPL','3-CPL with taphonomy'),bty='n',col=cols[
 ```
 
 The above *3-CPL with taphonomy* model represents a conflation of two model components: the population dynamics and the taphonomic loss. Instead we are interested in separating these components:
-```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='pdf', warning=FALSE}
+```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
 pop <- convertPars(pars=best.taph$par[1:5], years=5500:7500, type='CPL')
 taph <- convertPars(pars=best.taph$par[6:7], years=5500:7500, type='power')
 plotPD(pop)

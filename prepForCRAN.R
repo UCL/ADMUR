@@ -31,11 +31,11 @@ devtools::release()
 #----------------------------------------------------------------------------------------------
 # search for any specific words or phrases in: .R, .md, .Rmd
 #----------------------------------------------------------------------------------------------
-pattern <- '\\mjseqn'
-pattern <- '\\mjsdeqn'
-pattern <- 'Philo'
+#pattern <- '\\mjseqn'
+#pattern <- '\\mjsdeqn'
+#pattern <- 'Philo'
 pattern <- 'svg'
-pattern <- 'power law'
+#pattern <- 'power law'
 man <- list.files('man',full.names=T, pattern='.Rd')
 r <- list.files('R',full.names=T, pattern='.R')
 vig <- list.files('vignettes',full.names=T, pattern='.Rmd')

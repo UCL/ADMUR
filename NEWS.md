@@ -7,6 +7,11 @@
 
 # ADMUR build history
 
+### Version: 1.0.2.9002
+
+## 2021-03-19
+* svg replaced with pdf to resolve request from Pof Brian Ripley.
+
 ## 2021-01-22
 
 ### Version: 1.0.2.9001

@@ -97,7 +97,7 @@ Generate plot:
 library(ADMUR)
 load('results.RData')
 oldpar <- par(no.readonly = TRUE) 	
-svg('Fig1.svg',height=4,width=10)
+pdf('Fig1.pdf',height=4,width=10)
 par(mar=c(2,4,0.1,2))
 plot(NULL, xlim=c(7500,5500), ylim=c(0,0.0011), xlab='', ylab='', xaxs='i',cex.axis=0.7, bty='n',las=1)
 axis(1,at=6400,labels='calBP',tick=F)
@@ -337,7 +337,7 @@ Generate plot:
 oldpar <- par(no.readonly = TRUE) 	
 
 # Fig 2 plot
-svg('Fig2.svg',height=6,width=13)
+pdf('Fig2.pdf',height=6,width=13)
 layout(mat=matrix(1:14, 2, 7, byrow = F),widths=c(0.3,rep(1,6)), heights=c(1,1.5),respect=T)
 	
 # plot two blanks first
@@ -430,7 +430,7 @@ Generate plot:
 library(ADMUR)
 load('results.RData')
 oldpar <- par(no.readonly = TRUE) 	
-svg('Fig4.svg',height=4,width=10)
+pdf('Fig4.pdf',height=4,width=10)
 par(mar=c(2,4,0.1,0.1))
 plotSimulationSummary(summary, legend.x=11500,legend.y=0.0003)
 axis(side=1, at=2500,labels='calBP',tick=F)
@@ -507,7 +507,7 @@ Generate plot:
 
 ```{r, eval = FALSE}
 oldpar <- par(no.readonly = TRUE) 	
-svg('Fig5.svg',height=4,width=10)
+pdf('Fig5.pdf',height=4,width=10)
 par(mfrow=c(1,2))
 
 # model comparison
@@ -599,7 +599,7 @@ Generate Figure 6:
 
 ```{r, eval = FALSE}
 oldpar <- par(no.readonly = TRUE) 	
-svg('Fig6.svg',height=5,width=11)
+pdf('Fig6.pdf',height=5,width=11)
 par(mfrow=c(2,3))
 lwd <- 3
 red='firebrick'
@@ -631,7 +631,7 @@ Generate Figure 7:
 
 ```{r, eval = FALSE}
 oldpar <- par(no.readonly = TRUE) 	
-svg('Fig7.svg',height=5,width=12)
+pdf('Fig7.pdf',height=5,width=12)
 grey1 <- 'grey90'
 grey2 <- 'grey70'
 grey3 <- 'grey50'

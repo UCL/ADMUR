@@ -1,13 +1,10 @@
 \name{convertPars} 
-###
-pars, years, type, timeseries=NULL
-###
 \alias{convertPars} 
 \title{Converts parameters to x,y coordinates (date and pdf) that describe a model} 
 \description{
 	Converts either a vector of parameters, or a matrix of many parameter sets to model x,y coordinates (date and pdf)
 	\loadmathjax }
-\usage{convertPars(pars, years, type, taphonomy=FALSE)}
+\usage{convertPars(pars, years, type)}
 \arguments{
   \item{pars}{
 	Either a vector of one parameter set, or a matrix of several parameter sets (one set per row). 
@@ -45,7 +42,7 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 
 'uniform' is a uniform model requiring no parameters. I.e. the argument pars must be NULL or c(), and trivially the PDF is: \mjsdeqn{\frac{1}{x_{max} - x_{min}}}
 
-'timeseries' is a custom model of any complexity, typically derived from an independent source. For example, a timeseries of the proportion of forest to grassland through time, derived from pollen data. This requires a single parameter \mjseqn{r} to scale PDF.
+'timeseries' is a custom model of any complexity, typically derived from an independent source. For example, a timeseries of the proportion of forest to grassland through time, derived from pollen data. This requires a single parameter \mjseqn{r} to scale the PDF.
 	}
 	
 \examples{

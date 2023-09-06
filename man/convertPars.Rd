@@ -113,6 +113,5 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 
 	# and a uniform combined with a power model assumed to be a taphonomic effect (parameters = b,c)
 	pars <- runif(2, c(0,-3), c(20000,0))
-	x <- convertPars(pars=pars, years=5500:7500, type=c('uniform','power')
-
+	x <- convertPars(pars=pars, years=5500:7500, type=c('uniform','power'))
 	}

@@ -32,6 +32,14 @@ The motivation for creating the ADMUR package is to provide a robust framework t
 Unfortunately, the spatiotemporal sparsity of radiocarbon data conspires with the wiggly nature of the calibration curve to encourage the overinterpretation of such datasets, often leading to colourful but statistically unjustified interpretations of population dynamics.
 No statistical method can (or ever will) be able to perfectly reconstruct the true population dynamics from such a dataset. ADMUR is no exception to this, but provides tools to infer a plausible yet conservative reconstruction of population dynamics. 
 
+## Bayesian inference
+ADMUR discretises time to calculate model likelihoods numerically, and uses the Bayesian framework to obtain posterior probabilities of population parameters by combining a prior with the likelihood. However, given the recent fetishization of the word 'Bayesian' in archaeology, it is worth reflecting on exactly what this means. 
+The Bayesian approach provides a superb framework for justifying knowledge as beliefs that are being constantly updated in the light of new evidence. This implies that objective knowledge does not exist. Instead, given a set of observations, every observer should form a different conclusion depending on their prior beliefs. 
+This makes intuitive sense; a child may believe they have witnessed a victim being sawn in half at a magic show, whilst a parent is unlikely to believe it was real given their strong prior beliefs formed over many years of absorbing data that informs on what is anatomically possible with a human, the concepts of showmanship, and the punishments for murder. Therefore, the beauty and great power of the Bayesian approach is in providing a sensible means of making inferences when there are strong prior beliefs and only a small amount of new data.
+Priors are, by their very nature, subjective. The likelihood is not (the likelihood of something being true is defined as the probability of the data give that thing is true). In Bayesian inference, the most challenging part is usually formulating the likelihood function. Once obtained as a mathematical function, making the inference Bayesian is trivial. Both the frequentist and Bayesians agree on the likelihood, but in the extreme case on no data, the frequentist cannot provide an estimate, whilst the Bayesian recovers her prior.
+In the opposite situation where there are weak priors and a lot of data, the priors are 'washed out' by the new data, and the Bayesian posterior becomes indistinguishable from the frequentist estimate; both are data-dominated estimates (i.e. dominated by the likelihood).
+In the case of demographic modelling, we are fundamentally interested in what the data has to tell us, and are not interested in posteriors dominated by one researcher's strong priors and a tiny dataset. Therefore ADMUR applies a weak prior that is uniformly distributed across parameter space, and there is deliberately no provision for the user to change this prior.
+
 ## Installation
 
 The ADMUR package can be installed directly from the CRAN in the usual way:
@@ -181,11 +189,11 @@ plotPD(SPD)
 
 # 3. Continuous Piecewise Linear (CPL) Modelling
 
-A CPL model lends itself well to the objectives of identifying specific demographic events. Its parameters are the (x,y) coordinates of the hinge points, which are the relative population size (y) and timing (x) of these events. Crucially, this package calculates model likelihoods (the probability of the data given some proposed parameter combination). This likelihood is used in a search algorithm to find the maximum likelihood parameters; to compare models with different numbers parameters to find the best fit without overfitting; in Monte-Carlo Markov Chain (MCMC) analysis to estimate credible intervals of those parameters; and in a goodness-of-fit test to check that the data is a typical realisation of the maximum likelihood model and its parameters.
+A CPL model lends itself well to the objectives of identifying specific demographic events. Its parameters are the (x,y) coordinates of the hinge points, which are the relative population size (y) and timing (x) of these events. 
 
 ## Calculating likelihoods
 
-Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). This discretisation provides the advantage that numerical methods can be used to easily calculate relative likelihoods, provided the model is also discretised to the same time points. 
+Theoretically a calibrated date should be a continuous Probability Density Function (PDF), however in practice a date is represented as a discrete vector of probabilities corresponding to each calendar year, and therefore is a Probability Mass Function (PMF). This discretisation provides the advantage that numerical methods can be used to easily calculate likelihoods, provided the model is also discretised to the same time points. 
 
 A [toy()](../html/toy.html) model is provided to demonstrate how this achieved. First, we simulate a plausible ^14^C dataset and calibrate it. The function [simulateCalendarDates()](../html/simulateCalendarDates.html) automatically covers a slightly wider date range to ensure simulated ^14^C dates are well represented around the edges:
 
@@ -233,7 +241,7 @@ Crucially, [loglik()](../html/loglik.html) calculates the relative likelihoods f
 
 ## The anatomy of a CPL model
 
-Having established how to calculate the relative likelihood of a proposed model given a dataset, we can use any out-of-the-box search algorithm to find the maximum likelihood model. This first requires us to describe the PD of any population model in terms of a small number of parameters, rather than a vector of probabilities for each year.
+We can use any out-of-the-box search algorithm to find the maximum a posteriori (MAP) estimates for the model parameters. This first requires us to describe the PD of any population model in terms of a small number of parameters, rather than a vector of probabilities for each year.
 
 We achieve this using the Continuous Piecewise Linear (CPL) model, which is defined by the (x,y) coordinates of its hinge points.
 
@@ -259,9 +267,9 @@ set.seed(12345)
 CPLparsToHinges(pars=runif(11), years=5500:7500)
 ```
 
-Note: The Area Breaking Algorithm is a heuristic that ensures all parameter space is explored and therefore the maximum likelihood parameters are always found. However, unlike the one-dimensional stick-breaking process, its mapping of random parameters to PD coordinates is not perfectly even, and we welcome ideas for a more elegant algorithm.
+Note: The Area Breaking Algorithm is a heuristic that ensures all parameter space is explored and therefore the MAP parameters are always found. However, unlike the one-dimensional stick-breaking process, its mapping of random parameters to PD coordinates is not perfectly even, and we welcome ideas for a more elegant algorithm.
 
-## Maximum Likelihood parameter search
+## MAP parameter search
 
 Any preferred search algorithm can be used. For example, the JDEoptim function from [DEoptimR](https://cran.r-project.org/package=DEoptimR) uses a differential evolution optimisation algorithm that performs very nicely for this application. We recommend increasing the default NP parameter to at least 20 times the number of parameters, and repeating the search to ensure consistency:
 
@@ -291,7 +299,7 @@ text(x=CPL$year, y=CPL$pdf, pos=3, labels=c('H1','H2','H3','H4'))
 
 ## Credible interval parameter search using MCMC
 
-The ADMUR function [mcmc()](../html/mcmc.html) uses the Metropolis-Hastings algorithm to search joint parameter values of an n-CPL model, given a the calibrated probability distributions of phases in a ^14^C dataset (PDarray). In principle the starting parameters do not matter if burn is of an appropriate length, but in practice it is more efficient to start in a sensible place such as the maximum likelihood parameters: 
+The ADMUR function [mcmc()](../html/mcmc.html) uses the Metropolis-Hastings algorithm to search joint parameter values of an n-CPL model, given a the calibrated probability distributions of phases in a ^14^C dataset (PDarray). In principle the starting parameters do not matter if burn is of an appropriate length, but in practice it is more efficient to start in a sensible place such as the MAP parameters: 
 
 ```{r, eval = FALSE}
 chain <- mcmc(PDarray=PD, startPars=best$par, type='CPL', N=100000, burn=2000, thin=5, jumps =0.025)
@@ -309,7 +317,7 @@ for(n in 1:5){
 ![Single chain of all 5 raw parameters](mcmc_chain.png){width=680px}  
 
 
-These parameters can then be converted to the hinge coordinates using the [convertPars()](../html/convertPars.html) function, and their marginal distributions plotted. Note, the MLE parameters (red lines) may not exactly match the peaks of these distributions because they are only marginals. Note also the dates of hinge 1 and 2 are fixed at 5500 and 7500: 
+These parameters can then be converted to the hinge coordinates using the [convertPars()](../html/convertPars.html) function, and their marginal distributions plotted. Note, the MAP parameters (red lines) may not exactly match the peaks of these distributions because they are only marginals. Note also the dates of hinge 1 and 2 are fixed at 5500 and 7500: 
 ```{r, eval = FALSE}
 hinges <- convertPars(pars=chain$res, years=5500:7500, type='CPL')
 par(mfrow=c(3,2), mar=c(4,3,3,1))
@@ -326,9 +334,9 @@ hist(hinges$pdf2, border=c1,breaks=pdf.brk, main=names[4], xlab='');abline(v=CPL
 hist(hinges$pdf3, border=c1,breaks=pdf.brk, main=names[5], xlab='');abline(v=CPL$pdf[3],col=c2,lwd=lwd)
 hist(hinges$pdf4, border=c1,breaks=pdf.brk, main=names[6], xlab='');abline(v=CPL$pdf[4],col=c2,lwd=lwd)
 ```
-![Marginal distributions after conversion to hinge coordinates. Maximum Likelihoods (calculated separately) in red.](mcmc_posteriors.png){width=680px}  
+![Marginal distributions after conversion to hinge coordinates. MAP (calculated separately) in red.](mcmc_posteriors.png){width=680px}  
 
-Some two-dimensional combinations of joint parameters may be preferred, but still these are 2D marginal representations of 5D parameters, again with MLE in red:
+Some two-dimensional combinations of joint parameters may be preferred, but still these are 2D marginal representations of 5D parameters, again with MAP in red:
 
 ```{r, eval = FALSE}
 require(scales)
@@ -338,9 +346,9 @@ points(CPL$year[2], CPL$pdf[2], col='red', pch=16, cex=1.2)
 plot(hinges$yr3, hinges$pdf3, pch=16, col=alpha(1,0.02), ylim=c(0,0.0015))
 points(CPL$year[3], CPL$pdf[3], col='red', pch=16, cex=1.2) 
 ```
-![2D Marginal distributions. Maximum Likelihoods (calculated separately) in red.](mcmc_2D.png){width=680px}  
+![2D Marginal distributions. MAP (calculated separately) in red.](mcmc_2D.png){width=680px}  
 
-Alternatively, the joint distributions can be visualised by plotting the CPL model for each iteration of the chain, with the MLE in red:
+Alternatively, the joint distributions can be visualised by plotting the CPL model for each iteration of the chain, with the MAP in red:
 
 ```{r, eval = FALSE}
 plot(NULL, xlim=c(7500,5500),ylim=c(0,0.0011), xlab='calBP', ylab='PD', cex=0.7)
@@ -351,7 +359,7 @@ for(n in 1:nrow(hinges)){
 	}
 lines(x=CPL$year, y=CPL$pdf, lwd=2, col=c2)
 ```
-![Joint posterior distributions. Maximum Likelihood (calculated separately) in red.](mcmc_joint.png){width=680px}  
+![Joint posterior distributions. MAP (calculated separately) in red.](mcmc_joint.png){width=680px}  
 
 ## Relative growth and decline rates
 
@@ -392,7 +400,8 @@ rect(-100,-100,c(10,0,-10),c(10,0,-10), lty=2,border='grey')
 
 ## Model selection using BIC 
 
-A fundamentally important issue in modelling is the need to avoid overfitting an unjustifiably complex model to data, by using a formal model selection approach. In the example above we arbitrarily chose a 3-CPL model to fit to the data (since the data was randomly sampled from a 3-CPL toy population), however, given the small sample size (n = 303) it is possible a simpler model may have better predictive power. ADMUR achieves this using the so-called Bayesian Information Criterion (BIC) aka Schwarz Information Criterion, which balances the model likelihood against the number of parameters and sample size.
+A fundamentally important issue in modelling is the need to avoid overfitting an unjustifiably complex model to data, by using a formal model selection approach. In the example above we arbitrarily chose a 3-CPL model to fit to the data (since the data was randomly sampled from a 3-CPL toy population), however, given the small sample size (n = 303) it is possible a simpler model may have better predictive power. 
+ADMUR achieves this using the so-called Bayesian Information Criterion (BIC) aka Schwarz Information Criterion, which balances the model likelihood against the number of parameters and sample size.
 
 Therefore we should also find the Maximum Likelihood for other plausible models such as a 4-CPL, 2-CPL, 1-CPL, exponential and even a uniform:
 
@@ -459,7 +468,7 @@ legend(x=6300, y=max(CPL$pdf), cex=0.7, lwd=2, col=cols, bty='n', legend=legend)
 
 it is crucial to test if the selected model is plausible, or in other words, to test if the observed data is a reasonable outcome of the model. If the observed data is highly unlikely the model must be rejected, even if it was the best model selected.
 
-Typically a GOF quantifies how unusual it would be for the observed data to be generated by the model. Of course the probability of any particular dataset being generated by any particular model is vanishingly small, so instead we estimate how probable it is for the model to produce the observed data, *or data that are more extreme*. This is a similar concept to the p-value, but instead of using a null hypothesis we use the best selected model. We can generate many simulated datasets under this model, and calculate a summary statistic for each simulation. A one-tailed test will then establish the proportion of simulations that have a poorer summary statistic (more extreme) than the observed data's summary statistic.
+Typically a GOF quantifies how unusual it would be for the observed data to be generated by the model. Of course the probability of any particular dataset being generated by any particular model is vanishingly small, so instead we estimate how probable it is for the model to produce the observed data, *or data that are more extreme*. This is the same concept as the p-value, but instead of using a null hypothesis we use the best selected model. We can generate many simulated datasets under this model, and calculate a summary statistic for each simulation. A one-tailed test will then establish the proportion of simulations that have a poorer summary statistic (more extreme) than the observed data's summary statistic.
 
 For each dataset (simulated and observed) we generate an SPD and use a statistic that measures how divergent each SPD is from expectation, by calculating the proportion of the SPD that sits outside the 95% CI. 
 
@@ -482,7 +491,7 @@ legend(0.3,6000, bty='n', lwd=c(1,3), col=c('red','grey'), legend=c('observed','
 
 ## SPD simulation testing
 
-Part 2 provided a framework to directly select the best model given a dataset. This contrasts with the SPD simulation methodology which requires the researcher to *a priori* specify a single null model, then generate many simulated datasets under this null model which are compared with the observed dataset to generate a p-value. Without the model selection framework, the SPD simulation approach alone has several inferential shortcomings: 
+The previous section provided a framework to directly select the best model given a dataset. This contrasts with the SPD simulation methodology which requires the researcher to *a priori* specify a single null model, then generate many simulated datasets under this null model which are compared with the observed dataset to generate a p-value. Without the model selection framework, the SPD simulation approach alone has several inferential shortcomings: 
 
 * Recent studies increasingly suggest population fluctuations are ubiquitous thought history, rendering the application of a null model inappropriate. In contrast this new model selection framework allows any number of models to be compared. 
 * A low p-value merely allows us to reject (or fail to reject) the tested model, but does not provide us with a plausible alternative explanation. This leaves an inferential vacuum in which it is common for researchers to assign colourful demographic narratives to periods outside the 95% CI, which are not directly supported by the test statistic. Instead the CPL framework provides a single best explanation.
@@ -592,7 +601,7 @@ The above modelling components (MCMC, GOF, model comparison, relative likelihood
 
 See [convertPars()](../html/convertPars.html) for details. Care should be taken when considering a Gaussian model. The distribution of data from a single event can often superficially appear to be normally distributed due to the tendency to unconsciously apply regression methods (minimising the residuals).
 However, contrary to appearances (and intuitions) a Gaussian does not 'flatten' towards the tails, but decreases at a greater and greater rate towards zero.
-As a consequence, small amounts of data that are several standard deviations away from the mean *appear* to fit a Gaussian quite well, but under a likelihood framework are in fact absurdly improbable.
+As a consequence, small amounts of data that are several standard deviations away from the mean *appear* to fit a Gaussian quite well, but are in fact absurdly improbable.
 Instead, for single events consider a Cauchy model, given the phenomenon that real life data usually has fatter tails than a Gaussian.
 Alternatively, if the waxing and waning of data is suspected to be driven by an oscillating system (such as climate) a sinusoidal model may more sensible.
 
@@ -615,14 +624,14 @@ ncol(PD1)
 ncol(PD2)
 ncol(PD3)
 
-# maximum likelihood search, fitting various models to various datasets
+# MAP search, fitting various models to various datasets
 norm <- JDEoptim(lower=c(1000,1), upper=c(4000,5000), 
 	fn=objectiveFunction, PDarray=PD1, type='norm', NP=40, trace=T)
 cauchy <- JDEoptim(lower=c(1000,1), upper=c(4000,5000),
 	fn=objectiveFunction, PDarray=PD1, type='cauchy', NP=40, trace=T)
 sine <- JDEoptim(lower=c(0,0,0), upper=c(1/1000,2*pi,1),
 	fn=objectiveFunction, PDarray=PD2, type='sine', NP=60, trace=T)
-logistic <- JDEoptim(lower=c(0,0000), upper=c(1,10000),
+logistic <- JDEoptim(lower=c(0,0), upper=c(1,10000),
 	fn=objectiveFunction, PDarray=PD3, type='logistic', NP=40, trace=T)
 exp <- JDEoptim(lower=c(0), upper=c(1),
 	fn=objectiveFunction, PDarray=PD3, type='exp', NP=20, trace=T)
@@ -634,7 +643,7 @@ power <- JDEoptim(lower=c(0,-10), upper=c(10000,0),
 Note the upper boundaries for the sinewave (see [sinewavePDF()](../html/sinewavePDF.html) for details). 
 The first parameter governs the frequency, so should be constrained by a wavelength no shorter than c. 1/10th of the date range.  
 
-Now the maximum likelihood parameters need to be converted into a PDF and plotted:
+Now the MAP parameters need to be converted into a PDF and plotted:
 
 ```{r, eval = FALSE}
 # convert parameters to model PDs
@@ -671,6 +680,32 @@ legend(x=4000, y=max(spd3)*1.2, lwd=5, col=cols, bty='n', legend=c('Logistic','E
 
 **********
 
+# 5. Combination models
+
+ADMUR can also combine multiple models previously described into a more complex aggregated model. For example, we might hypothesise that an island's population dynamics are driven by the combination of some regular climatic oscillations (perhaps from orbital forcing) and growth to carrying capacity, and therefore wish to use a model that is the combination of sinusoidal and logistic. This can be achieved by using a vector of model types, and combining all the required parameters into a single vector, in their respective order.
+For example:
+
+```{r, eval = FALSE}
+# generate SPDs
+CalArray <- makeCalArray(intcal20, calrange = c(1000,4000))
+spd <- summedCalibrator(data2, CalArray, normalise='full')
+
+# calibrate phases
+PD <- phaseCalibrator(data2, CalArray, remove.external = TRUE)
+
+# MAP parameter search
+combo.sine.logistic <- JDEoptim(lower=c(0,0,0,0,0), upper=c(1/1000,2*pi,1,1,10000),
+	fn=objectiveFunction, PDarray=PD, type=c('sine','logistic'), NP=100, trace=T)
+	
+# Convert MAP parameters to a PDF
+mod.combo <- convertPars(pars=combo.sine.logistic$par, years, type=c('sine','logistic'))
+
+# Plot the SPD and the model
+
+```
+	
+**********
+
 # 5. Taphonomy
 
 Taphonomic loss has an important influence on the amount of datable material that can be recovered, with the obvious bias that older material is less likely to survive. This means that if a constant population deposited a perfectly uniform amount of material through time, we should expect the archaeological record to show an increase in dates towards the present, rather than a uniform distribution.
@@ -680,13 +715,13 @@ This taphonomic loss rate has been estimated by [Surovell et al.](https://doi.or
 However, there are two important issues to consider when modelling taphonomy:
 
 1. There is substantial uncertainty regarding the values of the parameters that determine the shape of the power function. We should expect different taphonomic rates in different locations due to variation in environmental and geological conditions. Indeed these studies have estimated different parameter values for the two datasets used. 
-1. There is a common misunderstanding that the taphonomic curve can be used to 'adjust' or 'correct' the data or an SPD to generate a more faithful representation of the true population dynamics. In the fact inclusion of taphonomy is achieved with additional appropriate model parameters, resulting in a more complex model. Whether or not this greater complexity is justified is moot - the decision to include or exclude cannot be resolved with model comparison and should be justified with an independent argument. When comparing models using BIC, all should be consistent in either including or excluding taphonomic curve parameters.
+1. There is a common misunderstanding that the taphonomic curve can be used to 'adjust' or 'correct' the data or an SPD to generate a more faithful representation of the true population dynamics. In fact the inclusion of taphonomy is achieved with additional appropriate model parameters, resulting in a more complex model. Whether or not this greater complexity is justified is moot - the decision to include or exclude cannot be resolved with model comparison and should be justified with an independent argument. When comparing models using BIC, all should be consistent in either including or excluding taphonomic curve parameters.
 
 ## Taphonomic curve parameters
 
 The above studies use regression methods to estimate the taphonomic curve parameters. These methods don't incorporate the full information of the calibrated 14C dates (instead a point estimate is used for each date), and therefore are not based on likelihoods. Nor do they provide confidence intervals for the curve parameters. Finally, the parameter $a$ is unnecessary for the purposes of population modelling, since we are not interested in estimating the *absolute* loss in material, merely the *relative* loss through time. Therefore we can consider the taphonomic curve as a PDF such that the total area across the study period equals 1. This results in the following formula, where $x$ is time, and $x_{min}$ and $x_{max}$ are the time boundaries of the study period: $$\frac{(c+1)(b+x)^c}{(b+x_{max})^{(c+1)} - (b+x_{min})^{(c+1)}}$$ 
 
-This defines ADMUR's power model PDF which we apply within the MCMC framework to estimate the joint parameter distributions of $b$ and $c$ from the same two datasets used in the above studies, constraining the study period (as they did) to between 1kyr and 40kyr BP as follows:
+This defines ADMUR's power model PDF which we apply within the MCMC framework to estimate the joint parameter distributions of $b$ and $c$ from the same two datasets used in the above studies, constraining the study period (as Bluhm and Surovell did) to between 1kyr and 40kyr BP as follows:
 
 ```{r, eval = FALSE}
 # generate an PD array for each dataset
@@ -732,18 +767,18 @@ Clearly the taphonomic parameters $b$ and $c$ are highly correlated, and althoug
 
 ## Including taphonomy in a model
 
-### Maximum Likelihood Search
+### MAP Search
 
 Taphonomy can be included in any ADMUR model by including the argument *taphonomy = TRUE*, which will then use the last two model parameters as the taphonomic parameters $b$ and $c$. We suggest constraining these parameters to $0 < b < 20000$ and $-3 < c < 0$, but if there is better prior knowledge of this range (perhaps an independent dataset based on volcanic eruptions for the same study area) then this can be further constrained accordingly.
 
-For example, we might perform a maximum likelihood search using the previously generated PD array, to find the best 3-CPL model with and without taphonomy as follows:
+For example, we might perform a MAP search using the previously generated PD array, to find the best 3-CPL model with and without taphonomy as follows:
 ```{r, eval = FALSE}
 best <- JDEoptim(lower=c(0,0,0,0,0),
 	upper=c(1,1,1,1,1), 
 	fn=objectiveFunction, 
 	PDarray=PD, 
 	type='CPL',
-	taphonomy=F, 
+	taphonomy=FALSE, 
 	trace=T, 
 	NP=100) 
 	
@@ -792,7 +827,7 @@ CPLparsToHinges(pars=best.taph$par[1:5], years=5500:7500)
 
 ### MCMC search for credible intervals
 
-We should always be cautious of assigning too much importance to point estimates.Maximum Likelihood Estimates above are no exception to this. Smaller sample sizes will always result in larger uncertainties, and it is always better to estimate this plausible range of results. This is of particular concern with taphonomic parameters since the reanalysis of the volcanic datasets above illustrates how a large range of parameter combinations provide very similar taphonomic curves. Furthermore, when including taphonomy in the model, the taphonomic parameters have the potential to interact with the population dynamics parameters in vastly more parameter combinations that will give in many different combinations of similar overall radiocarbon date distributions. 
+We should always be cautious of assigning too much importance to point estimates. MAP estimates above are no exception to this. Smaller sample sizes will always result in larger uncertainties, and it is always better to estimate the plausible range of results. This is of particular concern with taphonomic parameters since the reanalysis of the volcanic datasets above illustrates how a large range of parameter combinations provide very similar taphonomic curves. Furthermore, when including taphonomy in the model, the taphonomic parameters have the potential to interact with the population dynamics parameters in vastly more parameter combinations that will give in many different combinations of similar overall radiocarbon date distributions. 
 Therefore we can perform an MCMC parameter search as follows:
 
 ```{r, eval = FALSE}

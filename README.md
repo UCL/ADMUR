@@ -8,12 +8,22 @@
 # ADMUR
 ## Ancient Demographic Modelling Using Radiocarbon
 
-Tools to directly model underlying population dynamics using chronological datasets (radiocarbon and other) with a variety of models, including Continuous Piecewise Linear (CPL) model framework. Optional taphonomy. Model comparison framework using BIC. Package also calibrates 14C samples, and generates Summed Probability Distributions (SPD).  CPL modelling directly estimates the most likely population trajectory given a dataset, using SPD simulation analysis to generate a Goodness-of-fit test for the best selected model.
+Statistical tools to directly model underlying population dynamics using date datasets (radiocarbon and other). 
 
-Please contact a.timpson@ucl.ac.uk  in the first instance to make suggestions, report bugs or request help.
+### Population modelling
+
+Various model structures can be compared in a robust formal model comparison framework. Continuous Piecewise Linear (CPL) models are infinitely flexible, and can recover complex population dynamics if enough data is available. Other simpler models include: Uniform, Exponential, Gaussian, Cauchy, Sinusoidal, Logistic and Power law. Taphonomic loss included optionally as a power function. 
+
+### Bayesian Parameter estimation
+
+Posterior parameter estimates of population models, using model likelihoods and a weak uniform prior. 
+
+### SPDs and simulation based testing
+
+Package also calibrates 14C samples, generates Summed Probability Distributions (SPD), and performs SPD simulation analysis to generate a Goodness-of-fit test for the best selected model. 
+Continuous Piecewise Linear (CPL) models that are flexible to estimate any complex population dynamics
 
 ## Installation
-
 Install from CRAN, then load
 ``` r
 install.packages('ADMUR')
@@ -27,6 +37,10 @@ Refer to the vignette 'guide' for detailed support and examples.
 ``` r
 vignette('guide', package = 'ADMUR')
 ```
+
+## Contact
+
+Please contact a.timpson@ucl.ac.uk  in the first instance to make suggestions, report bugs or request help.
 
 ## References
 
@@ -58,5 +72,5 @@ Also thanks to the following who have reported bugs, requested additional functi
 - Prof Brian Ripley
 - Enrico Crema
 - Ricardo Fernandes
-
+- Mark G. Thomas
 ---

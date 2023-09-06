@@ -7,10 +7,30 @@
 
 # ADMUR build history
 
+### Version: 1.0.3.9004
+
+## 2021-03-23
+* taphonomy parameter deprecated. Instead, include 'power' as a model type, and allocate two parameters to it.
+
+### Version: 1.0.3.9003
+
+## 2021-03-22
+* Non-parametric models of any complexity handled. Requires a 'timeseries' data frame, and a single parameter to determine the relative amplitude.
+
+### Version: 1.0.3.9002
+
+## 2021-03-21
+* Parametric models can now be aggregated to any required complexity. For example, multiple sinewaves, or a Gaussian multiplied by an exponential.
+
+### Version: 1.0.3.9001
+
+## 2021-03-18
+* Minor updates
+
 ### Version: 1.0.3.9000
 
 ## 2021-03-19
-* svg replaced with png to resolve request from Pof Brian Ripley.
+* svg replaced with png to resolve request from Prof Brian Ripley.
 
 ## 2021-01-22
 

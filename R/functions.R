@@ -972,7 +972,7 @@ plotSimulationSummary <- function(summary, title=NULL, legend.x=NULL, legend.y=N
 	x.intersp = c(1,1,1,-0.5,-0.5,-0.5,-0.5))
 	}
 #----------------------------------------------------------------------------------------------
-rolling.mean <- function(x,k){
+rollmean <- function(x,k){
 	if(k<1)stop('k must be >=1')
 	if(abs(k - round(k))>0.0000001){
 		warning(' k was not an integer, so has been rounded')

@@ -11,7 +11,7 @@
 
 ## 2023-09-06
 * removed dependency on 'zoo' package.
-* fast rolling mean function.
+* fast rollmean function.
 
 ### Version: 1.0.3.9004
 

@@ -769,7 +769,7 @@ Clearly the taphonomic parameters $b$ and $c$ are highly correlated, and althoug
 
 ### MAP Search
 
-Taphonomy can be included in any ADMUR model by including the argument *taphonomy = TRUE*, which will then use the last two model parameters as the taphonomic parameters $b$ and $c$. We suggest constraining these parameters to $0 < b < 20000$ and $-3 < c < 0$, but if there is better prior knowledge of this range (perhaps an independent dataset based on volcanic eruptions for the same study area) then this can be further constrained accordingly.
+Taphonomy can be included in any ADMUR model by including 'power' model parameters (taphonomic parameters $b$ and $c$). We suggest constraining these parameters to $0 < b < 20000$ and $-3 < c < 0$, but if there is better prior knowledge of this range (perhaps an independent dataset based on volcanic eruptions for the same study area) then this can be further constrained accordingly.
 
 For example, we might perform a MAP search using the previously generated PD array, to find the best 3-CPL model with and without taphonomy as follows:
 ```{r, eval = FALSE}
@@ -778,7 +778,6 @@ best <- JDEoptim(lower=c(0,0,0,0,0),
 	fn=objectiveFunction, 
 	PDarray=PD, 
 	type='CPL',
-	taphonomy=FALSE, 
 	trace=T, 
 	NP=100) 
 	
@@ -786,8 +785,7 @@ best.taph <- JDEoptim(lower=c(0,0,0,0,0,0,-3),
 	upper=c(1,1,1,1,1,20000,0), 
 	fn=objectiveFunction, 
 	PDarray=PD, 
-	type='CPL',
-	taphonomy=T, 
+	type=c('CPL','power'),
 	trace=T, 
 	NP=140) 
 ```
@@ -800,8 +798,8 @@ load('vignette.3CPL.JDEoptim.best.taph.RData')
 ```
 
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
-CPL <- convertPars(pars=best$par, years=5500:7500, type='CPL', taphonomy=F)
-CPL.taph <- convertPars(pars=best.taph$par, years=5500:7500, type='CPL', taphonomy=T)
+CPL <- convertPars(pars=best$par, years=5500:7500, type='CPL')
+CPL.taph <- convertPars(pars=best.taph$par, years=5500:7500, type=('CPL','power'))
 
 SPD <- summedPhaseCalibrator( data=data, calcurve=shcal20, calrange=c(5500,7500) )
 plotPD(SPD)
@@ -833,7 +831,7 @@ Therefore we can perform an MCMC parameter search as follows:
 ```{r, eval = FALSE}
 chain.taph <- mcmc(PDarray = PD, 
 	startPars = c(0.5,0.5,0.5,0.5,0.5,10000,-1.5), 
-	type='CPL', taphonomy=T, 
+	type=c('CPL','power'), 
 	N = 30000, 
 	burn = 2000, 
 	thin = 5, 

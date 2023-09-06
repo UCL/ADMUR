@@ -4,7 +4,7 @@
 \description{
 	Converts either a vector of parameters, or a matrix of many parameter sets to model x,y coordinates (date and pdf)
 	\loadmathjax }
-\usage{convertPars(pars, years, type)}
+\usage{convertPars(pars, years, type, timeseries)}
 \arguments{
   \item{pars}{
 	Either a vector of one parameter set, or a matrix of several parameter sets (one set per row). 

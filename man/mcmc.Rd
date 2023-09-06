@@ -5,9 +5,6 @@
 \usage{mcmc(PDarray, 
 						startPars, 
 						type, 
-						taphonomy=FALSE, 
-						taph.min=c(0,-3), 
-						taph.max=c(20000,0), 
 						N=30000, 
 						burn=2000, 
 						thin=5, 
@@ -21,15 +18,6 @@
 	}
 \item{type}{
 	Choose from 'CPL', 'exp', 'norm', 'cauchy', 'sine', 'uniform', 'logistic', 'power'.
-	}
-\item{taphonomy}{
-	If TRUE, the last two parameters determine the taphonomic loss rate.
-	}
-\item{taph.min}{
-	Minimum values for the prior range of taphonomic parameters (b,c).  
-	}
-\item{taph.max}{
-	Maximum values for the prior range of taphonomic parameters (b,c). 
 	}
   \item{N}{
 	The total number of proposals made, before the chain is reduced for burn-in and thinning.
@@ -78,8 +66,7 @@ chain <- mcmc(PDarray = PD,
 # Run MCMC for a 3-CPL model with taphonomy (5 + 2 parameters)
 chain <- mcmc(PDarray = PD, 
 	startPars = c(rep(0.5,5),10000,-1.5), 
-	type='CPL', 
-	taphonomy=TRUE, 
+	type=c('CPL', 'power'), 
 	jumps = 0.02)	
 }
 }

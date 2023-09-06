@@ -471,7 +471,7 @@ loglik <- function(PD, model){
 	if(is.nan(loglik))loglik <- -Inf
 return(loglik)}
 #--------------------------------------------------------------------------------------------	
-convertPars <- function(pars, years, type,  timeseries=NULL){
+convertPars <- function(pars, years, type, timeseries=NULL){
 	
 	# backwards compatibility (pre v.1.0.4)
 	if(is.null(pars))pars <- NA
@@ -650,7 +650,7 @@ proposalFunction <- function(pars, jumps, type, taph.min, taph.max){
 
 return(new.pars)}
 #--------------------------------------------------------------------------------------------
-mcmc <- function(PDarray, startPars, type, pars.allocation=NULL, timeseries=NULL, N = 30000, burn = 2000, thin = 5, jumps = 0.02){ 
+mcmc <- function(PDarray, startPars, type, timeseries=NULL, N = 30000, burn = 2000, thin = 5, jumps = 0.02){ 
 
 	model.choices <- get.model.choices()$names
 	if(sum(!type%in%model.choices)!=0)stop(paste('Unknown model type. Choose from:',paste(model.choices,collapse=', ')))
@@ -664,9 +664,9 @@ mcmc <- function(PDarray, startPars, type, pars.allocation=NULL, timeseries=NULL
 	accepted <- rep(0,N)
 	for(n in 1:N){
 		all.pars[n,] <- pars
-		llik <- -objectiveFunction(pars, PDarray, type, pars.allocation, timeseries)
+		llik <- -objectiveFunction(pars, PDarray, type, timeseries)
 		prop.pars <- proposalFunction(pars, jumps, type)
-		prop.llik <- -objectiveFunction(prop.pars, PDarray, type, pars.allocation, timeseries)
+		prop.llik <- -objectiveFunction(prop.pars, PDarray, type, timeseries)
 		ratio <- min(exp(prop.llik-llik),1)
 		move <- sample(c(T,F),size=1,prob=c(ratio,1-ratio))
 		if(move){
@@ -752,7 +752,7 @@ SPDsimulationTest <- function(data, calcurve, calrange, pars, type, inc=5, N=200
 
 	# 3. convert best pars to a model
 	print('Converting model parameters into a PDF')
-	model <- convertPars(pars, years=CalArray$cal, type, pars.allocation, timeseries)
+	model <- convertPars(pars, years=CalArray$cal, type, timeseries)
 
 	# 4. Generate N simulations
 	print('Generating simulated SPDs under the model')

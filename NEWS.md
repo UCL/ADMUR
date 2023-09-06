@@ -7,6 +7,12 @@
 
 # ADMUR build history
 
+### Version: 1.0.3.9005
+
+## 2023-09-06
+* removed dependency on 'zoo' package.
+* fast rolling mean function.
+
 ### Version: 1.0.3.9004
 
 ## 2021-03-23

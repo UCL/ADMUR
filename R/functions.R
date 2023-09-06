@@ -954,8 +954,8 @@ plotSimulationSummary <- function(summary, title=NULL, legend.x=NULL, legend.y=N
 	lines(y=Y,x=X,lty=2)
 
 	smooth <- round(200/mean(diff(X)))			
-	Y.smooth <- zoo::rollmean(Y,smooth)
-	X.smooth <- zoo::rollmean(X,smooth)
+	Y.smooth <- rolling.mean(Y,smooth)
+	X.smooth <- rolling.mean(X,smooth)
 	lines(y=Y.smooth,X.smooth,lty=1,lwd=2)
 
 	legend(legend=c('SPD (200 yrs rolling mean)','SPD','Null model','50% CI','75% CI','95% CI','Outside 95% CI'),
@@ -972,5 +972,14 @@ plotSimulationSummary <- function(summary, title=NULL, legend.x=NULL, legend.y=N
 	x.intersp = c(1,1,1,-0.5,-0.5,-0.5,-0.5))
 	}
 #----------------------------------------------------------------------------------------------
-
+rolling.mean <- function(x,k){
+	if(k<1)stop('k must be >=1')
+	if(abs(k - round(k))>0.0000001){
+		warning(' k was not an integer, so has been rounded')
+		k <- round(k)
+		}
+	cs <- cumsum(c(0,x))
+	res <- (cs[-(1:k)] - cs[1:(length(cs)-k)])/k
+return(res)}
+#----------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------

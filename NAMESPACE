@@ -19,11 +19,11 @@ export(plotSimulationSummary)
 export(checkData)
 export(sinewavePDF)
 export(CPLparsToHinges)
-
+export(rollmean)
 
 importFrom(graphics, plot, axis, image, legend, lines, par, polygon, text)
 importFrom(grDevices, colorRampPalette)
 import(mathjaxr)
 importFrom(stats, approx, dcauchy, dlnorm, dnorm, dunif, qbeta, qgamma, quantile, rnorm, sd)
 importFrom(scales, alpha)
-importFrom(zoo, rollmean)
+

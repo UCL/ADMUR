@@ -91,7 +91,7 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 
 	# a combination model of a logistic (parameters = k, x0) and a power model assumed to be a taphonomic effect (parameters = b,c).
 	pars <- runif(4, c(0,6000,0,-3), c(0.01,6500,20000,0))
-	x <- convertPars( pars=pars, years=5500:7500, type=c('logistic', 'power')
+	x <- convertPars( pars=pars, years=5500:7500, type=c('logistic', 'power'))
 
 	# a single random sinewave parameter set (f,p,r)
 	f <- 1/runif(1,200,1000)

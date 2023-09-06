@@ -4,7 +4,7 @@
 \description{
 	Converts either a vector of parameters, or a matrix of many parameter sets to model x,y coordinates (date and pdf)
 	\loadmathjax }
-\usage{convertPars(pars, years, type, timeseries)}
+\usage{convertPars(pars, years, type, timeseries = NULL)}
 \arguments{
   \item{pars}{
 	Either a vector of one parameter set, or a matrix of several parameter sets (one set per row). 
@@ -14,19 +14,21 @@
 	}
   \item{type}{
 	Choose from 'CPL', 'exp', 'norm', 'cauchy', 'sine', 'uniform', 'logistic', 'power', 'timeseries'.
+	Composite models can be achieved using a vector of more than one type. For example, c('norm','power') will be a composite model, where the first two parameters are the mean and SD, the 3rd and 4th parameters determine the power distribution component, for example if modelling taphonomy.
 	}
   \item{timeseries}{
-	If type is 'timeseries', a data frame containing names x and y must be provided as the timeseries, where x is time and y is the density.
+	A data frame containing names x and y (date and pdf) must be provided as the timeseries, only if type is 'timeseries'.
+	If 'type' is anything else, timeseries is not required (default = NULL).
 	}
 }
 \details{
-Parameter searches will yield either a single set of parameters, or a matrix with one parameter set per row (such as the 'res' value from \code{\link[=mcmc]{mcmc}}) . Either can be handed directly to this function.
+Parameter searches will yield either a single set of parameters, or a matrix with one parameter set per row (such as the 'res' value from \code{\link[=mcmc]{mcmc}}). Either can be handed directly to this function.
 
 The structure of the output differs depending on if converting a vector or matrix.
 
-All models are truncated, such that the total area between \mjseqn{x_{min}} and \mjseqn{x_{max}} (the date range of 'years') equals 1.  
+All models are truncated, such that the total area between \mjseqn{x_{min}} and \mjseqn{x_{max}} (the date range of the argument 'years') equals 1.  
 
-'CPL' is a Continuous Piecewise Linear model. Pars must be of odd length, each between 0 and 1. A n-CPL model has \mjseqn{2n-1} parameters (\mjseqn{n-1} x-parameters and \mjseqn{n} y-parameters) that are mapped to \mjseqn{n+1} PD coordinates (x,y pairs) using a modified Stick Breaking Dirichlet Process. The first and last x-coordinate are set as \mjseqn{x_{min}} and \mjseqn{x_{max}}, and the remaining internal x-coordinates are converted from their respective x-parameters using the Beta distribution CDF (where \mjseqn{\alpha = 1} and \mjseqn{\beta =} the number of pieces still to be broken). The y-parameters (between 0 and 1) are converted to y-coordinates in two steps. Firstly, they are mapped from the parameter range (0,1) to the coordinate range (0, \mjseqn{\infty}) using the formula \mjseqn{\frac{1}{(1 - y)^2} - 1}, and the single remaining y-coordinate is set as \mjseqn{\frac{1}{(1 - 0.5)^2} - 1}. Secondly, they are normalised by the total area under the curve, calculated as the sum of the areas under all \mjseqn{n} pieces: \mjsdeqn{Area = \sum_{i=1}^{n} (\frac{y_i + y_{i+1}}{2})(x_{i+1} - x_i) }
+'CPL' is a Continuous Piecewise Linear model, its pars must be of odd length, each with a value between 0 and 1. A n-CPL model has \mjseqn{2n-1} parameters (\mjseqn{n-1} x-parameters and \mjseqn{n} y-parameters) that are mapped to \mjseqn{n+1} PD coordinates (x,y pairs) using a modified Stick Breaking Dirichlet Process. The first and last x-coordinate are set as \mjseqn{x_{min}} and \mjseqn{x_{max}}, and the remaining internal x-coordinates are converted from their respective x-parameters using the Beta distribution CDF (where \mjseqn{\alpha = 1} and \mjseqn{\beta =} the number of pieces still to be broken). The y-parameters (between 0 and 1) are converted to y-coordinates in two steps. Firstly, they are mapped from the parameter range (0,1) to the coordinate range (0, \mjseqn{\infty}) using the formula \mjseqn{\frac{1}{(1 - y)^2} - 1}, and the single remaining y-coordinate is set as \mjseqn{\frac{1}{(1 - 0.5)^2} - 1}. Secondly, they are normalised by the total area under the curve, calculated as the sum of the areas under all \mjseqn{n} pieces: \mjsdeqn{Area = \sum_{i=1}^{n} (\frac{y_i + y_{i+1}}{2})(x_{i+1} - x_i) }
 
 'exp' is a truncated exponential model of the form \mjseqn{f(x)=ae^{rx}} where \mjseqn{x =} years. The single parameter is used as the rate exponent \mjseqn{r} which gives growth through time if \mjseqn{r > 0}, decline if \mjseqn{r < 0}, and constant if \mjseqn{r=0}. The PDF is as follows. Note the \mjseqn{a} parameter cancels out: \mjsdeqn{\frac{-re^{-r x}}{e^{-rx_{max}} - e^{-rx_{min}}}}  
 
@@ -66,11 +68,13 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 	pars <- runif(2, c(6000,200), c(7000,1000))
 	x <- convertPars( pars=pars, years=5500:7500, type='norm')
 
-	# a combination model of a Gaussian (parameters = mean, sd) and a power model assumed to be a taphonomic effect (parameters = b,c).
+	# a combination model of a Gaussian (parameters = mean, sd), 
+	# and a power model assumed to be a taphonomic effect (parameters = b,c).
 	pars <- runif(4, c(6000,200,0,-3), c(7000,1000,20000,0))
 	x <- convertPars( pars=pars, years=5500:7500, type=c('norm','power'))
 
-	# 5 combination models of a Gaussian (parameters = mean, sd) and a power model assumed to be a taphonomic effect (parameters = b,c).
+	# 5 combination models of a Gaussian (parameters = mean, sd),
+	# and a power model assumed to be a taphonomic effect (parameters = b,c).
 	pars <- t(matrix(runif(4*5, c(6000,200,0,-3), c(7000,1000,20000,0)),4,5))
 	x <- convertPars( pars=pars, years=5500:7500, type=c('norm','power'))
 
@@ -78,7 +82,8 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 	pars <- runif(2, c(6000,200), c(7000,1000))
 	x <- convertPars( pars=pars, years=5500:7500, type='cauchy')
 
-	# a combination model of a Cauchy (parameters = location, scale) and a power model assumed to be a taphonomic effect (parameters = b,c).
+	# a combination model of a Cauchy (parameters = location, scale),
+	# and a power model assumed to be a taphonomic effect (parameters = b,c).
 	pars <- runif(4, c(6000,200,0,-3), c(7000,1000,20000,0))
 	x <- convertPars( pars=pars, years=5500:7500, type=c('norm','power'))
 
@@ -86,7 +91,8 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 	pars <- runif(2, c(0,6000), c(0.01,6500))
 	x <- convertPars( pars=pars, years=5500:7500, type='logistic')
 
-	# a combination model of a logistic (parameters = k, x0) and a power model assumed to be a taphonomic effect (parameters = b,c).
+	# a combination model of a logistic (parameters = k, x0),
+	# and a power model assumed to be a taphonomic effect (parameters = b,c).
 	pars <- runif(4, c(0,6000,0,-3), c(0.01,6500,20000,0))
 	x <- convertPars( pars=pars, years=5500:7500, type=c('logistic', 'power'))
 
@@ -96,7 +102,8 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 	r <- runif(1,0,1)
 	x <- convertPars( pars=c(f,p,r), years=5500:7500, type='sine')
 
-	# a combination model of a sinewave (parameters = f,p,r) and a power model assumed to be a taphonomic effect (parameters = b,c).
+	# a combination model of a sinewave (parameters = f,p,r),
+	# and a power model assumed to be a taphonomic effect (parameters = b,c).
 
 	f <- 1/runif(1,200,1000)
 	p <- runif(1,0,2*pi)

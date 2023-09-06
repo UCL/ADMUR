@@ -472,9 +472,12 @@ loglik <- function(PD, model){
 return(loglik)}
 #--------------------------------------------------------------------------------------------	
 convertPars <- function(pars, years, type, timeseries=NULL){
-	
+
 	# backwards compatibility (pre v.1.0.4)
 	if(is.null(pars))pars <- NA
+
+	# ensure pars are a matrix
+	if('numeric'%in%class(pars))pars <- t(as.matrix(pars))
 
 	# sanity checks
 	model.choices <- get.model.choices()$names
@@ -491,32 +494,37 @@ convertPars <- function(pars, years, type, timeseries=NULL){
 	n.pars <- get.model.choices()$n.pars
 	x <- n.pars[match(type,model.choices)]
 	if('CPL'%in%type){
-		n.pars.cpl <- length(pars) - sum(x,na.rm=T)
+		n.pars.cpl <- ncol(pars) - sum(x,na.rm=T)
 		x[is.na(x)] <- n.pars.cpl
 		if(n.pars.cpl<1)stop('incorrect number of pars')
 		}
-	if(sum(x)!=length(pars))stop('incorrect number of pars')
+	if(sum(x)!=ncol(pars))stop('incorrect number of pars')
 	end.index <- cumsum(x)
 	start.index <- c(0,end.index)[1:length(end.index)]+1
-	pars.list <- list()
-	for(n in 1:length(x))pars.list[[n]] <- pars[start.index[n]:end.index[n]]
 
-	# sanity checks
-	model.choices <- get.model.choices()$names
-	N <- length(pars.list)
+	# loop through each row of pars
+	res <- data.frame(year=years)
+	R <- nrow(pars)
+	for(r in 1:R){
 
-	# converting the parameters - can handle the conflation of multiple functions
-	tmp <- rep(1,length(years))
-	for(n in 1:N)tmp <- tmp*convertParsInner(pars.list[[n]],years,type[n], timeseries)
+		pars.list <- list()
+		for(n in 1:length(x))pars.list[[n]] <- pars[r,start.index[n]:end.index[n]]
+		N <- length(pars.list)
 
-	# The model must be returned as a PDF. I.e, the total area must sum to 1.
-	inc <- years[2]-years[1]
-	pdf <- tmp/(sum(tmp)*inc)
+		# converting the parameters - can handle the conflation of multiple functions
+		tmp <- rep(1,length(years))
+		for(n in 1:N)tmp <- tmp*convertParsInner (pars.list[[n]],years,type[n], timeseries)
 
-	res <- data.frame(year = years, pdf = pdf)
+		# The model must be returned as a PDF. I.e, the total area must sum to 1.
+		inc <- years[2]-years[1]
+		pdf <- tmp/(sum(tmp)*inc)
+		df <- data.frame(year = years, pdf = pdf)
+		if(R>1)names(df) <- c('year',paste('pdf',r,sep=''))
+		res <- merge(res,df,by='year')
+		}
 return(res)}
 #--------------------------------------------------------------------------------------------
-convertParsInner <- function(model.pars, years, type, timeseries){
+convertParsInner  <- function(model.pars, years, type, timeseries){
 
 	if(type=='CPL'){
 		tmp <- CPLPDF(years,model.pars)

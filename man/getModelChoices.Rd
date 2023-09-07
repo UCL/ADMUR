@@ -28,7 +28,7 @@ All models are truncated, such that the total area between \mjseqn{x_{min}} and 
 
 'sine' is a truncated sinewave model. The three parameters are used as specified in \code{\link[=sinewavePDF]{sinewavePDF}}
 
-'uniform' is a uniform model requiring no parameters. I.e. the argument pars must be NULL or c(), and trivially the PDF is: \mjsdeqn{\frac{1}{x_{max} - x_{min}}}
+'uniform' is a uniform model requiring no parameters. I.e. the argument pars must be NULL, and trivially the PDF is: \mjsdeqn{\frac{1}{x_{max} - x_{min}}}
 
 'timeseries' is a custom model of any complexity, typically derived from an independent source. For example, a timeseries of the proportion of forest to grassland through time, derived from pollen data. This requires a single parameter \mjseqn{r} to scale the PDF.
 	}

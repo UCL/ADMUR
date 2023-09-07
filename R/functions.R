@@ -10,8 +10,26 @@ getModelChoices <- function(){
 	# list is required in several functions, so avoids duplication if others are added to the package
 	# also provides the expected number of parameters for each, excpt CPL which can be any odd number of pars
 	names <- c('CPL','uniform','norm','exp','logistic','sine','cauchy','power','timeseries')
-	n.pars <- c(NA,1,2,1,2,3,2,2,1)
-	model.choices <- data.frame(names=names,n.pars=n.pars)
+	n.pars <- c(NA,NULL,2,1,2,3,2,2,1)
+	pars <- c(	'hinge coordinates',
+				'none',
+				'mean; SD',
+				'rate (r)',
+				'rate (k); centre (x_0)',
+				'frequency (f); cycle position in radians at x=0 (p); numeric between 0 and 1 determining how flat the distribution is (r)',
+				'centre location (x_0); scale (gamma)',
+				'b; c',
+				'scaling (r)')
+	description <- c(	'Contnuous Piecewise Linear model: any positive odd number of parameters, to define the free hinge points',
+						'Uniform model: a flat PDF requiring no parameters. I.e. the argument pars must be NULL',
+						'Gaussian model: aka a normal distribution',
+						'Exponential model: can be growth or decay',
+						'Logistic model: a sigmoidal model often used for growth from an initial founder event to a maximum carrying capacity',
+						'Sinusoidal model: a regularly oscillating PDF, always positive',
+						'Cauchy model: fatter tailed than Gaussians, which are arguably better descriptions of real data',
+						'Power function model',
+						'Timeseries model: an independent timeseries that is hypothesised to be a model for the timeseries being studied')
+	model.choices <- data.frame(names=names,n.pars=n.pars,pars=pars,description=description)
 return(model.choices)}
 #--------------------------------------------------------------------------------------------
 checkDataStructure <- function(data){

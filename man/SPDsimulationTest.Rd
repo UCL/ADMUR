@@ -2,7 +2,7 @@
 \alias{SPDsimulationTest} 
 \title{Goodness of Fit test, using SPD simulation} 
 \description{Calculates the data p-value given a model.}
-\usage{SPDsimulationTest(data, calcurve, calrange, pars, type, inc=5, N=20000)}
+\usage{SPDsimulationTest(data, calcurve, calrange, pars, type, inc=5, N=20000, timeseries = NULL)}
 \arguments{
   \item{data}{
 	A dataframe of 14C dates. Requires 'age' and 'sd', and at least one of 'site' and 'phase'. Optional 'datingType' comprising '14C' and/or anything else.
@@ -17,13 +17,16 @@
 	A single vector of one parameter combination. 
 	}
 \item{type}{
-	Choose 'CPL' for a Continuous Piecewise Linear model, 'exp' for an exponential model, or 'uniform' for a uniform model.
+	Choose from 'CPL', 'exp', 'norm', 'cauchy', 'sine', 'uniform', 'logistic', 'power', 'timeseries'.
 	}
 \item{inc}{
 	Increments to interpolate calendar years. Default = 5
 	}
 \item{N}{
 	The number of simulations to generate.
+	}
+\item{timeseries}{
+	Only if 'type' = 'timeseries', a data frame should be provided containing columns x and y that define the timeseries as year and value respectively.
 	}
 }
 \value{

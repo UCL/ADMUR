@@ -16,8 +16,11 @@
   \item{startPars}{
 	A vector of parameter values for the algorithm to start at. Suggest using the parameters found from a Maximum Likelihood search. Must have an odd length with values between 0 and 1 for an n-CPL model, or length 1 values between -0.1 and 0.1 for an exponential model.
 	}
-\item{type}{
+	\item{type}{
 	Choose from 'CPL', 'exp', 'norm', 'cauchy', 'sine', 'uniform', 'logistic', 'power'.
+	}
+	\item{timeseries}{
+	Only if 'type' = 'timeseries', a data frame should be provided containing columns x and y that define the timeseries as year and value respectively.
 	}
   \item{N}{
 	The total number of proposals made, before the chain is reduced for burn-in and thinning.

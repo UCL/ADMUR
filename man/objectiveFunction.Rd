@@ -13,6 +13,9 @@
   \item{type}{
 	Choose from 'CPL', 'exponential', or 'uniform'. 
 	}
+	\item{timeseries}{
+	Only if 'type' = 'timeseries', a data frame should be provided containing columns x and y that define the timeseries as year and value respectively.
+	}
 }
 \value{
 	Returns a single value, the negative log likelihood.

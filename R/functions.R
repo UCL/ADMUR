@@ -6,7 +6,7 @@
 # global variables
 if(getRversion() >= "2.15.1")  utils::globalVariables(c('age','datingType','site','calBP','phase','intcal20'))
 #--------------------------------------------------------------------------------------------
-get.model.choices <- function(){
+getModelChoices <- function(){
 	# list is required in several functions, so avoids duplication if others are added to the package
 	# also provides the expected number of parameters for each, excpt CPL which can be any odd number of pars
 	names <- c('CPL','uniform','norm','exp','logistic','sine','cauchy','power','timeseries')
@@ -480,7 +480,7 @@ convertPars <- function(pars, years, type, timeseries=NULL){
 	if('numeric'%in%class(pars))pars <- t(as.matrix(pars))
 
 	# sanity checks
-	model.choices <- get.model.choices()$names
+	model.choices <- getModelChoices()$names
 	if(sum(type=='CPL')>1)stop('multiple CPL models makes no sense, run a single CPL with more parameters')
 	if(sum(!type%in%model.choices)!=0)stop(paste('Unknown model type. Choose from:',paste(model.choices,collapse=', ')))
 	if('integer'%in%class(years))years <- as.numeric(years)
@@ -491,7 +491,7 @@ convertPars <- function(pars, years, type, timeseries=NULL){
 		}
 
 	# convert parameters to a list, accounting for the fact that CPL can have any odd number of parameters
-	n.pars <- get.model.choices()$n.pars
+	n.pars <- getModelChoices()$n.pars
 	x <- n.pars[match(type,model.choices)]
 	if('CPL'%in%type){
 		n.pars.cpl <- ncol(pars) - sum(x,na.rm=T)
@@ -660,7 +660,7 @@ return(new.pars)}
 #--------------------------------------------------------------------------------------------
 mcmc <- function(PDarray, startPars, type, timeseries=NULL, N = 30000, burn = 2000, thin = 5, jumps = 0.02){ 
 
-	model.choices <- get.model.choices()$names
+	model.choices <- getModelChoices()$names
 	if(sum(!type%in%model.choices)!=0)stop(paste('Unknown model type. Choose from:',paste(model.choices,collapse=', ')))
 
 	# starting parameters

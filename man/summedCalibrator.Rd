@@ -1,7 +1,7 @@
 \name{summedCalibrator} 
 \alias{summedCalibrator} 
 \title{Generates a summed probability distribution (SPD) of calibrated dates} 
-\description{Generates a Summed Probability Distribution (SPD). Handles both C14 and other date types e.g., thermoluminescence.}
+\description{Generates a Summed Probability Distribution (SPD). Handles both C14 and other date types e.g., thermoluminescence}
 \usage{summedCalibrator(data, CalArray, normalise = 'standard', checks = TRUE)}
 \arguments{
   \item{data}{

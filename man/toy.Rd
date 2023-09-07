@@ -3,7 +3,7 @@
 \alias{toy} 
 \title{Toy population model} 
 \description{
-	Data frame of a toy population model. Provides a discretised PDF across the time range of 7.5kyr to 5.5kyr BP. The model PDF outside this range is zero. Comprises two columns: year, pdf.
+	Data frame of a toy population model. Provides a discretised PDF across the time range of 7.5kyr to 5.5kyr BP. The model PDF outside this range is zero. Comprises two columns: year, pdf
 	}
 \usage{
 	toy

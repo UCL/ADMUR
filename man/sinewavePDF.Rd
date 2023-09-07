@@ -2,7 +2,7 @@
 \alias{sinewavePDF} 
 \title{PDF of a truncated sinusoidal curve} 
 \description{
-		Probability density function for a truncated sinusoidal curve.
+		Probability density function for a truncated sinusoidal curve
 		\loadmathjax }
 \usage{sinewavePDF(x, min, max, f, p, r)}
 \arguments{

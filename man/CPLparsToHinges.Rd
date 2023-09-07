@@ -2,7 +2,7 @@
 \alias{CPLparsToHinges} 
 \title{Converts CPL parameters (0 to 1) into hinge (x,y) coordinates (date and pdf) that describe a model} 
 \description{
-	Converts either a vector of parameters, or a matrix of many parameter sets to CPL-model hinges (date and pdf coordinates).
+	Converts either a vector of parameters, or a matrix of many parameter sets to CPL-model hinges (date and pdf coordinates)
 \loadmathjax }
 \usage{CPLparsToHinges(pars, years)}
 \arguments{

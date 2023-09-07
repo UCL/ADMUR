@@ -1,7 +1,7 @@
 \name{objectiveFunction} 
 \alias{objectiveFunction} 
-\title{Objective function to be minimised in a search. Returns the negative log likelihood.} 
-\description{Calculates the negative log likelihood of a model given a calibrated date matrix.}
+\title{Objective function to be minimised in a search. Returns the negative log likelihood} 
+\description{Calculates the negative log likelihood of a model given a calibrated date matrix}
 \usage{objectiveFunction(pars, PDarray, type)}
 \arguments{
   \item{pars}{

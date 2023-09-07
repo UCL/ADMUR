@@ -1,7 +1,7 @@
 \name{relativeRate} 
 \alias{relativeRate} 
-\title{Calculates the relative growth (or decline) rate per generation.} 
-\description{Calculates the generational growth/decline rate for a linear piece of a CPL model, or between any two x,y coordinate pairs.}
+\title{Calculates the relative growth (or decline) rate per generation} 
+\description{Calculates the generational growth/decline rate for a linear piece of a CPL model, or between any two x,y coordinate pairs}
 \usage{relativeRate(x, y, generation = 25, N = 1000)}
 \arguments{
   \item{x}{

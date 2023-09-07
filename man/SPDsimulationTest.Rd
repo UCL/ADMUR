@@ -1,7 +1,7 @@
 \name{SPDsimulationTest} 
 \alias{SPDsimulationTest} 
 \title{Goodness of Fit test, using SPD simulation} 
-\description{Calculates the data p-value given a model.}
+\description{Calculates the data p-value given a model}
 \usage{SPDsimulationTest(data, calcurve, calrange, pars, type, inc=5, N=20000, timeseries = NULL)}
 \arguments{
   \item{data}{

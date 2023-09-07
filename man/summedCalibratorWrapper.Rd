@@ -1,7 +1,7 @@
 \name{summedCalibratorWrapper} 
 \alias{summedCalibratorWrapper} 
-\title{Quick calibration of dates, without the need to choose a date range or generate a CalArray.} 
-\description{Wrapper function that easily generates and plots an SPD, at the cost of some user control.}
+\title{Quick calibration of dates, without the need to choose a date range or generate a CalArray} 
+\description{Wrapper function that easily generates and plots an SPD, at the cost of some user control}
 \usage{summedCalibratorWrapper(data, calcurve = intcal20, plot = TRUE)}
 \arguments{
   \item{data}{

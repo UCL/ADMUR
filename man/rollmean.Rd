@@ -1,7 +1,7 @@
 \name{rollmean} 
 \alias{rollmean} 
 \title{Rolling mean of a vector of values} 
-\description{Computes the rolling mean of a vector of values x. I.e., the mean of a sliding window k values wide.}
+\description{Computes the rolling mean of a vector of values x. I.e., the mean of a sliding window k values wide}
 \usage{rollmean(x, k)}
 \arguments{
   \item{x}{

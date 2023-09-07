@@ -1,7 +1,7 @@
 \name{makeCalArray} 
 \alias{makeCalArray} 
 \title{Makes a calibration curve probability array} 
-\description{Generates CalArray containing a 2D probability array of the calibration curve. }
+\description{Generates CalArray containing a 2D probability array of the calibration curve}
 \usage{makeCalArray(calcurve, calrange, inc=5)}
 \arguments{
   \item{calcurve}{

@@ -1,7 +1,7 @@
 \name{phaseCalibrator} 
 \alias{phaseCalibrator} 
 \title{Generates an SPD for each phase in a dataset} 
-\description{Generates a data frame of SPDs, one for each phase. }
+\description{Generates a data frame of SPDs, one for each phase}
 \usage{phaseCalibrator(data, CalArray, width = 200, remove.external = FALSE)}
 \arguments{
   \item{data}{

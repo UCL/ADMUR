@@ -1,7 +1,7 @@
 \name{plotCalArray} 
 \alias{plotCalArray} 
 \title{Plots a calibration curve probability array} 
-\description{Generates a basic image plot of the calibration curve.}
+\description{Generates a basic image plot of the calibration curve}
 \usage{plotCalArray(CalArray)}
 \arguments{
   \item{CalArray}{

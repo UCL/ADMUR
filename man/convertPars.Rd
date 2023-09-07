@@ -13,7 +13,7 @@
 	A vector of years.
 	}
   \item{type}{
-	Choose from 'CPL', 'exp', 'norm', 'cauchy', 'sine', 'uniform', 'logistic', 'power', 'timeseries'.
+	Choose from  the following currently available \code{\link[=getModelChoices]{getModelChoices}} 
 	Composite models can be achieved using a vector of more than one type. For example, c('norm','power') will be a composite model, where the first two parameters are the mean and SD, the 3rd and 4th parameters determine the power distribution component, for example if modelling taphonomy.
 	}
   \item{timeseries}{

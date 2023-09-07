@@ -3,7 +3,7 @@
 \alias{data3} 
 \title{Toy radiocarbon dataset} 
 \description{
-	Data frame comprising a randomly generated 14C dataset. The data generation process is deliberately left to the imagination.
+	Data frame comprising a randomly generated 14C dataset. The true data generation process is deliberately left to the imagination
 	}
 \usage{
 	data3

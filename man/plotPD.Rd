@@ -1,7 +1,7 @@
 \name{plotPD} 
 \alias{plotPD} 
 \title{Plots a calibrated PD of a single date, or SPD of multiple dates, or multiple SPDs} 
-\description{Generates a basic plot of the Probability Distribution of calibrated date, or Summed Probability Distribution of multiple calibrated dates, or multiple SPDs such as a data frame of phases.}
+\description{Generates a basic plot of the Probability Distribution of calibrated date, or Summed Probability Distribution of multiple calibrated dates, or multiple SPDs such as a data frame of phases}
 \usage{plotPD(x)}
 \arguments{
   \item{x}{

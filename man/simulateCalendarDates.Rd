@@ -1,7 +1,7 @@
 \name{simulateCalendarDates} 
 \alias{simulateCalendarDates} 
 \title{Converts calendar dates to 14C dates} 
-\description{Randomly samples calendar dates from a model, including dates slightly outside the model date range to avoid edge effects.}
+\description{Randomly samples calendar dates from a model, including dates slightly outside the model date range to avoid edge effects}
 \usage{simulateCalendarDates(model, n)}
 \arguments{
   \item{model}{

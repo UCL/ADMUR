@@ -1,7 +1,7 @@
 \name{plotSimulationSummary} 
 \alias{plotSimulationSummary} 
 \title{Plots a summary of the SPD simulation test} 
-\description{Plots the SPD and confidence intervals of simulated SPDs, including regions outside the CI, the model, and 200 yr rolling mean.}
+\description{Plots the SPD and confidence intervals of simulated SPDs, including regions outside the CI, the model, and 200 yr rolling mean}
 \usage{plotSimulationSummary(summary, title=NULL, legend.x=NULL, legend.y=NULL)}
 \arguments{
   \item{summary}{

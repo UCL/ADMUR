@@ -20,6 +20,7 @@ export(checkData)
 export(sinewavePDF)
 export(CPLparsToHinges)
 export(rollmean)
+export(getModelChoices)
 
 importFrom(graphics, plot, axis, image, legend, lines, par, polygon, text)
 importFrom(grDevices, colorRampPalette)

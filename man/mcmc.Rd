@@ -1,7 +1,7 @@
 \name{mcmc} 
 \alias{mcmc} 
-\title{Makes a MCMC chain using the Metropolis-Hastings algorithm.} 
-\description{Generates a single Markov Chain Monte Carlo using the Metropolis-Hastings algorithm.}
+\title{Makes a MCMC chain using the Metropolis-Hastings algorithm} 
+\description{Generates a single Markov Chain Monte Carlo using the Metropolis-Hastings algorithm}
 \usage{mcmc(PDarray, 
 						startPars, 
 						type, 

@@ -1,7 +1,7 @@
 \name{estimateDataDomain} 
 \alias{estimateDataDomain} 
-\title{Estimates the calendar date domain of a 14C dataset.} 
-\description{Estimates the approximate date range of a 14C dataset, in calendar time.}
+\title{Estimates the calendar date domain of a 14C dataset} 
+\description{Estimates the approximate date range of a 14C dataset, in calendar time}
 \usage{estimateDataDomain(data, calcurve)}
 \arguments{
   \item{data}{

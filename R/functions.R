@@ -10,9 +10,9 @@ getModelChoices <- function(){
 	# list is required in several functions, so avoids duplication if others are added to the package
 	# also provides the expected number of parameters for each, excpt CPL which can be any odd number of pars
 	names <- c('CPL','uniform','norm','exp','logistic','sine','cauchy','power','timeseries')
-	n.pars <- c(NA,0,2,1,2,3,2,2,1)
+	n.pars <- c(NA,1,2,1,2,3,2,2,1)
 	pars <- c(	'hinge coordinates',
-				'none',
+				'NA',
 				'mean; SD',
 				'rate (r)',
 				'rate (k); centre (x_0)',
@@ -491,11 +491,8 @@ return(loglik)}
 #--------------------------------------------------------------------------------------------	
 convertPars <- function(pars, years, type, timeseries=NULL){
 
-	# backwards compatibility (pre v.1.0.4)
-	if(is.null(pars))pars <- NA
-
 	# ensure pars are a matrix
-	if('numeric'%in%class(pars))pars <- t(as.matrix(pars))
+	if(!'matrix'%in%class(pars))pars <- t(as.matrix(pars))
 
 	# sanity checks
 	model.choices <- getModelChoices()$names
@@ -509,14 +506,13 @@ convertPars <- function(pars, years, type, timeseries=NULL){
 		}
 
 	# convert parameters to a list, accounting for the fact that CPL can have any odd number of parameters
-	n.pars <- getModelChoices()$n.pars
-	x <- n.pars[match(type,model.choices)]
+	MC <- getModelChoices()
+	x <- MC$n.pars[MC$names%in%type]
 	if('CPL'%in%type){
 		n.pars.cpl <- ncol(pars) - sum(x,na.rm=T)
 		x[is.na(x)] <- n.pars.cpl
 		if(n.pars.cpl<1)stop('incorrect number of pars')
 		}
-	if(sum(x)!=ncol(pars))stop('incorrect number of pars')
 	end.index <- cumsum(x)
 	start.index <- c(0,end.index)[1:length(end.index)]+1
 
@@ -524,7 +520,6 @@ convertPars <- function(pars, years, type, timeseries=NULL){
 	res <- data.frame(year=years)
 	R <- nrow(pars)
 	for(r in 1:R){
-
 		pars.list <- list()
 		for(n in 1:length(x))pars.list[[n]] <- pars[r,start.index[n]:end.index[n]]
 		N <- length(pars.list)

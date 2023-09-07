@@ -8,7 +8,7 @@ ADMUR: Ancient Demographic Modelling Using Radiocarbon
 Tools to directly model and compare the underlying dynamics of prehistoric population change using radiocarbon date datasets.
 	}
 \details{
-	Package to model population dynamics from anthropogenic datasets of dates, including radiocarbon dates and other date such as thermoluminescence. Provides tools to perform and compare three modelling approaches:
+	Package to model population dynamics from anthropogenic datasets of dates such as radiocarbon dates. Provides tools to perform and compare three modelling approaches:
 
 1. Directly modelling the underlying population dynamics using common parameteric models, including uniform, gaussian, exponential, logistic, sinusoidal, cauchy, power, etc.
 

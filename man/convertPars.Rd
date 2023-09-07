@@ -7,7 +7,7 @@
 \usage{convertPars(pars, years, type, timeseries = NULL)}
 \arguments{
   \item{pars}{
-	Either a vector of one parameter set, or a matrix of several parameter sets (one set per row). 
+	Either a numeric vector (one parameter set), or a matrix of several parameter sets (one set per row). 
 	}
   \item{years}{
 	A vector of years.
@@ -91,9 +91,11 @@ The structure of the output differs depending on if converting a vector or matri
 	x <- convertPars( pars=c(f,p,r,b,c), years=5500:7500, type=c('sine','power'))
 	
 	# although a uniform distribution has no parameters, a pdf can still be generated:
-	x <- convertPars(pars=NULL, years=5500:7500, type='uniform')
+	# pars must be set to NA
+	x <- convertPars(pars=NA, years=5500:7500, type='uniform')
 
-	# and a uniform combined with a power model assumed to be a taphonomic effect (parameters = b,c)
-	pars <- runif(2, c(0,-3), c(20000,0))
+	# and a uniform combined with a power model assumed to be a taphonomic effect (parameters = b,c):
+	# the parameter for the uniform component must be set to NA
+	pars <- c(NA, runif(2, c(0,-3), c(20000,0)))
 	x <- convertPars(pars=pars, years=5500:7500, type=c('uniform','power'))
 	}

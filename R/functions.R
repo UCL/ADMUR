@@ -724,7 +724,7 @@ estimateDataDomain <- function(data, calcurve){
 		}
 return(c(min.year, max.year))}
 #--------------------------------------------------------------------------------------------
-SPDsimulationTest <- function(data, calcurve, calrange, pars, type, inc=5, N=20000, pars.allocation=NULL, timeseries=NULL){
+SPDsimulationTest <- function(data, calcurve, calrange, pars, type, inc=5, N=20000, timeseries=NULL){
 
 	# data checks
 	if(nrow(data)==0)return(NULL)

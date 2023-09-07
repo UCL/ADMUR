@@ -19,7 +19,7 @@ Samples n random calendar dates from a model pdf. This model must be defined in 
 	}
 \examples{
 	# under a uniform model
-	model <- convertPars(pars=NULL, years=5000:6000,type='uniform')
+	model <- convertPars(pars=NA, years=5000:6000,type='uniform')
 	sims <- simulateCalendarDates(model, 1000)
 	range(sims)
 	

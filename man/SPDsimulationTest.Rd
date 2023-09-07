@@ -16,8 +16,8 @@
 \item{pars}{
 	A single vector of one parameter combination. 
 	}
-\item{type}{
-	Choose from 'CPL', 'exp', 'norm', 'cauchy', 'sine', 'uniform', 'logistic', 'power', 'timeseries'.
+  \item{type}{
+	Choose from  the following currently available \code{\link[=getModelChoices]{models}}. Composite models can be achieved using a vector of more than one type. For example, c('norm','power') will be a composite model, where the first two parameters are the mean and SD, the 3rd and 4th parameters determine the power distribution component, for example if modelling taphonomy.
 	}
 \item{inc}{
 	Increments to interpolate calendar years. Default = 5

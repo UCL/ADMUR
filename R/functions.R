@@ -10,7 +10,7 @@ getModelChoices <- function(){
 	# list is required in several functions, so avoids duplication if others are added to the package
 	# also provides the expected number of parameters for each, excpt CPL which can be any odd number of pars
 	names <- c('CPL','uniform','norm','exp','logistic','sine','cauchy','power','timeseries')
-	n.pars <- c(NA,NULL,2,1,2,3,2,2,1)
+	n.pars <- c(NA,0,2,1,2,3,2,2,1)
 	pars <- c(	'hinge coordinates',
 				'none',
 				'mean; SD',

@@ -228,7 +228,7 @@ loglik(PD=PD, model=toy)
 For comparison, we can calculate the overall relative likelihood of a uniform model given exactly the same data. Intuitively this should have a lower relative likelihood, since our dataset was randomly generated from the non-uniform toy population history:
 
 ```{r, eval = TRUE}
-uniform.model <- convertPars(pars=NULL, years=5500:7500, type='uniform')
+uniform.model <- convertPars(pars=NA, years=5500:7500, type='uniform')
 loglik(PD=PD, model=uniform.model)
 ```
 

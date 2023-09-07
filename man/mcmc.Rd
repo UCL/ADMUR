@@ -5,6 +5,7 @@
 \usage{mcmc(PDarray, 
 						startPars, 
 						type, 
+						timeseries=NULL,
 						N=30000, 
 						burn=2000, 
 						thin=5, 

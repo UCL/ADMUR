@@ -2,7 +2,7 @@
 \alias{objectiveFunction} 
 \title{Objective function to be minimised in a search. Returns the negative log likelihood} 
 \description{Calculates the negative log likelihood of a model given a calibrated date matrix}
-\usage{objectiveFunction(pars, PDarray, type)}
+\usage{objectiveFunction(pars, PDarray, type, timeseries=NULL)}
 \arguments{
   \item{pars}{
 	A numeric vector of parameters. 
@@ -45,7 +45,7 @@
 	objectiveFunction(pars, PD, type='norm')	
 
 	# the negative log likelihood given a uniform model
-	objectiveFunction(pars=NULL, PD, type='uniform')	
+	objectiveFunction(pars=NA, PD, type='uniform')	
 
 	# the negative log likelihood given a uniform model with taphonomy
 	pars <- c(runif(1, 0, 20000), runif(1, -3, 0))

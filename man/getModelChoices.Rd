@@ -5,8 +5,7 @@
 	Lists currently available models, the number of parameters, and a brief description
 	\loadmathjax }
 \usage{getModelChoices()}
-\arguments{
-}
+
 \details{
 
 All models are truncated, such that the total area between \mjseqn{x_{min}} and \mjseqn{x_{max}} (the date range of the argument 'years') equals 1.  

@@ -37,7 +37,7 @@ checkDataStructure <- function(data){
 	# helper function to check format of data, and throw warnings
 
 	x <- 'good'
-	if(class(data)!='data.frame'){warning('data must be a data.frame');return('bad')}
+	if(!is(data,'data.frame')){warning('data must be a data.frame');return('bad')}
 	if(sum(names(data)%in%c('age','sd'))!=2){warning("data must include 'age' and 'sd'");return('bad')}
 	if(!is.numeric(data$age)){warning('age must be numeric');return('bad')}	
 	if(!is.numeric(data$sd)){warning('sd must be numeric');return('bad')}		
@@ -492,16 +492,15 @@ return(loglik)}
 convertPars <- function(pars, years, type, timeseries=NULL){
 
 	# ensure pars are a matrix
-	if(!'matrix'%in%class(pars))pars <- t(as.matrix(pars))
+	if(!is(pars,'matrix'))pars <- t(as.matrix(pars))
 
 	# sanity checks
 	model.choices <- getModelChoices()$names
 	if(sum(type=='CPL')>1)stop('multiple CPL models makes no sense, run a single CPL with more parameters')
 	if(sum(!type%in%model.choices)!=0)stop(paste('Unknown model type. Choose from:',paste(model.choices,collapse=', ')))
-	if('integer'%in%class(years))years <- as.numeric(years)
-	if(!'numeric'%in%class(years))stop('years must be a numeric vector')
+	if(!is(years,'numeric'))stop('years must be a numeric vector')
 	if(!is.null(timeseries)){
-		if(class(timeseries)!='data.frame')stop('timeseries must be a data frame')
+		if(!is(timeseries,'data.frame'))stop('timeseries must be a data frame')
 		if(sum(c('x','y')%in%names(timeseries))!=2)stop('timeseries must include x and y')
 		}
 
@@ -582,7 +581,7 @@ return(pdf)}
 #--------------------------------------------------------------------------------------------
 CPLparsToHinges <- function(pars, years){
 
-	if('numeric'%in%class(pars)){
+	if(is(pars,'numeric')){
 		res <- CPLparsToHingesInner(pars, years)
 		return(res)}
 
@@ -847,7 +846,7 @@ return(list(timeseries=timeseries,
 #--------------------------------------------------------------------------------------------
 relativeDeclineRate <- function(x, y, generation, N){
 
-	if('numeric'%in%class(x)){
+	if(is(x,'numeric')){
 		x <- sort(x, decreasing=T)
 		y <- sort(y, decreasing=T)
 		X <- seq(x[1],x[2], length.out=N)
@@ -856,7 +855,7 @@ relativeDeclineRate <- function(x, y, generation, N){
 		res <- 100*(mean(k)-1)
 		}
 
-	if(!'numeric'%in%class(x)){
+	if(!is(x,'numeric')){
 		x <- t(apply(x, MARGIN=1, FUN=sort, decreasing=T))
 		y <- t(apply(y, MARGIN=1, FUN=sort, decreasing=T))
 		C <- nrow(x)
@@ -873,14 +872,14 @@ return(res)	}
 #----------------------------------------------------------------------------------------------
 relativeRate <- function(x, y, generation=25, N=1000){
 
-	if('numeric'%in%class(x)){
+	if(is(x,'numeric')){
 		grad <- diff(y)/diff(x)
 		if(grad==0)return(0)
 		res <- relativeDeclineRate(x, y, generation, N)
 		if(grad<0)res <- res*(-1)
 		}
 
-	if(!'numeric'%in%class(x)){
+	if(!is(x,'numeric')){
 		grad <- apply(x, MARGIN=1, FUN=diff)/apply(y, MARGIN=1, FUN=diff)
 		res <- relativeDeclineRate(x, y, generation, N)
 		res[grad<0] <- res[grad<0]*(-1) 

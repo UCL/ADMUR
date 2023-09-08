@@ -94,7 +94,7 @@ The structure of the output differs depending on if converting a vector or matri
 	# pars must be set to NA
 	x <- convertPars(pars=NA, years=5500:7500, type='uniform')
 
-	# and a uniform combined with a power model assumed to be a taphonomic effect (parameters = b,c):
+	# a uniform combined with a power model (assumed to be a taphonomic effect):
 	# the parameter for the uniform component must be set to NA
 	pars <- c(NA, runif(2, c(0,-3), c(20000,0)))
 	x <- convertPars(pars=pars, years=5500:7500, type=c('uniform','power'))

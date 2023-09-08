@@ -12,6 +12,7 @@
 ## 2023-09-06
 * removed dependency on 'zoo' package.
 * fast rollmean function.
+* removed dependency on 'scales' package.
 
 ### Version: 1.0.3.9004
 

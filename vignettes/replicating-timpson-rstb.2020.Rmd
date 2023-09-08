@@ -630,6 +630,7 @@ par(oldpar)
 Generate Figure 7:
 
 ```{r, eval = FALSE}
+library(scales)
 oldpar <- par(no.readonly = TRUE) 	
 pdf('Fig7.pdf',height=5,width=12)
 grey1 <- 'grey90'

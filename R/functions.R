@@ -968,8 +968,8 @@ plotSimulationSummary <- function(summary, title=NULL, legend.x=NULL, legend.y=N
 	upper.y <- lower.y <- Y
 	upper.y[upperpoly] <- summary$timeseries$model[upperpoly]
 	lower.y[lowerpoly] <- summary$timeseries$model[lowerpoly]
-	polygon(c(X,rev(X)),c(upper.y,rev(summary$timeseries$model)),border=NA, col=scales::alpha('firebrick',alpha=0.6))
-	polygon(c(X,rev(X)),c(lower.y,rev(summary$timeseries$model)),border=NA, col=scales::alpha('firebrick',alpha=0.6))
+	polygon(c(X,rev(X)),c(upper.y,rev(summary$timeseries$model)),border=NA, col='firebrick')
+	polygon(c(X,rev(X)),c(lower.y,rev(summary$timeseries$model)),border=NA, col='firebrick')
 
 	lines(x=X, y=summary$timeseries$model, col='steelblue',lty=3, lwd=2)
 	lines(y=Y,x=X,lty=2)

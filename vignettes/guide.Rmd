@@ -339,7 +339,7 @@ hist(hinges$pdf4, border=c1,breaks=pdf.brk, main=names[6], xlab='');abline(v=CPL
 Some two-dimensional combinations of joint parameters may be preferred, but still these are 2D marginal representations of 5D parameters, again with MAP in red:
 
 ```{r, eval = FALSE}
-require(scales)
+library(scales)
 par( mfrow=c(1,2) , mar=c(4,4,1.5,2), cex=0.7 )
 plot(hinges$yr2, hinges$pdf2, pch=16, col=alpha(1,0.02), ylim=c(0,0.0005))
 points(CPL$year[2], CPL$pdf[2], col='red', pch=16, cex=1.2)

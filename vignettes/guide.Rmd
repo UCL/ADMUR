@@ -799,7 +799,7 @@ load('vignette.3CPL.JDEoptim.best.taph.RData')
 
 ```{r, eval = TRUE, fig.height = 4, fig.width=7, fig.align = "center", dev='jpeg', quality=100, warning=FALSE}
 CPL <- convertPars(pars=best$par, years=5500:7500, type='CPL')
-CPL.taph <- convertPars(pars=best.taph$par, years=5500:7500, type=('CPL','power'))
+CPL.taph <- convertPars(pars=best.taph$par, years=5500:7500, type=c('CPL','power'))
 
 SPD <- summedPhaseCalibrator( data=data, calcurve=shcal20, calrange=c(5500,7500) )
 plotPD(SPD)

@@ -24,7 +24,7 @@ p.caption {font-size: 0.7em;}
 
 ## Introduction to ADMUR
 
-This vignette provides a comprehensive guide to modelling population dynamics using the R package ADMUR, and accompanies the publication 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates', Philosophical Transactions B, 2020, A. Timpson et al. https://doi.org/10.1098/rstb.2019.0723 
+This vignette provides a comprehensive guide to modelling population dynamics using the R package ADMUR, and accompanies the publication 'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates', Philosophical Transactions B, 2020, A. Timpson et al. https://royalsocietypublishing.org/doi/10.1098/rstb.2019.0723 
 
 Throughout this vignette, R code blocks often use objects created earlier in the vignette in previous code blocks. However, the manual for each function provides examples with self sufficient R code blocks.
 

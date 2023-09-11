@@ -13,6 +13,7 @@
 * removed dependency on 'zoo' package.
 * fast rollmean function.
 * removed dependency on 'scales' package.
+* removed dependency on 'grDevices' package by using greyscale instead
 
 ### Version: 1.0.3.9004
 

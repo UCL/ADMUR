@@ -21,7 +21,7 @@ Tools to directly model and compare the underlying dynamics of prehistoric popul
 Tools to estimate Maximum likelihood; Goodness of Fit tests; model comparison.
 	}
 \references{
-	'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates' by Adrian Timpson, Ramiro Barberena, Mark G. Thomas, César Méndez and Katie Manning, published in Philosophical Transactions of the Royal Society B, 2020. https://doi.org/10.1098/rstb.2019.0723
+	'Directly modelling population dynamics in the South American Arid Diagonal using 14C dates' by Adrian Timpson, Ramiro Barberena, Mark G. Thomas, César Méndez and Katie Manning, published in Philosophical Transactions of the Royal Society B, 2020. https://royalsocietypublishing.org/doi/10.1098/rstb.2019.0723
 	
 	'ADMUR: Ancient Demographic Modelling Using Radiocarbon. Adrian Timpson. University College London. 
 	Research Department of Genetics, Environment and Evolution (GEE), Darwin Building, Gower Street, London, WC1E 6BT. 2020 

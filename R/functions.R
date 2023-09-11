@@ -155,8 +155,8 @@ plotCalArray <- function(CalArray){
 	P <- CalArray$probs
 	c14 <- as.numeric(row.names(P))
 	cal <- as.numeric(colnames(P))
-	colfunc <- colorRampPalette(c('white','steelblue'))
-	image(cal,c14,t(P)^0.1,xlab='Cal BP',ylab='14C',xlim=rev(range(cal)),col = colfunc(20),las=1, cex.axis=0.7, cex.lab=0.7)
+	col <- paste('grey',seq(100,0,by=-10),sep='')
+	image(cal,c14,t(P)^0.1,xlab='Cal BP',ylab='14C',xlim=rev(range(cal)),col=col, las=1, cex.axis=0.7, cex.lab=0.7)
 	}
 #--------------------------------------------------------------------------------------------	
 plotPD <- function(x){

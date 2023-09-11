@@ -1,9 +1,9 @@
 <a href="https://github.com/UCL"><img src="tools/logos/logo_UCL.png" alt="UCL Research Software Development" height="70"/></a>
-<a href="https://www.ucl.ac.uk/biosciences/departments/genetics-evolution-and-environment/research/molecular-and-cultural-evolution-lab"><img src="tools/logos/logo_MACElab.png" alt="UCL Research Software Development" height="70"/></a>
+<a href="https://www.ucl.ac.uk/biosciences/gee/molecular-and-cultural-evolution-lab"><img src="tools/logos/logo_MACElab.png" alt="UCL Research Software Development" height="70"/></a>
 <a href="https://www.shh.mpg.de"><img src="tools/logos/logo_MPI.png" alt="Max Planck Institute for the Science of Human History" height="70"/></a>
 <a href="https://www.shh.mpg.de/1143811/pan-ev"><img src="tools/logos/logo_PanEv.png" alt="Pan African Evolution ResearchGroup" height="70"/></a>
 
-[![Build Status](https://travis-ci.org/AdrianTimpson/ADMUR.svg?branch=master)](https://travis-ci.org/AdrianTimpson/ADMUR)
+[![Build Status](https://app.travis-ci.com/AdrianTimpson/ADMUR.svg?branch=master)](https://app.travis-ci.com/AdrianTimpson/ADMUR)
 
 # ADMUR
 ## Ancient Demographic Modelling Using Radiocarbon
@@ -46,7 +46,7 @@ Please contact a.timpson@ucl.ac.uk  in the first instance to make suggestions, r
 
 This package accompanies the following paper:
 
-Timpson A., Barberena R., Thomas M. G., Mendez C., Manning K. 2020. "Directly modelling population dynamics in the South American Arid Diagonal using 14C dates",Philosophical Transactions B. <https://doi.org/10.1098/rstb.2019.0723>.
+Timpson A., Barberena R., Thomas M. G., Mendez C., Manning K. 2020. "Directly modelling population dynamics in the South American Arid Diagonal using 14C dates",Philosophical Transactions B. <https://royalsocietypublishing.org/doi/10.1098/rstb.2019.0723>.
 
 Citations available as follows:
 ``` r
